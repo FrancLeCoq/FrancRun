@@ -705,17 +705,18 @@ function update(){
 
   // Spawn rates — at level 10, use infinite tier for escalation
   const effectiveLvl = lvl>=MAX_LEVEL ? getLvl10Tier() : lvl;
-  const mBonus=isMobile?10:0;
+  const mBonus = isMobile ? 18 : 0; // bigger delay between spawns on mobile
   let base;
-  if(effectiveLvl<=5)        base=Math.max(14,32-effectiveLvl*3.5)+mBonus;
+  if(effectiveLvl<=5)        base=Math.max(18,32-effectiveLvl*3.5)+mBonus;
   else if(effectiveLvl===6)  base=26+mBonus;
-  else                       base=Math.max(5,26-(effectiveLvl-6)*3.5)+mBonus; // can go below 7 at lvl10+
+  else                       base=Math.max(8,26-(effectiveLvl-6)*3.5)+mBonus;
 
   if(frameCount%Math.floor(base)===0) enemies.push(spawnEnemy(lvl));
-  if(effectiveLvl>=7&&frameCount%Math.floor(base*1.6)===0) enemies.push(spawnEnemy(lvl));
-  if(effectiveLvl>=9&&frameCount%Math.floor(base*2.2)===0) enemies.push(spawnEnemy(lvl));
-  // Level 10+ — extra third wave that grows over time
-  if(lvl>=MAX_LEVEL&&getLvl10Tier()>=11&&frameCount%Math.floor(base*3)===0) enemies.push(spawnEnemy(lvl));
+  // Extra waves start later on mobile (lvl 8 instead of 7, lvl 10 instead of 9)
+  if(effectiveLvl>=(isMobile?8:7)&&frameCount%Math.floor(base*1.6)===0) enemies.push(spawnEnemy(lvl));
+  if(effectiveLvl>=(isMobile?10:9)&&frameCount%Math.floor(base*2.2)===0) enemies.push(spawnEnemy(lvl));
+  // Level 10+ third wave — on mobile only from tier 3 instead of tier 2
+  if(lvl>=MAX_LEVEL&&getLvl10Tier()>=(isMobile?12:11)&&frameCount%Math.floor(base*3)===0) enemies.push(spawnEnemy(lvl));
   if(Math.random()<0.012+Math.min(lvl,15)*0.003) coins.push(spawnCoin(lvl));
 
   // Player anim
