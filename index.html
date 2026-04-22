@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🐓 Chicken Game V4</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -64,7 +65,7 @@ canvas{position:fixed;inset:0;pointer-events:none}
 <div id="panel">
   <h2>🐓 CHICKEN GAME</h2>
   <p>Collect golden eggs, dodge the enemies!<br>
-  <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels &bull; 5 lives</span><br>
+  <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels</span><br>
   <span style="color:#c9aaee;font-size:11px">Weapons from level 3 &bull; Level 10 = Survival!</span></p>
   <button class="btn" id="startBtn">▶ PLAY</button>
   <button class="btn btn-blue" id="scoresBtn" style="margin-top:8px">🏆 HIGH SCORES</button>
@@ -74,13 +75,15 @@ canvas{position:fixed;inset:0;pointer-events:none}
   </div>
   <div style="margin-top:14px;padding:12px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left">
     <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
-    <div style="font-size:11.5px;color:#c9aaee;line-height:1.7">
-      <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
-      <span style="color:#a3e635">💚 Holding $FRANC</span> + wallet connected to Telegram:<br>
-      &nbsp;&nbsp;→ <b style="color:#FFD700">5 lives</b> to start<br>
-      &nbsp;&nbsp;→ <b style="color:#FFD700">+1 bonus life</b> every 100 eggs collected
+    <div id="francStatus" style="font-size:11.5px;color:#c9aaee;line-height:1.7">
+      <span style="color:#ff8888">🖤 No $FRANC detected</span> — <b style="color:#fff">1 life</b> only<br>
+      <span style="color:#c9aaee;font-size:10px">Connect your wallet & hold $FRANC for 5 lives</span>
+    </div>
+    <div style="font-size:10px;color:#7c5fa0;margin-top:6px;line-height:1.5">
+      Holding $FRANC → 5 lives &bull; +1 life every 100 eggs collected
     </div>
   </div>
+</div>
 </div>
 
 <script>
@@ -157,8 +160,81 @@ function getShootRate(lvl){return lvl>=7?3:lvl>=5?6:lvl>=3?16:0;}
 function getLevelEggs(sc){return sc%EGGS_PER_LEVEL;}
 function getLevelProgress(sc){return getLevel(sc)>=MAX_LEVEL?100:(getLevelEggs(sc)/EGGS_PER_LEVEL)*100;}
 
+// ===== $FRANC / TELEGRAM WALLET DETECTION =====
+// Default: 1 life (no $FRANC)
+// $FRANC holder connected via Telegram wallet: 5 lives + 1 per 100 eggs
+let MAX_LIVES=1;
+let hasFranc=false;
+let totalEggsEver=0; // cumulative eggs across sessions (stored in localStorage)
+
+async function detectFranc(){
+  const tg=window.Telegram?.WebApp;
+  if(!tg||!tg.initData){
+    // Not inside Telegram — default 1 life (demo/browser mode)
+    MAX_LIVES=1; hasFranc=false;
+    showFrancStatus();
+    return;
+  }
+  tg.ready(); tg.expand();
+
+  // ── Try to read wallet from Telegram (TON Connect auto-detection)
+  // In production: call your backend with tg.initData to verify $FRANC balance
+  // For now: check if user has connected a wallet via Telegram's built-in wallet
+  try {
+    // Attempt backend check (replace with your real API endpoint)
+    const res=await fetch('https://YOUR-BACKEND.railway.app/check-franc',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({initData:tg.initData})
+    });
+    if(res.ok){
+      const data=await res.json();
+      hasFranc=data.hasFranc||false;
+    }
+  } catch(e){
+    // Backend not configured yet → default 1 life
+    hasFranc=false;
+  }
+
+  // Load cumulative eggs from localStorage
+  try{ totalEggsEver=parseInt(localStorage.getItem('cgTotalEggs')||'0'); }catch(e){}
+
+  // Compute lives
+  if(hasFranc){
+    const bonusLives=Math.floor(totalEggsEver/100);
+    MAX_LIVES=5+bonusLives;
+  } else {
+    MAX_LIVES=1;
+  }
+  showFrancStatus();
+}
+
+function showFrancStatus(){
+  // Update menu panel to show current status
+  const statusEl=document.getElementById('francStatus');
+  if(!statusEl)return;
+  if(hasFranc){
+    const bonus=Math.floor(totalEggsEver/100);
+    statusEl.innerHTML=`<span style="color:#a3e635">💚 $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;
+  } else {
+    statusEl.innerHTML=`<span style="color:#ff8888">🖤 No $FRANC detected</span> — <b style="color:#fff">1 life</b> only<br><span style="color:#c9aaee;font-size:10px">Connect your wallet & hold $FRANC for 5 lives</span>`;
+  }
+}
+
+function saveCumulativeEggs(newEggs){
+  totalEggsEver+=newEggs;
+  try{ localStorage.setItem('cgTotalEggs',totalEggsEver); }catch(e){}
+  // Recompute bonus lives if $FRANC holder
+  if(hasFranc){
+    const bonus=Math.floor(totalEggsEver/100);
+    MAX_LIVES=5+bonus;
+  }
+}
+
+// Run detection on page load
+detectFranc();
+
 // ===== LIVES =====
-let MAX_LIVES=5;
 function updateLivesBar(l){
   livesBar.innerHTML='';
   for(let i=0;i<MAX_LIVES;i++){
@@ -405,7 +481,7 @@ function update(){
     else{e.x+=e.vx;e.y+=e.vy;if(lvl>=3){e.x+=edx/ed*0.4;e.y+=edy/ed*0.4;}}
     if(Math.hypot(player.x-e.x,player.y-e.y)<32&&player.inv<=0){
       lives--;player.inv=50;playSound('hit');triggerShake(10,22);spawnParticles(player.x,player.y,'#ffcc00',12);playerAnim.squish=0.7;updateLivesBar(lives);
-      if(lives<=0){playSound('die');triggerShake(22,70);saveScore(score,getLevel(score));gameState='dying';showMsg('GAME OVER',99999,'gameover');setTimeout(()=>{gameState='gameover';showGameOver();},1200);}
+      if(lives<=0){playSound('die');triggerShake(22,70);saveCumulativeEggs(score);saveScore(score,getLevel(score));gameState='dying';showMsg('GAME OVER',99999,'gameover');setTimeout(()=>{gameState='gameover';showGameOver();},1200);}
     }
   });
   enemies=enemies.filter(e=>e.x>-80&&e.x<canvas.width+80&&e.y>-80&&e.y<canvas.height+80);
