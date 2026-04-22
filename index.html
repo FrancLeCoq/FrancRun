@@ -40,6 +40,19 @@ canvas{position:fixed;inset:0;pointer-events:none}
 #lvlProgress .bar-bg{background:rgba(0,0,0,0.6);border-radius:20px;height:12px;border:1px solid rgba(180,100,255,0.35);overflow:hidden}
 #lvlProgress .bar-fill{height:100%;background:linear-gradient(90deg,#a855f7,#FFD700);border-radius:20px;transition:width 0.3s ease;box-shadow:0 0 10px #a855f7}
 #lvlProgress .bar-label{text-align:center;font-size:11px;color:#b89fd4;font-family:'Fredoka One',cursive;margin-top:3px;letter-spacing:1px}
+@media(max-width:600px){
+  #ui .label{font-size:10px}
+  #ui .val{font-size:16px}
+  #lvlProgress{width:200px}
+  #lvlProgress .bar-label{font-size:9px}
+  #panel{width:290px;padding:18px 16px}
+  #panel h2{font-size:24px}
+  #panel p{font-size:11px}
+  .btn{font-size:13px;padding:11px}
+  #livesBar span{font-size:17px!important}
+  #msg{font-size:52px}
+  #levelup{font-size:36px}
+}
 </style>
 </head>
 <body>
@@ -322,15 +335,53 @@ function startGame(){
 }
 startBtn.addEventListener('click',startGame);
 
-// ===== INPUT =====
-let mouseX=canvas.width/2,mouseY=canvas.height/2;
-function move(x,y){mouseX=x;mouseY=y;if(gameState!=='play')return;player.x=x;player.y=y;}
-addEventListener('mousemove',e=>move(e.clientX,e.clientY));
-addEventListener('pointermove',e=>{if(e.isPrimary)move(e.clientX,e.clientY);});
+// ===== MOBILE SCALE =====
+// Detect mobile and reduce game element scale
+const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth < 600;
+const SCALE = isMobile ? 0.62 : 1.0; // smaller sprites on mobile
+
+// ===== INPUT — smooth follow =====
+// Target position (where finger/mouse is)
+let targetX = canvas.width/2, targetY = canvas.height/2;
+// Player lerps toward target each frame — smooth, not teleport
+const LERP_SPEED = isMobile ? 0.13 : 0.22; // mobile slightly slower = more fluid feel
+
+function setTarget(x,y){
+  targetX=x; targetY=y;
+}
+
+// Mouse
+addEventListener('mousemove',e=>{setTarget(e.clientX,e.clientY);});
+
+// Touch — follow finger continuously, prevent page scroll
+addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const t=e.touches[0];
+  setTarget(t.clientX,t.clientY);
+},{passive:false});
+
+addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const t=e.touches[0];
+  setTarget(t.clientX,t.clientY);
+},{passive:false});
+
+// Pointer fallback
+addEventListener('pointermove',e=>{
+  if(e.isPrimary) setTarget(e.clientX,e.clientY);
+});
+
+// Apply smooth movement each frame toward target
+function updatePlayerMovement(){
+  if(!player||gameState!=='play') return;
+  player.x += (targetX - player.x) * LERP_SPEED;
+  player.y += (targetY - player.y) * LERP_SPEED;
+}
 
 // ===== DRAW SPRITES =====
 function drawChickenSprite(x,y,angle,inv,anim){
   ctx.save();ctx.translate(x,y);
+  ctx.scale(SCALE,SCALE);
   ctx.translate(0,Math.sin(anim.bobPhase)*3);
   ctx.rotate(anim.tiltAngle*0.15);
   const bs=1+Math.sin(anim.breathe)*0.015;
@@ -353,6 +404,7 @@ function drawChickenSprite(x,y,angle,inv,anim){
 
 function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite){
   ctx.save();ctx.translate(x,y);
+  ctx.scale(SCALE,SCALE);
   const dx=player?player.x-x:0,dy=player?player.y-y:0;
   ctx.rotate(Math.atan2(dy,dx));
   ctx.translate(0,Math.sin(t*0.18+wobble)*3);
@@ -387,6 +439,7 @@ function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite){
 
 function drawCoinSprite(x,y,t,bob){
   ctx.save();ctx.translate(x,y+Math.sin(t*0.06+bob)*5);
+  ctx.scale(SCALE,SCALE);
   ctx.scale(Math.abs(Math.cos(t*0.07))*0.6+0.4,1);
   ctx.shadowColor='#FFD700';ctx.shadowBlur=15+Math.sin(t*0.1)*5;
   if(coinImg.complete&&coinImg.naturalWidth>0){const sz=44;ctx.drawImage(coinImg,-sz/2,-sz/2,sz,sz);}
@@ -413,6 +466,7 @@ function drawParticle(p){
 function update(){
   if(gameState!=='play')return;
   frameCount++;
+  updatePlayerMovement(); // smooth lerp toward finger/mouse
   const lvl=getLevel(score);
   if(lvl!==lastLevel&&lvl<=MAX_LEVEL){showLevelUp(lvl);lastLevel=lvl;spawnParticles(player.x,player.y,'#FFD700',20,true);spawnParticles(player.x,player.y,'#a855f7',15,true);}
   updateProgressBar();
@@ -463,7 +517,7 @@ function update(){
     if(b.life<=0||b.x<-20||b.x>canvas.width+20||b.y<-20||b.y>canvas.height+20)return false;
     for(let i=enemies.length-1;i>=0;i--){
       const e=enemies[i];
-      if(Math.hypot(b.x-e.x,b.y-e.y)<24){
+      if(Math.hypot(b.x-e.x,b.y-e.y)<24*SCALE){
         e.hp--;spawnParticles(b.x,b.y,'#ff4400',4);
         if(e.hp<=0){spawnParticles(e.x,e.y,'#8b1a1a',12,true);spawnParticles(e.x,e.y,'#ff4400',8);addFloatText(e.x,e.y-20,'💀',null,28);playSound('kill');enemies.splice(i,1);}
         return false;
@@ -479,7 +533,7 @@ function update(){
     const spd=(e.elite?1.5:1)*getEnemySpeed(lvl);
     if(lvl>=5){e.x+=edx/ed*spd;e.y+=edy/ed*spd;}
     else{e.x+=e.vx;e.y+=e.vy;if(lvl>=3){e.x+=edx/ed*0.4;e.y+=edy/ed*0.4;}}
-    if(Math.hypot(player.x-e.x,player.y-e.y)<32&&player.inv<=0){
+    if(Math.hypot(player.x-e.x,player.y-e.y)<32*SCALE&&player.inv<=0){
       lives--;player.inv=50;playSound('hit');triggerShake(10,22);spawnParticles(player.x,player.y,'#ffcc00',12);playerAnim.squish=0.7;updateLivesBar(lives);
       if(lives<=0){playSound('die');triggerShake(22,70);saveCumulativeEggs(score);saveScore(score,getLevel(score));gameState='dying';showMsg('GAME OVER',99999,'gameover');setTimeout(()=>{gameState='gameover';showGameOver();},1200);}
     }
@@ -489,7 +543,7 @@ function update(){
   // Coins
   coins.forEach(c=>{c.x+=c.vx;c.y+=c.vy;c.t++;});
   coins=coins.filter(c=>{
-    if(Math.hypot(player.x-c.x,player.y-c.y)<30){score++;playSound('coin');spawnParticles(c.x,c.y,'#FFD700',10);spawnParticles(c.x,c.y,'#fff',4);addFloatText(c.x,c.y-20,'+1',null,20);playerAnim.squish=1.25;return false;}
+    if(Math.hypot(player.x-c.x,player.y-c.y)<30*SCALE){score++;playSound('coin');spawnParticles(c.x,c.y,'#FFD700',10);spawnParticles(c.x,c.y,'#fff',4);addFloatText(c.x,c.y-20,'+1',null,20);playerAnim.squish=1.25;return false;}
     return c.x>-50&&c.x<canvas.width+50&&c.y>-50&&c.y<canvas.height+50;
   });
 
