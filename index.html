@@ -328,7 +328,8 @@ function spawnEnemy(lvl){
   return{x,y,vx,vy,hp,maxHp:hp,t:0,wobble:Math.random()*Math.PI*2,elite:isElite};
 }
 function spawnCoin(lvl){
-  const sp=1.2+lvl*0.1; const s=Math.random()*4|0; let x,y,vx=0,vy=0;
+  const sp=(1.2+lvl*0.1)*(isMobile?0.45:1.0); // much slower on mobile
+  const s=Math.random()*4|0; let x,y,vx=0,vy=0;
   if(s===0){x=-25;y=Math.random()*canvas.height;vx=sp;}
   else if(s===1){x=canvas.width+25;y=Math.random()*canvas.height;vx=-sp;}
   else if(s===2){x=Math.random()*canvas.width;y=-25;vy=sp;}
@@ -511,10 +512,12 @@ function updatePlayerMovement(){
         player.y=Math.max(50,Math.min(canvas.height-40, player.y+Math.sin(ang)*speed));
       }
     } else {
-      // Drag mode — lerp toward finger
+      // Drag mode — player follows finger with vertical offset upward
+      // so the character is always visible above the thumb
+      const FINGER_OFFSET_Y = 85; // px above finger
       if(dragActive){
-        player.x+=(dragTouchX-player.x)*DRAG_LERP;
-        player.y+=(dragTouchY-player.y)*DRAG_LERP;
+        player.x+=(dragTouchX - player.x)*DRAG_LERP;
+        player.y+=((dragTouchY - FINGER_OFFSET_Y) - player.y)*DRAG_LERP;
         player.x=Math.max(20,Math.min(canvas.width-20,  player.x));
         player.y=Math.max(50,Math.min(canvas.height-40, player.y));
       }
