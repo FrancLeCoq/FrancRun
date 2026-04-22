@@ -36,8 +36,9 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .slist{text-align:left;margin:8px 0;max-height:160px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between}
 .franc-box{margin-top:12px;padding:11px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left}
-/* Joystick — centered bottom, full width zone */
-#joystick-zone{position:fixed;bottom:0;left:0;width:100%;height:220px;z-index:6;display:none;touch-action:none}
+/* Touch zone — full screen during play */
+#touch-zone{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
+/* Joystick visuals */
 #joystick-base{
   position:fixed;border-radius:50%;
   background:rgba(168,85,247,0.12);
@@ -46,15 +47,6 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   width:150px;height:150px;
   box-shadow:0 0 30px rgba(168,85,247,0.2),inset 0 0 20px rgba(168,85,247,0.08);
 }
-/* Direction arrows inside base */
-#joystick-base::before{
-  content:'';position:absolute;inset:0;border-radius:50%;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(200,150,255,0.25) 0%, transparent 30%),
-    radial-gradient(circle at 50% 82%, rgba(200,150,255,0.25) 0%, transparent 30%),
-    radial-gradient(circle at 18% 50%, rgba(200,150,255,0.25) 0%, transparent 30%),
-    radial-gradient(circle at 82% 50%, rgba(200,150,255,0.25) 0%, transparent 30%);
-}
 #joystick-stick{
   position:fixed;border-radius:50%;
   background:radial-gradient(circle at 35% 35%, rgba(230,180,255,0.95), rgba(160,80,240,0.85));
@@ -62,8 +54,18 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   display:none;transform:translate(-50%,-50%);pointer-events:none;
   width:66px;height:66px;
   box-shadow:0 0 18px rgba(168,85,247,0.8),0 4px 12px rgba(0,0,0,0.4);
-  transition:box-shadow 0.1s;
 }
+/* Mode toggle button */
+#modeBtn{
+  position:fixed;bottom:14px;right:14px;z-index:8;
+  display:none;
+  background:rgba(30,10,65,0.85);
+  border:1.5px solid rgba(168,85,247,0.5);
+  border-radius:20px;padding:6px 13px;
+  color:#c084fc;font-size:11px;font-family:'Fredoka One',cursive;
+  cursor:pointer;touch-action:manipulation;letter-spacing:1px;
+}
+#modeBtn:active{opacity:0.7}
 @media(max-width:600px){
   #panel{width:88vw;padding:16px 14px}
   #panel h2{font-size:22px}
@@ -79,9 +81,10 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 
 <canvas id="game"></canvas>
 <div id="gameTouch"></div>
-<div id="joystick-zone"></div>
+<div id="touch-zone"></div>
 <div id="joystick-base"></div>
 <div id="joystick-stick"></div>
+<button id="modeBtn" onclick="toggleMode()">🕹️ JOYSTICK</button>
 
 <div id="ui">
   <div class="label">SCORE</div>
@@ -375,69 +378,112 @@ function updateProgressBar(){
 }
 
 // ══════════════════════════════════════════════
-//  JOYSTICK (mobile) + MOUSE (desktop)
+//  DUAL INPUT MODE (mobile)
+//  mode='drag'    → finger follows player (direct drag)
+//  mode='joystick'→ virtual joystick centered bottom
 // ══════════════════════════════════════════════
-const JOY_RADIUS   = 72;   // larger travel zone = more precision in small moves
-const JOY_SPEED_MAX= 5.5;  // top speed px/frame at full deflection
+const JOY_RADIUS    = 72;
+const JOY_SPEED_MAX = 5.5;
+const DRAG_LERP     = 0.18; // smoothing for drag mode
 
+let inputMode = localStorage.getItem('lcfInputMode')||'drag'; // persisted choice
+
+const touchZone     = document.getElementById('touch-zone');
+const modeBtnEl     = document.getElementById('modeBtn');
+
+// Joystick state
 let joyActive  = false;
-let joyOriginX = 0, joyOriginY = 0;
-let joyDX = 0, joyDY = 0; // raw normalized -1..1
+let joyDX = 0, joyDY = 0;
 
-// Fixed anchor: always center-bottom of screen
-function getJoyAnchor(){
-  return { x: window.innerWidth/2, y: window.innerHeight - 95 };
-}
+// Drag state
+let dragActive = false;
+let dragTouchX = 0, dragTouchY = 0;
+
+// Finger press ring (visual under player in drag mode)
+let fingerRing = { active:false, x:0, y:0, alpha:0 };
+
+function getJoyAnchor(){ return { x:window.innerWidth/2, y:window.innerHeight-95 }; }
 
 function showJoyBase(){
-  const a = getJoyAnchor();
-  joystickBase.style.display  = 'block';
-  joystickStick.style.display = 'block';
-  joystickBase.style.left  = a.x+'px';
-  joystickBase.style.top   = a.y+'px';
-  joystickStick.style.left = a.x+'px';
-  joystickStick.style.top  = a.y+'px';
+  const a=getJoyAnchor();
+  joystickBase.style.cssText =`display:block;left:${a.x}px;top:${a.y}px`;
+  joystickStick.style.cssText=`display:block;left:${a.x}px;top:${a.y}px`;
 }
 function hideJoy(){
-  joystickBase.style.display  = 'none';
-  joystickStick.style.display = 'none';
+  joystickBase.style.display='none';
+  joystickStick.style.display='none';
   joyDX=0; joyDY=0; joyActive=false;
 }
-function updateStick(touchX, touchY){
-  const a   = getJoyAnchor();
-  const dx  = touchX - a.x;
-  const dy  = touchY - a.y;
-  const dist= Math.hypot(dx, dy);
-  const capped = Math.min(dist, JOY_RADIUS);
-  const ang    = Math.atan2(dy, dx);
-  // Move stick visual
-  joystickStick.style.left = (a.x + Math.cos(ang)*capped)+'px';
-  joystickStick.style.top  = (a.y + Math.sin(ang)*capped)+'px';
-  // Normalized deflection (0..1)
-  const norm = dist>6 ? capped/JOY_RADIUS : 0;
-  joyDX = norm > 0 ? Math.cos(ang)*norm : 0;
-  joyDY = norm > 0 ? Math.sin(ang)*norm : 0;
+function updateStick(tx,ty){
+  const a=getJoyAnchor();
+  const dx=tx-a.x, dy=ty-a.y;
+  const dist=Math.hypot(dx,dy);
+  const capped=Math.min(dist,JOY_RADIUS);
+  const ang=Math.atan2(dy,dx);
+  joystickStick.style.left=(a.x+Math.cos(ang)*capped)+'px';
+  joystickStick.style.top =(a.y+Math.sin(ang)*capped)+'px';
+  const norm=dist>6?capped/JOY_RADIUS:0;
+  joyDX=norm>0?Math.cos(ang)*norm:0;
+  joyDY=norm>0?Math.sin(ang)*norm:0;
+}
+
+function applyInputMode(){
+  if(!isMobile) return;
+  modeBtnEl.style.display='block';
+  if(inputMode==='joystick'){
+    modeBtnEl.textContent='👆 DRAG';
+    modeBtnEl.title='Switch to drag mode';
+  } else {
+    modeBtnEl.textContent='🕹️ JOYSTICK';
+    modeBtnEl.title='Switch to joystick mode';
+  }
+}
+
+// Global toggle — called from onclick
+function toggleMode(){
+  inputMode = inputMode==='joystick' ? 'drag' : 'joystick';
+  try{ localStorage.setItem('lcfInputMode', inputMode); }catch(e){}
+  hideJoy();
+  dragActive=false; fingerRing.active=false;
+  applyInputMode();
 }
 
 if(isMobile){
-  // Whole bottom zone triggers joystick — finger can start anywhere
-  joystickZone.addEventListener('touchstart',e=>{
+  touchZone.addEventListener('touchstart',e=>{
     e.preventDefault();
-    const t = e.changedTouches[0];
-    joyActive   = true;
-    joyOriginX  = t.clientX;
-    joyOriginY  = t.clientY;
-    joyDX=0; joyDY=0;
-    showJoyBase();
-    updateStick(t.clientX, t.clientY);
+    const t=e.changedTouches[0];
+    if(inputMode==='joystick'){
+      joyActive=true; joyDX=0; joyDY=0;
+      showJoyBase();
+      updateStick(t.clientX, t.clientY);
+    } else {
+      // Drag mode — set target to touch position immediately
+      dragActive=true;
+      dragTouchX=t.clientX; dragTouchY=t.clientY;
+      fingerRing.active=true; fingerRing.x=t.clientX; fingerRing.y=t.clientY; fingerRing.alpha=1;
+    }
   },{passive:false});
-  joystickZone.addEventListener('touchmove',e=>{
+
+  touchZone.addEventListener('touchmove',e=>{
     e.preventDefault();
-    if(!joyActive) return;
-    updateStick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    const t=e.changedTouches[0];
+    if(inputMode==='joystick'){
+      if(joyActive) updateStick(t.clientX, t.clientY);
+    } else {
+      dragTouchX=t.clientX; dragTouchY=t.clientY;
+      fingerRing.x=t.clientX; fingerRing.y=t.clientY;
+    }
   },{passive:false});
-  joystickZone.addEventListener('touchend',   e=>{ e.preventDefault(); hideJoy(); },{passive:false});
-  joystickZone.addEventListener('touchcancel',e=>{ hideJoy(); },{passive:false});
+
+  touchZone.addEventListener('touchend',e=>{
+    e.preventDefault();
+    if(inputMode==='joystick') hideJoy();
+    else { dragActive=false; fingerRing.active=false; }
+  },{passive:false});
+
+  touchZone.addEventListener('touchcancel',e=>{
+    hideJoy(); dragActive=false; fingerRing.active=false;
+  },{passive:false});
 }
 
 // Desktop mouse
@@ -446,27 +492,101 @@ window.addEventListener('mousemove',e=>{ if(gameState==='play'){ targetX=e.clien
 
 function setTouchOverlay(on){
   gameTouch.style.display='none';
-  joystickZone.style.display=(on&&isMobile)?'block':'none';
-  if(!on) hideJoy();
+  touchZone.style.display=(on&&isMobile)?'block':'none';
+  modeBtnEl.style.display=(on&&isMobile)?'block':'none';
+  if(!on){ hideJoy(); dragActive=false; fingerRing.active=false; }
+  if(on&&isMobile) applyInputMode();
 }
 
 function updatePlayerMovement(){
   if(!player||gameState!=='play') return;
   if(isMobile){
-    if(joyActive&&(Math.abs(joyDX)>0.04||Math.abs(joyDY)>0.04)){
-      // Quadratic curve: small moves = fine control, large moves = fast
-      // norm is already 0..1, apply power curve for better feel
-      const norm = Math.hypot(joyDX, joyDY);
-      const curve = norm * norm * 0.4 + norm * 0.6; // blend linear+quadratic
-      const ang   = Math.atan2(joyDY, joyDX);
-      const speed = curve * JOY_SPEED_MAX;
-      player.x = Math.max(20, Math.min(canvas.width -20,  player.x + Math.cos(ang)*speed));
-      player.y = Math.max(50, Math.min(canvas.height-40,  player.y + Math.sin(ang)*speed));
+    if(inputMode==='joystick'){
+      if(joyActive&&(Math.abs(joyDX)>0.04||Math.abs(joyDY)>0.04)){
+        const norm=Math.hypot(joyDX,joyDY);
+        const curve=norm*norm*0.4+norm*0.6;
+        const ang=Math.atan2(joyDY,joyDX);
+        const speed=curve*JOY_SPEED_MAX;
+        player.x=Math.max(20,Math.min(canvas.width-20,  player.x+Math.cos(ang)*speed));
+        player.y=Math.max(50,Math.min(canvas.height-40, player.y+Math.sin(ang)*speed));
+      }
+    } else {
+      // Drag mode — lerp toward finger
+      if(dragActive){
+        player.x+=(dragTouchX-player.x)*DRAG_LERP;
+        player.y+=(dragTouchY-player.y)*DRAG_LERP;
+        player.x=Math.max(20,Math.min(canvas.width-20,  player.x));
+        player.y=Math.max(50,Math.min(canvas.height-40, player.y));
+      }
     }
+    // Fade finger ring when released
+    if(!fingerRing.active && fingerRing.alpha>0) fingerRing.alpha=Math.max(0,fingerRing.alpha-0.06);
   } else {
     player.x+=(targetX-player.x)*0.22;
     player.y+=(targetY-player.y)*0.22;
   }
+}
+
+// Draw finger ring + joystick hints on canvas
+function drawMobileHints(){
+  if(!isMobile) return;
+  ctx.save();
+
+  if(inputMode==='drag'){
+    // ── Big press ring under player position ──
+    if(player && (fingerRing.active || fingerRing.alpha>0)){
+      const a=fingerRing.active?Math.min(1,fingerRing.alpha):fingerRing.alpha;
+      // Outer pulse ring at player position
+      const pulse=1+0.08*Math.sin(frameCount*0.22);
+      ctx.globalAlpha=a*0.35;
+      ctx.strokeStyle='#a855f7'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(player.x, player.y+18, 46*pulse*SCALE, 0, Math.PI*2); ctx.stroke();
+      // Inner solid ring
+      ctx.globalAlpha=a*0.18;
+      ctx.fillStyle='#c084fc';
+      ctx.beginPath(); ctx.arc(player.x, player.y+18, 36*SCALE, 0, Math.PI*2); ctx.fill();
+      // Finger position ring (where finger actually is)
+      if(fingerRing.active && (Math.abs(fingerRing.x-player.x)>15 || Math.abs(fingerRing.y-player.y)>15)){
+        ctx.globalAlpha=a*0.4;
+        ctx.strokeStyle='#FFD700'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.arc(fingerRing.x, fingerRing.y, 22, 0, Math.PI*2); ctx.stroke();
+        // Line from player to finger
+        ctx.globalAlpha=a*0.2;
+        ctx.strokeStyle='#FFD700'; ctx.lineWidth=1;
+        ctx.setLineDash([4,6]);
+        ctx.beginPath(); ctx.moveTo(player.x,player.y+18); ctx.lineTo(fingerRing.x,fingerRing.y); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+    // Idle hint
+    if(!dragActive){
+      ctx.globalAlpha=0.15;
+      ctx.strokeStyle='#c084fc'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height-60, 32, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle='#c084fc'; ctx.font='10px Fredoka One,cursive';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('DRAG', canvas.width/2, canvas.height-60);
+    }
+  } else {
+    // ── Joystick idle hint ──
+    if(!joyActive){
+      const jcx=canvas.width/2, jcy=canvas.height-95;
+      ctx.globalAlpha=0.20;
+      ctx.strokeStyle='#a855f7'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.arc(jcx,jcy,72,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle='rgba(168,85,247,0.4)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(jcx,jcy,28,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle='rgba(192,132,252,0.5)';
+      ctx.font='bold 16px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('▲',jcx,    jcy-52);
+      ctx.fillText('▼',jcx,    jcy+52);
+      ctx.fillText('◀',jcx-52, jcy);
+      ctx.fillText('▶',jcx+52, jcy);
+      ctx.globalAlpha=0.28; ctx.fillStyle='#c084fc';
+      ctx.beginPath(); ctx.arc(jcx,jcy,14,0,Math.PI*2); ctx.fill();
+    }
+  }
+  ctx.restore();
 }
 
 // ══════════════════════════════════════════════
@@ -475,6 +595,7 @@ function updatePlayerMovement(){
 function startGame(){
   panel.classList.add('hidden');
   setTouchOverlay(true);
+  if(isMobile) applyInputMode();
   gameState='play'; score=0; lives=MAX_LIVES;
   enemies=[]; coins=[]; bullets=[]; particles=[]; floatingTexts=[];
   lastLevel=1; shootCooldown=0; frameCount=0; eliteCounter=0;
@@ -752,30 +873,7 @@ function draw(){
       ctx.shadowColor=ft.color||'#FFD700';ctx.shadowBlur=8;ctx.fillText(ft.text,ft.x,ft.y);ctx.restore();
     });
     drawWeaponHUD(getLevel(score));
-    // Mobile joystick hint — centered at bottom, shown when idle
-    if(isMobile){
-      const jcx = canvas.width/2;
-      const jcy = canvas.height - 95;
-      ctx.save();
-      // Outer ring
-      ctx.globalAlpha = joyActive ? 0 : 0.22;
-      ctx.strokeStyle='#a855f7'; ctx.lineWidth=2.5;
-      ctx.beginPath(); ctx.arc(jcx, jcy, 72, 0, Math.PI*2); ctx.stroke();
-      // Inner dead zone ring
-      ctx.strokeStyle='rgba(168,85,247,0.4)'; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.arc(jcx, jcy, 28, 0, Math.PI*2); ctx.stroke();
-      // Direction arrow hints (▲▼◀▶)
-      ctx.fillStyle='rgba(192,132,252,0.5)'; ctx.font='bold 16px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('▲', jcx,     jcy-52);
-      ctx.fillText('▼', jcx,     jcy+52);
-      ctx.fillText('◀', jcx-52,  jcy);
-      ctx.fillText('▶', jcx+52,  jcy);
-      // Center dot
-      ctx.globalAlpha = joyActive ? 0 : 0.3;
-      ctx.fillStyle='#c084fc';
-      ctx.beginPath(); ctx.arc(jcx, jcy, 14, 0, Math.PI*2); ctx.fill();
-      ctx.restore();
-    }
+    drawMobileHints();
   }
   ctx.restore();
 }
