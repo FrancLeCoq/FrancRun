@@ -410,6 +410,11 @@ function showJoyBase(){
   joystickBase.style.cssText =`display:block;left:${a.x}px;top:${a.y}px`;
   joystickStick.style.cssText=`display:block;left:${a.x}px;top:${a.y}px`;
 }
+function resetStickCenter(){
+  const a=getJoyAnchor();
+  joystickStick.style.left=a.x+'px';
+  joystickStick.style.top =a.y+'px';
+}
 function hideJoy(){
   joystickBase.style.display='none';
   joystickStick.style.display='none';
@@ -447,6 +452,7 @@ function toggleMode(){
   hideJoy();
   dragActive=false; fingerRing.active=false;
   applyInputMode();
+  if(inputMode==='joystick' && gameState==='play') showJoyBase();
 }
 
 if(isMobile){
@@ -478,12 +484,18 @@ if(isMobile){
 
   touchZone.addEventListener('touchend',e=>{
     e.preventDefault();
-    if(inputMode==='joystick') hideJoy();
-    else { dragActive=false; fingerRing.active=false; }
+    if(inputMode==='joystick'){
+      // Stick snaps back to center, base stays visible
+      joyActive=false; joyDX=0; joyDY=0;
+      resetStickCenter();
+    } else {
+      dragActive=false; fingerRing.active=false;
+    }
   },{passive:false});
 
   touchZone.addEventListener('touchcancel',e=>{
-    hideJoy(); dragActive=false; fingerRing.active=false;
+    if(inputMode==='joystick'){ joyActive=false; joyDX=0; joyDY=0; resetStickCenter(); }
+    else { dragActive=false; fingerRing.active=false; }
   },{passive:false});
 }
 
@@ -496,7 +508,10 @@ function setTouchOverlay(on){
   touchZone.style.display=(on&&isMobile)?'block':'none';
   modeBtnEl.style.display=(on&&isMobile)?'block':'none';
   if(!on){ hideJoy(); dragActive=false; fingerRing.active=false; }
-  if(on&&isMobile) applyInputMode();
+  if(on&&isMobile){
+    applyInputMode();
+    if(inputMode==='joystick') showJoyBase(); // always show base when game starts
+  }
 }
 
 function updatePlayerMovement(){
@@ -571,23 +586,22 @@ function drawMobileHints(){
       ctx.fillText('DRAG', canvas.width/2, canvas.height-60);
     }
   } else {
-    // ── Joystick idle hint ──
-    if(!joyActive){
-      const jcx=canvas.width/2, jcy=canvas.height-95;
-      ctx.globalAlpha=0.20;
-      ctx.strokeStyle='#a855f7'; ctx.lineWidth=2.5;
-      ctx.beginPath(); ctx.arc(jcx,jcy,72,0,Math.PI*2); ctx.stroke();
-      ctx.strokeStyle='rgba(168,85,247,0.4)'; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.arc(jcx,jcy,28,0,Math.PI*2); ctx.stroke();
-      ctx.fillStyle='rgba(192,132,252,0.5)';
-      ctx.font='bold 16px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('▲',jcx,    jcy-52);
-      ctx.fillText('▼',jcx,    jcy+52);
-      ctx.fillText('◀',jcx-52, jcy);
-      ctx.fillText('▶',jcx+52, jcy);
-      ctx.globalAlpha=0.28; ctx.fillStyle='#c084fc';
-      ctx.beginPath(); ctx.arc(jcx,jcy,14,0,Math.PI*2); ctx.fill();
-    }
+    // ── Joystick — always draw hint ring on canvas (base is already shown via HTML)
+    const jcx=canvas.width/2, jcy=canvas.height-95;
+    const activeAlpha = joyActive ? 0.55 : 0.22;
+    ctx.globalAlpha=activeAlpha;
+    ctx.strokeStyle=joyActive?'#c084fc':'#a855f7'; ctx.lineWidth=joyActive?3:2.5;
+    ctx.beginPath(); ctx.arc(jcx,jcy,72,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle=joyActive?'rgba(220,160,255,0.6)':'rgba(168,85,247,0.35)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(jcx,jcy,28,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle=joyActive?'rgba(220,170,255,0.8)':'rgba(192,132,252,0.4)';
+    ctx.font='bold 16px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('▲',jcx,    jcy-52);
+    ctx.fillText('▼',jcx,    jcy+52);
+    ctx.fillText('◀',jcx-52, jcy);
+    ctx.fillText('▶',jcx+52, jcy);
+    ctx.globalAlpha=joyActive?0.6:0.28; ctx.fillStyle='#c084fc';
+    ctx.beginPath(); ctx.arc(jcx,jcy,14,0,Math.PI*2); ctx.fill();
   }
   ctx.restore();
 }
@@ -705,7 +719,7 @@ function update(){
 
   // Spawn rates — at level 10, use infinite tier for escalation
   const effectiveLvl = lvl>=MAX_LEVEL ? getLvl10Tier() : lvl;
-  const mBonus = isMobile ? 18 : 0; // bigger delay between spawns on mobile
+  const mBonus = isMobile ? 24 : 0; // more delay between spawns on mobile
   let base;
   if(effectiveLvl<=5)        base=Math.max(18,32-effectiveLvl*3.5)+mBonus;
   else if(effectiveLvl===6)  base=26+mBonus;
