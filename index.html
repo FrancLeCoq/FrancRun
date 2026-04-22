@@ -267,10 +267,14 @@ function spawnParticles(x,y,color,n=8,big=false){
 // ===== SPAWN =====
 // Difficulty curve: gentle plateau at lvl 6, then gradual ramp again
 // Speed: 1→5: linear growth, lvl6 intentionally slowed, 7→10: resume
+// Difficulty curve — mobile gets a speed penalty so it's playable on small screen
+const MOBILE_SPD = isMobile ? 0.55 : 1.0;
 function getEnemySpeed(lvl){
-  if(lvl<=5) return 1.2+lvl*0.22;
-  if(lvl===6) return 1.2+5*0.22*0.75; // ~25% slower than lvl5 would be
-  return 1.2+5*0.22*0.75+(lvl-6)*0.18; // resume from that plateau
+  let s;
+  if(lvl<=5) s=1.2+lvl*0.22;
+  else if(lvl===6) s=1.2+5*0.22*0.75;
+  else s=1.2+5*0.22*0.75+(lvl-6)*0.18;
+  return s*MOBILE_SPD;
 }
 let eliteCounter=0;
 function spawnEnemy(lvl,forceElite=false){
@@ -466,12 +470,12 @@ function update(){
   if(lvl!==lastLevel&&lvl<=MAX_LEVEL){showLevelUp(lvl);lastLevel=lvl;spawnParticles(player.x,player.y,'#FFD700',20,true);spawnParticles(player.x,player.y,'#a855f7',15,true);}
   updateProgressBar();
 
-  // Spawn rate: eased at lvl 6 (deliberate breathing room)
-  // lvl 1→5: 32 down to ~20  |  lvl6: fixed at 26 (slower!)  |  lvl7→10: ramps again
+  // Spawn rate — mobile gets extra breathing room
+  const mobileSpawnBonus = isMobile ? 10 : 0;
   let base;
-  if(lvl<=5)      base=Math.max(14,32-lvl*3.5);
-  else if(lvl===6)base=26; // plateau — player can breathe
-  else            base=Math.max(7,26-(lvl-6)*4);
+  if(lvl<=5)      base=Math.max(14,32-lvl*3.5)+mobileSpawnBonus;
+  else if(lvl===6)base=26+mobileSpawnBonus;
+  else            base=Math.max(7,26-(lvl-6)*4)+mobileSpawnBonus;
 
   if(frameCount%Math.floor(base)===0)enemies.push(spawnEnemy(lvl));
   // Extra wave only from lvl 7 (NOT 6)
@@ -556,7 +560,7 @@ function drawBg(){
   else{grd.addColorStop(0,'#0d0520');grd.addColorStop(1,'#150830');}
   ctx.fillStyle=grd;ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // Nebula glows
+  // Nebula glows (static, no per-frame cost)
   const nb1=ctx.createRadialGradient(canvas.width*0.75,canvas.height*0.25,5,canvas.width*0.75,canvas.height*0.25,canvas.width*0.5);
   nb1.addColorStop(0,'rgba(130,40,220,0.09)');nb1.addColorStop(1,'transparent');
   ctx.fillStyle=nb1;ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -564,13 +568,13 @@ function drawBg(){
   nb2.addColorStop(0,'rgba(60,0,180,0.1)');nb2.addColorStop(1,'transparent');
   ctx.fillStyle=nb2;ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // Stars (some purple-tinted)
-  for(let i=0;i<120;i++){
-    const sx=((i*137+frameCount*0.04)%1)*canvas.width;
-    const sy=((i*89+i*0.3)%1)*canvas.height*0.75;
-    const br=Math.sin(frameCount*0.04+i)*0.4+0.6;
-    const sz=i%7===0?1.8:i%3===0?1.2:0.7;
-    ctx.fillStyle=i%4===0?`rgba(200,150,255,${0.3*br})`:`rgba(255,255,255,${0.22*br})`;
+  // Stars — FIXED positions, only twinkle in brightness (no horizontal drift)
+  for(let i=0;i<80;i++){
+    const sx=((i*137.508)%1)*canvas.width;        // fixed X — no frameCount
+    const sy=((i*89.321+i*0.31)%1)*canvas.height*0.78; // fixed Y
+    const br=Math.sin(frameCount*0.025+i*1.3)*0.35+0.65; // gentle twinkle only
+    const sz=i%7===0?1.6:i%3===0?1.0:0.6;
+    ctx.fillStyle=i%5===0?`rgba(200,150,255,${0.28*br})`:`rgba(255,255,255,${0.20*br})`;
     ctx.beginPath();ctx.arc(sx,sy,sz,0,Math.PI*2);ctx.fill();
   }
   // Danger glow at high levels
