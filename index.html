@@ -36,12 +36,16 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .slist{text-align:left;margin:8px 0;max-height:160px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between}
 .franc-box{margin-top:12px;padding:11px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left}
+/* Joystick */
+#joystick-zone{position:fixed;bottom:60px;left:0;width:50%;height:200px;z-index:6;display:none;touch-action:none}
+#joystick-base{position:absolute;width:110px;height:110px;border-radius:50%;background:rgba(168,85,247,0.18);border:2px solid rgba(168,85,247,0.45);display:none;transform:translate(-50%,-50%);pointer-events:none}
+#joystick-stick{position:absolute;width:48px;height:48px;border-radius:50%;background:rgba(200,130,255,0.7);border:2px solid rgba(230,180,255,0.9);display:none;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 12px rgba(168,85,247,0.6)}
 @media(max-width:600px){
   #panel{width:88vw;padding:16px 14px}
   #panel h2{font-size:22px}
   .btn{font-size:14px;padding:13px}
   #ui .val{font-size:18px}
-  #lvlProgress{width:210px}
+  #lvlProgress{width:210px;bottom:30px}
   #msg{font-size:46px}
   #levelup{font-size:30px}
 }
@@ -51,6 +55,9 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 
 <canvas id="game"></canvas>
 <div id="gameTouch"></div>
+<div id="joystick-zone"></div>
+<div id="joystick-base"></div>
+<div id="joystick-stick"></div>
 
 <div id="ui">
   <div class="label">SCORE</div>
@@ -111,7 +118,10 @@ const levelupEl = document.getElementById('levelup');
 const weaponEl  = document.getElementById('weaponInfo');
 const barFill   = document.getElementById('barFill');
 const barLabel  = document.getElementById('barLabel');
-const gameTouch = document.getElementById('gameTouch');
+const gameTouch     = document.getElementById('gameTouch');
+const joystickZone  = document.getElementById('joystick-zone');
+const joystickBase  = document.getElementById('joystick-base');
+const joystickStick = document.getElementById('joystick-stick');
 
 // ══════════════════════════════════════════════
 //  IMAGES
@@ -125,9 +135,8 @@ coinImg.src    = '/mnt/user-data/uploads/piece_1f.png';
 //  MOBILE DETECTION
 // ══════════════════════════════════════════════
 const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth < 700;
-const SCALE    = isMobile ? 0.62 : 1.0;
-const LERP     = isMobile ? 0.12 : 0.22;
-const MOBILE_SPD = isMobile ? 0.55 : 1.0;
+const SCALE      = isMobile ? 0.58 : 1.0;
+const MOBILE_SPD = isMobile ? 0.35 : 1.0; // much slower enemies on mobile
 
 // ══════════════════════════════════════════════
 //  AUDIO
@@ -342,23 +351,72 @@ function updateProgressBar(){
 }
 
 // ══════════════════════════════════════════════
-//  INPUT — smooth touch follow
+//  JOYSTICK (mobile) + MOUSE (desktop)
 // ══════════════════════════════════════════════
-let targetX=0, targetY=0;
-function setTarget(x,y){ targetX=x; targetY=y; }
-function setTouchOverlay(on){ gameTouch.style.display=on?'block':'none'; }
+const JOY_RADIUS = 50;   // max stick travel px
+const JOY_SPEED  = 3.0;  // player px/frame at full stick deflection
 
-// Game touch overlay (only during play)
-gameTouch.addEventListener('touchstart',e=>{ e.preventDefault(); setTarget(e.touches[0].clientX,e.touches[0].clientY); },{passive:false});
-gameTouch.addEventListener('touchmove', e=>{ e.preventDefault(); setTarget(e.touches[0].clientX,e.touches[0].clientY); },{passive:false});
-gameTouch.addEventListener('mousemove', e=>setTarget(e.clientX,e.clientY));
-// Desktop
-window.addEventListener('mousemove', e=>{ if(gameState==='play') setTarget(e.clientX,e.clientY); });
+let joyActive  = false;
+let joyOriginX = 0, joyOriginY = 0;
+let joyDX = 0, joyDY = 0; // normalized -1..1
+
+function showJoyBase(cx,cy){
+  joystickBase.style.cssText =`display:block;left:${cx}px;top:${cy}px`;
+  joystickStick.style.cssText=`display:block;left:${cx}px;top:${cy}px`;
+}
+function hideJoy(){
+  joystickBase.style.display='none';
+  joystickStick.style.display='none';
+  joyDX=0; joyDY=0; joyActive=false;
+}
+function updateStick(cx,cy){
+  const dx=cx-joyOriginX, dy=cy-joyOriginY;
+  const dist=Math.hypot(dx,dy);
+  const capped=Math.min(dist,JOY_RADIUS);
+  const ang=Math.atan2(dy,dx);
+  joystickStick.style.left=(joyOriginX+Math.cos(ang)*capped)+'px';
+  joystickStick.style.top =(joyOriginY+Math.sin(ang)*capped)+'px';
+  joyDX = dist>5 ? Math.cos(ang)*(capped/JOY_RADIUS) : 0;
+  joyDY = dist>5 ? Math.sin(ang)*(capped/JOY_RADIUS) : 0;
+}
+
+if(isMobile){
+  joystickZone.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    joyActive=true; joyOriginX=t.clientX; joyOriginY=t.clientY;
+    joyDX=0; joyDY=0;
+    showJoyBase(t.clientX,t.clientY);
+  },{passive:false});
+  joystickZone.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(joyActive) updateStick(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+  },{passive:false});
+  joystickZone.addEventListener('touchend',  e=>{ e.preventDefault(); hideJoy(); },{passive:false});
+  joystickZone.addEventListener('touchcancel',e=>{ hideJoy(); },{passive:false});
+}
+
+// Desktop mouse
+let targetX=canvas.width/2, targetY=canvas.height/2;
+window.addEventListener('mousemove',e=>{ if(gameState==='play'){ targetX=e.clientX; targetY=e.clientY; }});
+
+function setTouchOverlay(on){
+  gameTouch.style.display='none';
+  joystickZone.style.display=(on&&isMobile)?'block':'none';
+  if(!on) hideJoy();
+}
 
 function updatePlayerMovement(){
   if(!player||gameState!=='play') return;
-  player.x+=(targetX-player.x)*LERP;
-  player.y+=(targetY-player.y)*LERP;
+  if(isMobile){
+    if(joyActive&&(Math.abs(joyDX)>0.05||Math.abs(joyDY)>0.05)){
+      player.x=Math.max(20,Math.min(canvas.width -20, player.x+joyDX*JOY_SPEED));
+      player.y=Math.max(50,Math.min(canvas.height-40, player.y+joyDY*JOY_SPEED));
+    }
+  } else {
+    player.x+=(targetX-player.x)*0.22;
+    player.y+=(targetY-player.y)*0.22;
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -644,6 +702,17 @@ function draw(){
       ctx.shadowColor=ft.color||'#FFD700';ctx.shadowBlur=8;ctx.fillText(ft.text,ft.x,ft.y);ctx.restore();
     });
     drawWeaponHUD(getLevel(score));
+    // Mobile joystick hint (shown when not actively touching)
+    if(isMobile&&!joyActive){
+      ctx.save();
+      ctx.globalAlpha=0.25;
+      ctx.strokeStyle='#a855f7'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(canvas.width*0.22, canvas.height-90, 46, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(canvas.width*0.22, canvas.height-90, 20, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle='#c084fc'; ctx.font='11px Fredoka One,cursive'; ctx.textAlign='center';
+      ctx.fillText('JOYSTICK', canvas.width*0.22, canvas.height-38);
+      ctx.restore();
+    }
   }
   ctx.restore();
 }
