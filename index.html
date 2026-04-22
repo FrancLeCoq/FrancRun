@@ -384,8 +384,8 @@ function updateProgressBar(){
 //  mode='joystick'→ virtual joystick centered bottom
 // ══════════════════════════════════════════════
 const JOY_RADIUS    = 72;
-const JOY_SPEED_MAX = 5.5;
-const DRAG_LERP     = 0.18; // smoothing for drag mode
+const JOY_SPEED_MAX = 3.4;  // reduced for better control
+const DRAG_LERP     = 0.18;
 
 let inputMode = localStorage.getItem('lcfInputMode')||'drag'; // persisted choice
 
