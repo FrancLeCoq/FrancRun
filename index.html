@@ -22,7 +22,8 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 #lvlProgress .bar-label{text-align:center;font-size:10px;color:#b89fd4;margin-top:3px}
 #msg{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);font-size:76px;color:#fff;text-shadow:0 0 40px #fff;opacity:0;transition:.3s;z-index:15;pointer-events:none;white-space:nowrap;font-family:'Bangers',cursive;letter-spacing:5px}
 #msg.show{opacity:1}
-#msg.gameover{color:#ff2222;text-shadow:0 0 40px #ff0000;font-size:66px}
+#msg.gameover{color:#cc0000;text-shadow:0 0 30px #ff0000,0 0 60px #880000,0 0 100px #440000;font-size:72px;animation:bloodPulse 0.8s ease-in-out infinite alternate}
+@keyframes bloodPulse{0%{text-shadow:0 0 30px #ff0000,0 0 60px #880000;color:#cc0000}100%{text-shadow:0 0 50px #ff2200,0 0 90px #aa0000,0 0 140px #660000;color:#ff1111}}
 #levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:4px}
 #levelup.show{opacity:1}
 /* Panel */
@@ -538,6 +539,14 @@ function showLevelUp(lvl){
         setTimeout(()=>{weaponEl.style.opacity=0;},3000);
       },400);
     }
+    if(lvl===10){
+      clearEnemiesExplosion('#ff0000','#cc0000');
+      setTimeout(()=>{
+        weaponEl.textContent='☠️ ALMOST THERE — SUDDEN DEATH AWAITS!';
+        weaponEl.style.opacity=1;
+        setTimeout(()=>{weaponEl.style.opacity=0;},3500);
+      },400);
+    }
   }
   levelupEl.className='show';
   levelupTimeout=setTimeout(()=>{ levelupEl.className=''; },2500);
@@ -792,6 +801,8 @@ function drawMobileHints(){
 //  START GAME  (global — called from onclick)
 // ══════════════════════════════════════════════
 function startGame(){
+  panel.style.borderColor='';
+  panel.style.boxShadow='';
   panel.classList.add('hidden');
   setTouchOverlay(true);
   if(isMobile) applyInputMode();
@@ -908,8 +919,8 @@ function update(){
     showLevelUp(lvl); lastLevel=lvl;
     spawnParticles(player.x,player.y,'#FFD700',20,true);
     spawnParticles(player.x,player.y,'#a855f7',15,true);
-    // Invincibilité bonus pendant l'explosion aux niveaux 7, 9, 11
-    if(lvl===7||lvl===9||isMortSubite(lvl)){
+    // Invincibilité bonus pendant l'explosion aux niveaux 7, 9, 10, 11
+    if(lvl===7||lvl===9||lvl===10||isMortSubite(lvl)){
       player.inv=Math.max(player.inv, 180); // 3s de répit garanties
     }
   }
@@ -1041,8 +1052,8 @@ function update(){
       spawnParticles(player.x,player.y,'#ffcc00',12); playerAnim.squish=0.7;
       updateLivesBar(lives);
       if(lives<=0){
+        lives=0; updateLivesBar(0); // force affichage ❤️ 0
         playSound('die'); triggerShake(22,70);
-        // Purge tous les textes flottants et l'animation de vie
         floatingTexts=[]; particles=[];
         clearTimeout(lifeGainTimeout);
         const lgEl=document.getElementById('lifeGainMsg');
@@ -1050,7 +1061,7 @@ function update(){
         saveCumulativeEggs(score); saveScore(score,getLevel(score));
         gameState='dying'; setTouchOverlay(false);
         showMsg('GAME OVER',99999,'gameover');
-        setTimeout(()=>{ gameState='gameover'; showGameOver(); },1200);
+        setTimeout(()=>{ gameState='gameover'; showGameOver(); },1800);
       }
     }
   });
@@ -1184,12 +1195,14 @@ function draw(){
 //  GAME OVER & MENU  (global — called from onclick)
 // ══════════════════════════════════════════════
 function showGameOver(){
+  panel.style.borderColor='rgba(200,0,0,0.6)';
+  panel.style.boxShadow='0 0 80px rgba(180,0,0,0.7)';
   panel.innerHTML=`
-    <h2 style="color:#ff3333">💀 GAME OVER</h2>
+    <h2 style="color:#ff0000;font-size:38px;text-shadow:0 0 20px #ff0000,0 0 40px #880000;letter-spacing:3px">💀 GAME OVER</h2>
     <p style="font-size:19px;color:#FFD700;margin:10px 0;font-family:'Bangers',cursive;letter-spacing:2px">Score: <b>${score}</b> eggs</p>
     <p style="font-size:13px;color:#c9aaee">Level reached: <b style="color:#fff">${getLevel(score)}</b></p>
     <div style="margin:8px 0;font-size:13px;color:#aaa" id="rankInfo"></div>
-    <button class="btn" onclick="startGame()">🔄 PLAY AGAIN</button>
+    <button class="btn" style="background:linear-gradient(135deg,#8b0000,#cc0000)" onclick="startGame()">🔄 PLAY AGAIN</button>
     <button class="btn btn-blue" onclick="goMenu()">🏠 MENU</button>
     <div style="margin-top:12px">
       <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">TOP 10</b>
