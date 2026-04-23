@@ -246,14 +246,14 @@ function isMortSubite(lvl){ return lvl>=MORT_SUBITE; }
 // La cadence de tir augmente avec les niveaux pour compenser
 function getWeapon(lvl){ return lvl>=4?'pistol':'none'; }
 function getShootRate(lvl){
-  if(lvl<4)  return 0;
-  if(lvl===4) return 22; // lent — découverte
-  if(lvl===5) return 18;
-  if(lvl===6) return 15;
-  if(lvl===7) return 12;
-  if(lvl===8) return 10;
-  if(lvl===9) return 8;
-  return 6; // niveau 10 + Mort Subite
+  if(lvl<4)   return 0;
+  if(lvl===4) return 18; // un chouia plus rapide qu'avant
+  if(lvl===5) return 15;
+  if(lvl===6) return 13;
+  if(lvl===7) return 11;
+  if(lvl===8) return 9;
+  if(lvl===9) return 7;
+  return 5; // niveau 10 + Mort Subite
 }
 function getLevelEggs(sc){ return sc%EGGS_PER_LEVEL; }
 function getLevelProgress(sc){ return getLevel(sc)>=MAX_LEVEL?100:(getLevelEggs(sc)/EGGS_PER_LEVEL)*100; }
@@ -271,16 +271,15 @@ function getEnemySpeed(lvl){
   return s*MOBILE_SPD;
 }
 
-// Ratio d'IA homing par niveau (0=libre, 1=100% vers joueur)
+// Ratio d'IA homing par niveau selon tableau
 function getHomingRatio(lvl){
-  if(lvl<=3)  return 0;    // libre
-  if(lvl===4) return 0.25;
-  if(lvl===5) return 0.40;
-  if(lvl===6) return 0.60;
-  if(lvl===7) return 0.70;
-  if(lvl===8) return 0.80;
-  if(lvl===9) return 0.90;
-  return 1.0; // niveau 10 + Mort Subite = 100% homing
+  if(lvl<=3)  return 0;    // 0% homing
+  if(lvl===4) return 0.10; // 10%
+  if(lvl===5) return 0.20; // 20%
+  if(lvl===6) return 0.30; // 30%
+  if(lvl===7) return 0.40; // 40%
+  if(lvl>=8)  return 0.50; // 50% — niveaux 8 à Mort Subite
+  return 0.50;
 }
 
 // Tier pour la Mort Subite (escalade infinie)
@@ -917,15 +916,21 @@ function update(){
   if(weapon!=='none'){
     if(shootCooldown>0) shootCooldown--;
     if(shootCooldown<=0&&enemies.length>0){
+      // Vise uniquement les ennemis homing — sinon le plus proche
+      const homingEnemies=enemies.filter(e=>e.homing);
+      const targets=homingEnemies.length>0?homingEnemies:enemies;
       let cl=null,md=Infinity;
-      enemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});
+      targets.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});
       if(cl){
         const ddx=cl.x-player.x,ddy=cl.y-player.y,ang=Math.atan2(ddy,ddx),spd=10;
         bullets.push({x:player.x,y:player.y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,angle:ang,type:'pistol',life:70});
         shootCooldown=getShootRate(lvl); playSound('shoot'); playerAnim.squish=0.82;
       }
     }
-    if(enemies.length>0){let cl=null,md=Infinity;enemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});if(cl)player.angle=Math.atan2(cl.y-player.y,cl.x-player.x);}
+    // Oriente le personnage vers les homing en priorité
+    const homingEnemies2=enemies.filter(e=>e.homing);
+    const aimTargets=homingEnemies2.length>0?homingEnemies2:enemies;
+    if(aimTargets.length>0){let cl=null,md=Infinity;aimTargets.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});if(cl)player.angle=Math.atan2(cl.y-player.y,cl.x-player.x);}
   }
 
   // Bullets
