@@ -1003,7 +1003,7 @@ function update(){
       e.x+=e.vx; e.y+=e.vy;
     }
     if(Math.hypot(player.x-e.x,player.y-e.y)<(e.big?42:32)*SCALE&&player.inv<=0){
-      lives--; player.inv=50; playSound('hit'); triggerShake(10,22);
+      lives--; player.inv=300; playSound('hit'); triggerShake(10,22); // 300 frames = 5s à 60fps
       spawnParticles(player.x,player.y,'#ffcc00',12); playerAnim.squish=0.7;
       updateLivesBar(lives);
       if(lives<=0){
@@ -1111,6 +1111,30 @@ function draw(){
     bullets.forEach(b=>drawBullet(b));
     particles.forEach(p=>drawParticle(p));
     if(player) drawChickenSprite(player.x,player.y,player.inv,playerAnim);
+    // Bouclier d'invincibilité — countdown au-dessus du personnage
+    if(player&&player.inv>0){
+      const secsLeft=Math.ceil(player.inv/60);
+      const alpha=Math.min(1, player.inv/60); // fade out progressif sur la dernière seconde
+      ctx.save();
+      ctx.globalAlpha=alpha*0.85;
+      // Cercle de protection
+      ctx.strokeStyle='#00eeff';
+      ctx.lineWidth=2;
+      ctx.shadowColor='#00eeff';
+      ctx.shadowBlur=12+Math.sin(frameCount*0.3)*4;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, 36*SCALE, 0, Math.PI*2);
+      ctx.stroke();
+      // Countdown en secondes
+      ctx.globalAlpha=alpha;
+      ctx.fillStyle='#00eeff';
+      ctx.font=`bold ${14*SCALE}px Bangers,cursive`;
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.shadowBlur=8;
+      ctx.fillText('🛡️ '+secsLeft+'s', player.x, player.y-48*SCALE);
+      ctx.restore();
+    }
     floatingTexts.forEach(ft=>{
       ctx.save();ctx.globalAlpha=ft.life/ft.maxLife;ctx.fillStyle=ft.color||'#FFD700';
       ctx.font=`bold ${ft.size}px Bangers,cursive`;ctx.textAlign='center';ctx.textBaseline='middle';
