@@ -127,7 +127,8 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
       <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px">
         <span style="font-size:18px">❤️</span>
         <span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br>
-        <b style="color:#FFD700">5 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br>
+        <b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br>
+        <b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫<br>
         <span style="color:#888;font-size:10px">※ No bonus lives in 💀 Sudden Death</span></span>
       </div>
     </div>
@@ -318,7 +319,7 @@ async function detectFranc(){
     });
     if(res.ok){ const d=await res.json(); hasFranc=d.hasFranc||false; MAX_LIVES=d.lives||1; }
   }catch(e){ hasFranc=false; }
-  MAX_LIVES = hasFranc ? 5+Math.floor(totalEggsEver/100) : 1;
+  MAX_LIVES = hasFranc ? 10+Math.floor(totalEggsEver/100) : 1;
   showFrancStatus();
 }
 
@@ -342,8 +343,8 @@ function saveCumulativeEggs(n){
   totalEggsEver+=n;
   try{ localStorage.setItem('lcfTotalEggs',totalEggsEver); }catch(e){}
   if(hasFranc){
-    const prevLives=5+Math.floor(prevEggs/100);
-    const newLives =5+Math.floor(totalEggsEver/100);
+    const prevLives=10+Math.floor(prevEggs/100);
+    const newLives =10+Math.floor(totalEggsEver/100);
     MAX_LIVES=newLives;
     // Animation +1 vie si palier 100 œufs franchi
     if(newLives>prevLives && gameState==='play'){
@@ -849,8 +850,8 @@ function drawCoinSprite(x,y,t,bob){
 
 function drawBullet(b){
   ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);
-  // pistol1=jaune, pistol2=cyan pour distinguer les deux pistolets
-  const col=b.type==='pistol2'?'#00eeff':'#FFD700';
+  // pistol1=jaune, pistol2=cyan, pistol3=vert ($FRANC holders uniquement)
+  const col=b.type==='pistol3'?'#00ff88':b.type==='pistol2'?'#00eeff':'#FFD700';
   ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;
   ctx.beginPath();ctx.ellipse(0,0,8,3,0,0,Math.PI*2);ctx.fill();
   ctx.globalAlpha=0.4;ctx.beginPath();ctx.ellipse(-10,0,6,2,0,0,Math.PI*2);ctx.fill();
@@ -924,7 +925,7 @@ function update(){
   playerAnim.breathe+=0.04;
   playerAnim.squish+=(1-playerAnim.squish)*0.2;
 
-  // Weapon — double pistolet sur les homing
+  // Weapon — double pistolet (tous) ou triple pistolet ($FRANC holders)
   const weapon=getWeapon(lvl);
   if(weapon!=='none'){
     if(shootCooldown>0) shootCooldown--;
@@ -933,23 +934,36 @@ function update(){
     const baseRate=getShootRate(lvl);
     const adaptedRate=Math.max(2, Math.round(baseRate*(1-homingRatio*0.7)));
     if(shootCooldown<=0&&homingEnemies.length>0){
-      // Trie par distance
       const sorted=[...homingEnemies].sort((a,b)=>
         Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y)
       );
-      const t1=sorted[0]; // cible principale — la plus proche
-      const ang1=Math.atan2(t1.y-player.y,t1.x-player.x);
       const spd=10;
+
+      // Pistolet 1 — homing le plus proche
+      const t1=sorted[0];
+      const ang1=Math.atan2(t1.y-player.y,t1.x-player.x);
       bullets.push({x:player.x,y:player.y,vx:Math.cos(ang1)*spd,vy:Math.sin(ang1)*spd,angle:ang1,type:'pistol1',life:70});
 
-      // 2e pistolet — 2e homing le plus proche dans une direction différente (>30° d'écart)
+      // Pistolet 2 — 2e homing dans direction différente (>30°)
       const t2=sorted.find(e=>{
-        const ang2=Math.atan2(e.y-player.y,e.x-player.x);
-        return Math.abs(ang2-ang1)>0.52; // >30°
+        const a=Math.atan2(e.y-player.y,e.x-player.x);
+        return Math.abs(a-ang1)>0.52;
       });
       if(t2){
         const ang2=Math.atan2(t2.y-player.y,t2.x-player.x);
         bullets.push({x:player.x,y:player.y,vx:Math.cos(ang2)*spd,vy:Math.sin(ang2)*spd,angle:ang2,type:'pistol2',life:70});
+
+        // Pistolet 3 — uniquement $FRANC holders — 3e homing dans direction encore différente
+        if(hasFranc){
+          const t3=sorted.find(e=>{
+            const a=Math.atan2(e.y-player.y,e.x-player.x);
+            return Math.abs(a-ang1)>0.52 && Math.abs(a-Math.atan2(t2.y-player.y,t2.x-player.x))>0.52;
+          });
+          if(t3){
+            const ang3=Math.atan2(t3.y-player.y,t3.x-player.x);
+            bullets.push({x:player.x,y:player.y,vx:Math.cos(ang3)*spd,vy:Math.sin(ang3)*spd,angle:ang3,type:'pistol3',life:70});
+          }
+        }
       }
       shootCooldown=adaptedRate; playSound('shoot'); playerAnim.squish=0.82;
     }
