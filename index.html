@@ -374,13 +374,7 @@ detectFranc();
 //  LIVES BAR
 // ══════════════════════════════════════════════
 function updateLivesBar(l){
-  livesBar.innerHTML='';
-  for(let i=0;i<MAX_LIVES;i++){
-    const h=document.createElement('span');
-    h.style.cssText=`font-size:20px;filter:drop-shadow(0 0 4px ${i<l?'#ff4444':'#333'})`;
-    h.textContent=i<l?'❤️':'🖤';
-    livesBar.appendChild(h);
-  }
+  livesBar.innerHTML=`<span style="font-size:22px;filter:drop-shadow(0 0 6px #ff4444)">❤️</span><span style="font-size:20px;font-family:'Bangers',cursive;color:#ff4444;letter-spacing:1px;text-shadow:0 0 8px #ff4444;margin-left:4px">${Math.max(0,l)}</span>`;
 }
 
 let lifeGainTimeout=null;
@@ -393,9 +387,9 @@ function showLifeGain(){
   el.style.animation='lifeGain 1.8s ease-out forwards';
   clearTimeout(lifeGainTimeout);
   lifeGainTimeout=setTimeout(()=>{ el.style.animation='none'; },1900);
-  // Fait pulser toutes les vies
-  const hearts=livesBar.querySelectorAll('span');
-  hearts.forEach(h=>{ h.style.animation='none'; h.offsetHeight; h.style.animation='heartPop 0.5s ease-out'; });
+  // Fait pulser le cœur unique
+  const heart=livesBar.querySelector('span');
+  if(heart){ heart.style.animation='none'; heart.offsetHeight; heart.style.animation='heartPop 0.5s ease-out'; }
   playSound('coin');
 }
 
