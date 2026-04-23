@@ -127,7 +127,8 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
       <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px">
         <span style="font-size:18px">❤️</span>
         <span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br>
-        <b style="color:#FFD700">5 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs</span>
+        <b style="color:#FFD700">5 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br>
+        <span style="color:#888;font-size:10px">※ No bonus lives in 💀 Sudden Death</span></span>
       </div>
     </div>
     <div id="francBadge" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"></div>
@@ -973,6 +974,10 @@ function update(){
       updateLivesBar(lives);
       if(lives<=0){
         playSound('die'); triggerShake(22,70);
+        // Annule toute animation de vie en cours
+        clearTimeout(lifeGainTimeout);
+        const lgEl=document.getElementById('lifeGainMsg');
+        if(lgEl) lgEl.style.animation='none';
         saveCumulativeEggs(score); saveScore(score,getLevel(score));
         gameState='dying'; setTouchOverlay(false);
         showMsg('GAME OVER',99999,'gameover');
@@ -990,8 +995,10 @@ function update(){
       score++; playSound('coin');
       spawnParticles(c.x,c.y,'#FFD700',10); spawnParticles(c.x,c.y,'#fff',4);
       addFloatText(c.x,c.y-20,'+1',null,20); playerAnim.squish=1.25;
-      // +1 vie tous les 100 œufs EN COURS DE PARTIE (holders $FRANC uniquement, jamais en mourant)
-      if(hasFranc && score>0 && score%100===0 && lives>0 && gameState==='play'){
+      // +1 vie tous les 100 œufs EN COURS DE PARTIE
+      // Uniquement : holders $FRANC + niveaux 1-10 (pas en Sudden Death) + joueur encore vivant
+      const curLvl=getLevel(score);
+      if(hasFranc && score>0 && score%100===0 && lives>1 && gameState==='play' && !isMortSubite(curLvl)){
         lives=Math.min(lives+1, MAX_LIVES+1);
         MAX_LIVES=Math.max(MAX_LIVES,lives);
         addFloatText(player.x,player.y-50,'❤️ +1 LIFE!','#ff4444',20);
