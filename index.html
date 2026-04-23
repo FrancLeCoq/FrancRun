@@ -106,8 +106,8 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 <div id="panel">
   <h2>🐓 LE COQ FRANC</h2>
   <p>Collect golden eggs &amp; dodge enemies!<br>
-  <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels</span><br>
-  <span style="color:#c9aaee;font-size:11px">Weapons from level 3 &bull; Level 10 = Survival!</span></p>
+  <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Mort Subite</span><br>
+  <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Mort Subite!</span></p>
   <button class="btn" onclick="startGame()">▶ PLAY</button>
   <button class="btn btn-blue" onclick="togglePanel('scorePanel','scoreList')">🏆 HIGH SCORES</button>
   <div id="scorePanel" style="display:none;margin-top:10px">
@@ -222,29 +222,57 @@ function applyShake(){ if(shakeDur>0){ ctx.translate((Math.random()-0.5)*shakeAm
 
 // ══════════════════════════════════════════════
 //  LEVEL SYSTEM
+//  Niveau 1 = très facile (découverte)
+//  Niveaux 2→10 = progression normale
+//  Niveau 11 = MORT SUBITE (infini)
 // ══════════════════════════════════════════════
-const EGGS_PER_LEVEL=30, MAX_LEVEL=10;
+const EGGS_PER_LEVEL=30, MAX_LEVEL=11;
+const MORT_SUBITE = 11; // niveau infini final
+
 function getLevel(sc){ return Math.min(MAX_LEVEL, Math.floor(sc/EGGS_PER_LEVEL)+1); }
-function getWeapon(lvl){ return lvl>=7?'gatling':lvl>=3?'pistol':'none'; }
-function getShootRate(lvl){ return lvl>=7?3:lvl>=5?6:lvl>=3?16:0; }
+function isMortSubite(lvl){ return lvl>=MORT_SUBITE; }
+
+// Armes débloquées au niveau 4 (décalé d'un cran)
+function getWeapon(lvl){ return lvl>=8?'gatling':lvl>=4?'pistol':'none'; }
+function getShootRate(lvl){ return lvl>=8?3:lvl>=6?6:lvl>=4?16:0; }
 function getLevelEggs(sc){ return sc%EGGS_PER_LEVEL; }
 function getLevelProgress(sc){ return getLevel(sc)>=MAX_LEVEL?100:(getLevelEggs(sc)/EGGS_PER_LEVEL)*100; }
 
 function getEnemySpeed(lvl){
-  let s;
-  if(lvl<=5) s=1.2+lvl*0.22;
-  else if(lvl===6) s=1.2+5*0.22*0.75;
-  else s=1.2+5*0.22*0.75+(lvl-6)*0.18;
-  // Level 10 — infinite escalation: every 30 eggs beyond level 10 adds speed
-  if(lvl>=MAX_LEVEL){
+  // Niveau 1 = très lent pour la découverte
+  if(lvl===1) return 0.6*MOBILE_SPD;
+  // Niveaux 2→6 = montée progressive
+  if(lvl<=6) s=1.0+(lvl-1)*0.22;
+  // Niveau 7 = respiration
+  else if(lvl===7) s=1.0+5*0.22*0.75;
+  // Niveaux 8→10 = montée
+  else s=1.0+5*0.22*0.75+(lvl-7)*0.18;
+  var s=s||1.0;
+  // Mort Subite — escalade infinie
+  if(isMortSubite(lvl)){
     const beyond=Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL);
-    s+=Math.floor(beyond/30)*0.12; // +0.12 speed per extra 30 eggs
+    s+=Math.floor(beyond/30)*0.12;
   }
   return s*MOBILE_SPD;
 }
 
-// Returns effective difficulty tier at level 10 (used for spawn rate)
-function getLvl10Tier(){ return Math.min(15, MAX_LEVEL+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30)); }
+// Tier pour la Mort Subite (escalade infinie)
+function getMortSubiteTier(){ return Math.min(20, MORT_SUBITE+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30)); }
+
+// ── MODE TEST SECRET ──────────────────────────
+// Tape "FRANC" sur le clavier en mode menu pour activer 5 vies
+let secretBuffer='';
+document.addEventListener('keydown', e=>{
+  secretBuffer=(secretBuffer+e.key).slice(-5).toUpperCase();
+  if(secretBuffer==='FRANC'){
+    hasFranc=true; MAX_LIVES=5; lives=5;
+    updateLivesBar(lives);
+    const el=document.getElementById('francStatus');
+    if(el) el.innerHTML='<span style="color:#FFD700">🔑 MODE TEST ACTIF — 5 vies</span>';
+    alert('🔑 Mode test activé ! 5 vies débloquées.');
+    secretBuffer='';
+  }
+});
 
 // ══════════════════════════════════════════════
 //  $FRANC / TELEGRAM
@@ -257,11 +285,11 @@ async function detectFranc(){
   try{ totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0'); }catch(e){}
   if(!tg||!tg.initData){ MAX_LIVES=1; hasFranc=false; showFrancStatus(); return; }
   try{
-    const res=await fetch('https://YOUR-BACKEND.railway.app/check-franc',{
+    const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/check-franc',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({initData:tg.initData})
+      body:JSON.stringify({initData:tg.initData, game_id:'francrun'})
     });
-    if(res.ok){ const d=await res.json(); hasFranc=d.hasFranc||false; }
+    if(res.ok){ const d=await res.json(); hasFranc=d.hasFranc||false; MAX_LIVES=d.lives||1; }
   }catch(e){ hasFranc=false; }
   MAX_LIVES = hasFranc ? 5+Math.floor(totalEggsEver/100) : 1;
   showFrancStatus();
@@ -282,6 +310,20 @@ function saveCumulativeEggs(n){
   totalEggsEver+=n;
   try{ localStorage.setItem('lcfTotalEggs',totalEggsEver); }catch(e){}
   if(hasFranc) MAX_LIVES=5+Math.floor(totalEggsEver/100);
+  // Sauvegarde le score dans Supabase si dans Telegram
+  const tg=window.Telegram?.WebApp;
+  if(tg?.initData){
+    fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        initData:       tg.initData,
+        game_id:        'francrun',
+        score,
+        level_reached:  getLevel(score),
+        eggs_collected: n,
+      })
+    }).catch(()=>{});
+  }
 }
 
 detectFranc();
@@ -356,23 +398,33 @@ function showMsg(text,d=1000,cls=''){
 }
 function showLevelUp(lvl){
   clearTimeout(levelupTimeout);
-  levelupEl.textContent='⭐ LEVEL '+lvl+'!'; levelupEl.className='show';
+  if(isMortSubite(lvl)){
+    levelupEl.textContent='💀 MORT SUBITE !';
+    levelupEl.style.color='#ff2222';
+    levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';
+  } else {
+    levelupEl.textContent='⭐ LEVEL '+lvl+'!';
+    levelupEl.style.color='#FFD700';
+    levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
+  }
+  levelupEl.className='show';
   levelupTimeout=setTimeout(()=>{ levelupEl.className=''; },2000);
   playSound('levelup');
   const w=getWeapon(lvl);
-  if(w==='pistol'&&lvl===3){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
-  if(w==='gatling'&&lvl===7){weaponEl.textContent='💥 GATLING GUN UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
-  if(lvl===MAX_LEVEL){weaponEl.textContent='🔥 MAX LEVEL — SURVIVE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},4000);}
+  if(w==='pistol'&&lvl===4){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
+  if(w==='gatling'&&lvl===8){weaponEl.textContent='💥 GATLING GUN UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
+  if(isMortSubite(lvl)){weaponEl.textContent='💀 MORT SUBITE — SURVIVEZ !';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);}
 }
 function updateProgressBar(){
   const lvl=getLevel(score);
-  if(lvl>=MAX_LEVEL){
-    const tier=getLvl10Tier();
+  if(isMortSubite(lvl)){
     const beyond=Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL);
     const pct=((beyond%30)/30)*100;
     barFill.style.width=pct+'%';
-    barLabel.textContent=`⚡ MAX LEVEL — TIER ${tier-MAX_LEVEL+1} — SCORE: ${score}`;
+    barFill.style.background='linear-gradient(90deg,#ff2222,#ff8800)';
+    barLabel.textContent=`💀 MORT SUBITE — SCORE: ${score}`;
   } else {
+    barFill.style.background='linear-gradient(90deg,#a855f7,#FFD700)';
     barFill.style.width=getLevelProgress(score)+'%';
     barLabel.textContent=getLevelEggs(score)+' / '+EGGS_PER_LEVEL+' eggs → Level '+(lvl+1);
   }
@@ -717,20 +769,22 @@ function update(){
   }
   updateProgressBar();
 
-  // Spawn rates — at level 10, use infinite tier for escalation
-  const effectiveLvl = lvl>=MAX_LEVEL ? getLvl10Tier() : lvl;
-  const mBonus = isMobile ? 24 : 0; // more delay between spawns on mobile
+  // Spawn rates
+  // Niveau 1 = moitié moins d'ennemis pour la découverte
+  const effectiveLvl = isMortSubite(lvl) ? getMortSubiteTier() : lvl;
+  const mBonus = isMobile ? 24 : 0;
   let base;
-  if(effectiveLvl<=5)        base=Math.max(18,32-effectiveLvl*3.5)+mBonus;
-  else if(effectiveLvl===6)  base=26+mBonus;
-  else                       base=Math.max(8,26-(effectiveLvl-6)*3.5)+mBonus;
+  if(effectiveLvl===1)        base=70+mBonus;          // niveau 1 = très peu d'ennemis
+  else if(effectiveLvl<=6)    base=Math.max(18,38-(effectiveLvl-1)*3.5)+mBonus;
+  else if(effectiveLvl===7)   base=26+mBonus;           // respiration niveau 7
+  else                        base=Math.max(8,26-(effectiveLvl-7)*3.5)+mBonus;
 
   if(frameCount%Math.floor(base)===0) enemies.push(spawnEnemy(lvl));
-  // Extra waves start later on mobile (lvl 8 instead of 7, lvl 10 instead of 9)
-  if(effectiveLvl>=(isMobile?8:7)&&frameCount%Math.floor(base*1.6)===0) enemies.push(spawnEnemy(lvl));
-  if(effectiveLvl>=(isMobile?10:9)&&frameCount%Math.floor(base*2.2)===0) enemies.push(spawnEnemy(lvl));
-  // Level 10+ third wave — on mobile only from tier 3 instead of tier 2
-  if(lvl>=MAX_LEVEL&&getLvl10Tier()>=(isMobile?12:11)&&frameCount%Math.floor(base*3)===0) enemies.push(spawnEnemy(lvl));
+  // Vagues supplémentaires — décalées d'un niveau vs avant
+  if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*1.6)===0) enemies.push(spawnEnemy(lvl));
+  if(effectiveLvl>=(isMobile?11:10)&&frameCount%Math.floor(base*2.2)===0) enemies.push(spawnEnemy(lvl));
+  // Mort Subite — 3e vague croissante
+  if(isMortSubite(lvl)&&getMortSubiteTier()>=(isMobile?13:12)&&frameCount%Math.floor(base*3)===0) enemies.push(spawnEnemy(lvl));
   if(Math.random()<0.012+Math.min(lvl,15)*0.003) coins.push(spawnCoin(lvl));
 
   // Player anim
@@ -780,8 +834,8 @@ function update(){
     e.t++;
     const edx=player.x-e.x,edy=player.y-e.y,ed=Math.hypot(edx,edy)||1;
     const spd=(e.elite?1.5:1)*getEnemySpeed(lvl);
-    if(lvl>=5){e.x+=edx/ed*spd;e.y+=edy/ed*spd;}
-    else{e.x+=e.vx;e.y+=e.vy;if(lvl>=3){e.x+=edx/ed*0.4;e.y+=edy/ed*0.4;}}
+    if(lvl>=6){e.x+=edx/ed*spd;e.y+=edy/ed*spd;}
+    else{e.x+=e.vx;e.y+=e.vy;if(lvl>=4){e.x+=edx/ed*0.4;e.y+=edy/ed*0.4;}}
     if(Math.hypot(player.x-e.x,player.y-e.y)<32*SCALE&&player.inv<=0){
       lives--; player.inv=50; playSound('hit'); triggerShake(10,22);
       spawnParticles(player.x,player.y,'#ffcc00',12); playerAnim.squish=0.7;
@@ -830,8 +884,9 @@ function update(){
 function drawBg(){
   const lvl=getLevel(score);
   const grd=ctx.createLinearGradient(0,0,0,canvas.height);
-  if(lvl>=8){grd.addColorStop(0,'#0a0018');grd.addColorStop(1,'#200040');}
-  else if(lvl>=5){grd.addColorStop(0,'#0d0520');grd.addColorStop(1,'#1a0840');}
+  if(isMortSubite(lvl)){grd.addColorStop(0,'#150005');grd.addColorStop(1,'#3a0010');}
+  else if(lvl>=9){grd.addColorStop(0,'#0a0018');grd.addColorStop(1,'#200040');}
+  else if(lvl>=6){grd.addColorStop(0,'#0d0520');grd.addColorStop(1,'#1a0840');}
   else{grd.addColorStop(0,'#0d0520');grd.addColorStop(1,'#150830');}
   ctx.fillStyle=grd; ctx.fillRect(0,0,canvas.width,canvas.height);
 
