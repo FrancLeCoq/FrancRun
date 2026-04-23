@@ -491,23 +491,59 @@ function showMsg(text,d=1000,cls=''){
   msgEl.textContent=text; msgEl.className=cls?'show '+cls:'show';
   msgTimeout=setTimeout(()=>{ msgEl.className=''; },d);
 }
+// Explosion de tous les ennemis à l'écran — donne du souffle au joueur
+function clearEnemiesExplosion(color1, color2){
+  enemies.forEach(e=>{
+    spawnParticles(e.x, e.y, color1, 14, true);
+    spawnParticles(e.x, e.y, color2, 8, true);
+    triggerShake(6, 15);
+  });
+  enemies=[];
+  bullets=[];
+  playSound('levelup');
+}
+
 function showLevelUp(lvl){
   clearTimeout(levelupTimeout);
   if(isMortSubite(lvl)){
     levelupEl.textContent='💀 SUDDEN DEATH!';
     levelupEl.style.color='#ff2222';
     levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';
+    // Explosion + message motivant au niveau 11
+    clearEnemiesExplosion('#ff4400','#ffaa00');
+    setTimeout(()=>{
+      weaponEl.style.fontSize='13px';
+      weaponEl.textContent='🏆 WELL DONE — FIGHT TO THE DEATH! GET MAX POINTS!';
+      weaponEl.style.opacity=1;
+      setTimeout(()=>{weaponEl.style.opacity=0;},5000);
+    },600);
   } else {
     levelupEl.textContent='⭐ LEVEL '+lvl+'!';
     levelupEl.style.color='#FFD700';
     levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
+    // Explosion aux niveaux 7 et 9
+    if(lvl===7){
+      clearEnemiesExplosion('#a855f7','#FFD700');
+      setTimeout(()=>{
+        weaponEl.textContent='💥 CLEARED! CATCH YOUR BREATH!';
+        weaponEl.style.opacity=1;
+        setTimeout(()=>{weaponEl.style.opacity=0;},3000);
+      },400);
+    }
+    if(lvl===9){
+      clearEnemiesExplosion('#ff4400','#ff8800');
+      setTimeout(()=>{
+        weaponEl.textContent='💥 CLEARED! LAST CHANCE TO BREATHE!';
+        weaponEl.style.opacity=1;
+        setTimeout(()=>{weaponEl.style.opacity=0;},3000);
+      },400);
+    }
   }
   levelupEl.className='show';
-  levelupTimeout=setTimeout(()=>{ levelupEl.className=''; },2000);
+  levelupTimeout=setTimeout(()=>{ levelupEl.className=''; },2500);
   playSound('levelup');
   const w=getWeapon(lvl);
   if(w==='pistol'&&lvl===4){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
-  if(isMortSubite(lvl)){weaponEl.textContent='💀 SUDDEN DEATH — SURVIVE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);}
 }
 function updateProgressBar(){
   const lvl=getLevel(score);
@@ -872,6 +908,10 @@ function update(){
     showLevelUp(lvl); lastLevel=lvl;
     spawnParticles(player.x,player.y,'#FFD700',20,true);
     spawnParticles(player.x,player.y,'#a855f7',15,true);
+    // Invincibilité bonus pendant l'explosion aux niveaux 7, 9, 11
+    if(lvl===7||lvl===9||isMortSubite(lvl)){
+      player.inv=Math.max(player.inv, 180); // 3s de répit garanties
+    }
   }
   updateProgressBar();
 
