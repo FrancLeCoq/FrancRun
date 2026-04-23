@@ -807,10 +807,15 @@ function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){
   const sc=elite?1.35:big?1.7:1.0;
   ctx.scale(sc,sc);
   if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}
-  if(big&&!elite){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}
+  else if(homing&&big){ctx.shadowColor='#cc3300';ctx.shadowBlur=14;}
+  else if(homing){ctx.shadowColor='#ff6600';ctx.shadowBlur=10+Math.sin(t*0.1)*3;} // homing = halo orange
+  else if(big){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}
   ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  // Couleur : elite=rouge vif, big=bordeaux foncé, normal=rouge sombre
-  ctx.fillStyle=hp<maxHp?(elite?'#cc2200':big?'#7a0a0a':'#9b1a1a'):(elite?'#aa1800':big?'#6a0808':'#8b1a1a');
+  // Couleur : elite=rouge vif, homing=orange-rouge, big=bordeaux, libre=rouge sombre
+  const bodyCol=hp<maxHp
+    ?(elite?'#cc2200':homing&&big?'#8a2200':homing?'#c43a00':big?'#7a0a0a':'#9b1a1a')
+    :(elite?'#aa1800':homing&&big?'#7a1e00':homing?'#b03200':big?'#6a0808':'#8b1a1a');
+  ctx.fillStyle=bodyCol;
   ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle=elite?'#5a0000':big?'#3a0505':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.ellipse(8,-18,10,4,0,0,Math.PI*2);ctx.fill();ctx.fillRect(2,-18,12,5);
@@ -844,7 +849,8 @@ function drawCoinSprite(x,y,t,bob){
 
 function drawBullet(b){
   ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);
-  const col=b.type==='gatling'?'#ff6600':'#FFD700';
+  // pistol1=jaune, pistol2=cyan pour distinguer les deux pistolets
+  const col=b.type==='pistol2'?'#00eeff':'#FFD700';
   ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;
   ctx.beginPath();ctx.ellipse(0,0,8,3,0,0,Math.PI*2);ctx.fill();
   ctx.globalAlpha=0.4;ctx.beginPath();ctx.ellipse(-10,0,6,2,0,0,Math.PI*2);ctx.fill();
@@ -918,27 +924,41 @@ function update(){
   playerAnim.breathe+=0.04;
   playerAnim.squish+=(1-playerAnim.squish)*0.2;
 
-  // Weapon
+  // Weapon — double pistolet sur les homing
   const weapon=getWeapon(lvl);
   if(weapon!=='none'){
     if(shootCooldown>0) shootCooldown--;
     const homingEnemies=enemies.filter(e=>e.homing);
-    // Cadence adaptée au % de homing présents à l'écran
-    // 10% homing → tir lent / 50% homing → mitraillette rapide
     const homingRatio=enemies.length>0?homingEnemies.length/enemies.length:0;
     const baseRate=getShootRate(lvl);
     const adaptedRate=Math.max(2, Math.round(baseRate*(1-homingRatio*0.7)));
     if(shootCooldown<=0&&homingEnemies.length>0){
+      // Trie par distance
+      const sorted=[...homingEnemies].sort((a,b)=>
+        Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y)
+      );
+      const t1=sorted[0]; // cible principale — la plus proche
+      const ang1=Math.atan2(t1.y-player.y,t1.x-player.x);
+      const spd=10;
+      bullets.push({x:player.x,y:player.y,vx:Math.cos(ang1)*spd,vy:Math.sin(ang1)*spd,angle:ang1,type:'pistol1',life:70});
+
+      // 2e pistolet — 2e homing le plus proche dans une direction différente (>30° d'écart)
+      const t2=sorted.find(e=>{
+        const ang2=Math.atan2(e.y-player.y,e.x-player.x);
+        return Math.abs(ang2-ang1)>0.52; // >30°
+      });
+      if(t2){
+        const ang2=Math.atan2(t2.y-player.y,t2.x-player.x);
+        bullets.push({x:player.x,y:player.y,vx:Math.cos(ang2)*spd,vy:Math.sin(ang2)*spd,angle:ang2,type:'pistol2',life:70});
+      }
+      shootCooldown=adaptedRate; playSound('shoot'); playerAnim.squish=0.82;
+    }
+    // Oriente vers le homing le plus proche
+    if(homingEnemies.length>0){
       let cl=null,md=Infinity;
       homingEnemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});
-      if(cl){
-        const ddx=cl.x-player.x,ddy=cl.y-player.y,ang=Math.atan2(ddy,ddx),spd=10;
-        bullets.push({x:player.x,y:player.y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,angle:ang,type:'pistol',life:70});
-        shootCooldown=adaptedRate; playSound('shoot'); playerAnim.squish=0.82;
-      }
+      if(cl) player.angle=Math.atan2(cl.y-player.y,cl.x-player.x);
     }
-    // Oriente le personnage vers le homing le plus proche
-    if(homingEnemies.length>0){let cl=null,md=Infinity;homingEnemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});if(cl)player.angle=Math.atan2(cl.y-player.y,cl.x-player.x);}
   }
 
   // Bullets
