@@ -66,7 +66,9 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   cursor:pointer;touch-action:manipulation;letter-spacing:1px;
 }
 #modeBtn:active{opacity:0.7}
-@media(max-width:600px){
+@keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.8)}70%{transform:scale(0.9)}100%{transform:scale(1)}}
+@keyframes lifeGain{0%{opacity:0;transform:translate(-50%,-20px) scale(0.5)}30%{opacity:1;transform:translate(-50%,-40px) scale(1.2)}80%{opacity:1;transform:translate(-50%,-60px) scale(1)}100%{opacity:0;transform:translate(-50%,-80px) scale(0.8)}}
+#lifeGainMsg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-family:'Bangers',cursive;letter-spacing:3px;color:#ff4444;text-shadow:0 0 20px #ff0000,0 0 40px #ffaaaa;z-index:25;pointer-events:none;opacity:0;white-space:nowrap}
   #panel{width:88vw;padding:16px 14px}
   #panel h2{font-size:22px}
   .btn{font-size:14px;padding:13px}
@@ -93,6 +95,7 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   <div class="val" id="levelEl">1</div>
 </div>
 
+<div id="lifeGainMsg"></div>
 <div id="livesBar"></div>
 <div id="weaponInfo"></div>
 <div id="msg"></div>
@@ -104,10 +107,10 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 </div>
 
 <div id="panel">
-  <h2>🐓 LE COQ FRANC</h2>
+  <h2>🐓 FRANC RUN</h2>
   <p>Collect golden eggs &amp; dodge enemies!<br>
-  <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Mort Subite</span><br>
-  <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Mort Subite!</span></p>
+  <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
+  <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
   <button class="btn" onclick="startGame()">▶ PLAY</button>
   <button class="btn btn-blue" onclick="togglePanel('scorePanel','scoreList')">🏆 HIGH SCORES</button>
   <div id="scorePanel" style="display:none;margin-top:10px">
@@ -115,11 +118,17 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
     <ul class="slist" id="scoreList"></ul>
   </div>
   <div class="franc-box">
-    <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:6px">💎 $FRANC RULES</div>
-    <div id="francStatus" style="font-size:11px;color:#c9aaee;line-height:1.7">
-      <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
-      <span style="color:#a3e635">💚 Holding $FRANC</span> + Telegram wallet:<br>
-      &nbsp;→ <b style="color:#FFD700">5 lives</b> &bull; <b style="color:#FFD700">+1 life</b> per 100 eggs
+    <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
+    <div id="francStatus" style="font-size:12px;color:#c9aaee;line-height:2">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">💔</span>
+        <span><span style="color:#ff8888">Without $FRANC:</span> <b style="color:#fff">1 life only</b></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px">
+        <span style="font-size:18px">❤️</span>
+        <span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br>
+        <b style="color:#FFD700">5 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs</span>
+      </div>
     </div>
   </div>
 </div>
@@ -239,16 +248,11 @@ function getLevelEggs(sc){ return sc%EGGS_PER_LEVEL; }
 function getLevelProgress(sc){ return getLevel(sc)>=MAX_LEVEL?100:(getLevelEggs(sc)/EGGS_PER_LEVEL)*100; }
 
 function getEnemySpeed(lvl){
-  // Niveau 1 = très lent pour la découverte
-  if(lvl===1) return 0.6*MOBILE_SPD;
-  // Niveaux 2→6 = montée progressive
-  if(lvl<=6) s=1.0+(lvl-1)*0.22;
-  // Niveau 7 = respiration
+  let s;
+  if(lvl===1)      s=0.6;
+  else if(lvl<=6)  s=1.0+(lvl-1)*0.22;
   else if(lvl===7) s=1.0+5*0.22*0.75;
-  // Niveaux 8→10 = montée
-  else s=1.0+5*0.22*0.75+(lvl-7)*0.18;
-  var s=s||1.0;
-  // Mort Subite — escalade infinie
+  else             s=1.0+5*0.22*0.75+(lvl-7)*0.18;
   if(isMortSubite(lvl)){
     const beyond=Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL);
     s+=Math.floor(beyond/30)*0.12;
@@ -307,10 +311,20 @@ function showFrancStatus(){
 }
 
 function saveCumulativeEggs(n){
+  const prevEggs=totalEggsEver;
   totalEggsEver+=n;
   try{ localStorage.setItem('lcfTotalEggs',totalEggsEver); }catch(e){}
-  if(hasFranc) MAX_LIVES=5+Math.floor(totalEggsEver/100);
-  // Sauvegarde le score dans Supabase si dans Telegram
+  if(hasFranc){
+    const prevLives=5+Math.floor(prevEggs/100);
+    const newLives =5+Math.floor(totalEggsEver/100);
+    MAX_LIVES=newLives;
+    // Animation +1 vie si palier 100 œufs franchi
+    if(newLives>prevLives && gameState==='play'){
+      lives=Math.min(lives+1, MAX_LIVES);
+      updateLivesBar(lives);
+      showLifeGain();
+    }
+  }
   const tg=window.Telegram?.WebApp;
   if(tg?.initData){
     fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{
@@ -339,6 +353,22 @@ function updateLivesBar(l){
     h.textContent=i<l?'❤️':'🖤';
     livesBar.appendChild(h);
   }
+}
+
+let lifeGainTimeout=null;
+function showLifeGain(){
+  const el=document.getElementById('lifeGainMsg');
+  if(!el) return;
+  el.textContent='❤️ +1 LIFE!';
+  el.style.animation='none';
+  el.offsetHeight; // reflow
+  el.style.animation='lifeGain 1.8s ease-out forwards';
+  clearTimeout(lifeGainTimeout);
+  lifeGainTimeout=setTimeout(()=>{ el.style.animation='none'; },1900);
+  // Fait pulser toutes les vies
+  const hearts=livesBar.querySelectorAll('span');
+  hearts.forEach(h=>{ h.style.animation='none'; h.offsetHeight; h.style.animation='heartPop 0.5s ease-out'; });
+  playSound('coin');
 }
 
 // ══════════════════════════════════════════════
@@ -438,7 +468,7 @@ function showMsg(text,d=1000,cls=''){
 function showLevelUp(lvl){
   clearTimeout(levelupTimeout);
   if(isMortSubite(lvl)){
-    levelupEl.textContent='💀 MORT SUBITE !';
+    levelupEl.textContent='💀 SUDDEN DEATH!';
     levelupEl.style.color='#ff2222';
     levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';
   } else {
@@ -452,7 +482,7 @@ function showLevelUp(lvl){
   const w=getWeapon(lvl);
   if(w==='pistol'&&lvl===4){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
   if(w==='gatling'&&lvl===8){weaponEl.textContent='💥 GATLING GUN UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
-  if(isMortSubite(lvl)){weaponEl.textContent='💀 MORT SUBITE — SURVIVEZ !';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);}
+  if(isMortSubite(lvl)){weaponEl.textContent='💀 SUDDEN DEATH — SURVIVE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);}
 }
 function updateProgressBar(){
   const lvl=getLevel(score);
@@ -461,7 +491,7 @@ function updateProgressBar(){
     const pct=((beyond%30)/30)*100;
     barFill.style.width=pct+'%';
     barFill.style.background='linear-gradient(90deg,#ff2222,#ff8800)';
-    barLabel.textContent=`💀 MORT SUBITE — SCORE: ${score}`;
+    barLabel.textContent=`💀 SUDDEN DEATH — SCORE: ${score}`;
   } else {
     barFill.style.background='linear-gradient(90deg,#a855f7,#FFD700)';
     barFill.style.width=getLevelProgress(score)+'%';
