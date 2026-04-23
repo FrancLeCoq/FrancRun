@@ -900,10 +900,10 @@ function update(){
   if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0) enemies.push(spawnEnemy(lvl));
   // 4e vague en Mort Subite
   if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0) enemies.push(spawnEnemy(lvl));
-  // Ennemis "libres" supplémentaires à partir du niveau 6 (+10% population, obstacles)
-  if(effectiveLvl>=6&&frameCount%Math.floor(base*0.9)===0){
+  // Ennemis "libres" supplémentaires à partir du niveau 6 (obstacles, ~5% de population en +)
+  if(effectiveLvl>=6&&frameCount%Math.floor(base*0.95)===0){
     const e=spawnEnemy(lvl);
-    e.homing=false; // forcé libre — obstacle uniquement
+    e.homing=false;
     enemies.push(e);
   }
   if(Math.random()<0.012+Math.min(lvl,15)*0.003) coins.push(spawnCoin(lvl));
@@ -974,7 +974,8 @@ function update(){
       updateLivesBar(lives);
       if(lives<=0){
         playSound('die'); triggerShake(22,70);
-        // Annule toute animation de vie en cours
+        // Purge tous les textes flottants et l'animation de vie
+        floatingTexts=[]; particles=[];
         clearTimeout(lifeGainTimeout);
         const lgEl=document.getElementById('lifeGainMsg');
         if(lgEl) lgEl.style.animation='none';
@@ -1001,7 +1002,6 @@ function update(){
       if(hasFranc && score>0 && score%100===0 && lives>1 && gameState==='play' && !isMortSubite(curLvl)){
         lives=Math.min(lives+1, MAX_LIVES+1);
         MAX_LIVES=Math.max(MAX_LIVES,lives);
-        addFloatText(player.x,player.y-50,'❤️ +1 LIFE!','#ff4444',20);
         updateLivesBar(lives);
         showLifeGain();
       }
