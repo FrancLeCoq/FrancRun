@@ -265,11 +265,11 @@ let secretBuffer='';
 document.addEventListener('keydown', e=>{
   secretBuffer=(secretBuffer+e.key).slice(-5).toUpperCase();
   if(secretBuffer==='FRANC'){
-    hasFranc=true; MAX_LIVES=5; lives=5;
+    hasFranc=true; MAX_LIVES=10; lives=Math.min(lives+10,10);
     updateLivesBar(lives);
     const el=document.getElementById('francStatus');
-    if(el) el.innerHTML='<span style="color:#FFD700">🔑 MODE TEST ACTIF — 5 vies</span>';
-    alert('🔑 Mode test activé ! 5 vies débloquées.');
+    if(el) el.innerHTML='<span style="color:#FFD700">🔑 MODE TEST — 10 vies</span>';
+    alert('🔑 Mode test activé ! 10 vies débloquées.');
     secretBuffer='';
   }
 });
@@ -357,6 +357,17 @@ function spawnParticles(x,y,color,n=8,big=false){
 //  SPAWN
 // ══════════════════════════════════════════════
 let eliteCounter=0;
+let bigCounter=0;
+
+// Ratio de gros monstres par niveau
+function getBigEnemyChance(lvl){
+  if(lvl>=11) return 4/5;  // Mort Subite : 4/5
+  if(lvl>=10) return 2/5;  // Niveau 10 : 2/5
+  if(lvl>=7)  return 1/5;  // Niveaux 7,8,9 : 1/5
+  if(lvl>=5)  return 1/10; // Niveaux 5,6 : 1/10
+  return 0;                // Niveaux 1→4 : aucun
+}
+
 function spawnEnemy(lvl){
   const sp=getEnemySpeed(lvl); let x,y,vx=0,vy=0;
   const s=Math.random()*4|0;
@@ -364,10 +375,38 @@ function spawnEnemy(lvl){
   else if(s===1){x=canvas.width+45;y=Math.random()*canvas.height;vx=-sp;}
   else if(s===2){x=Math.random()*canvas.width;y=-45;vy=sp;}
   else{x=Math.random()*canvas.width;y=canvas.height+45;vy=-sp;}
-  let hp=lvl>=8?4:lvl>=6?3:lvl>=3?2:1;
-  const isElite=lvl>=8&&(++eliteCounter%10===0);
-  if(isElite){hp+=3;vx*=1.5;vy*=1.5;}
-  return{x,y,vx,vy,hp,maxHp:hp,t:0,wobble:Math.random()*Math.PI*2,elite:isElite};
+
+  // ── HP progressif par niveau ──
+  // Niveaux 1-3  : 1 HP  (pas de barre de vie)
+  // Niveau 4     : 2 HP  (arme débloquée → ennemis résistent un peu)
+  // Niveau 5-6   : 2-3 HP
+  // Niveau 7     : 3 HP
+  // Niveau 8-9   : 4 HP
+  // Niveau 10    : 5 HP
+  // Mort Subite  : 6 HP
+  let hp;
+  if(lvl<=3)       hp=1;
+  else if(lvl===4) hp=2;
+  else if(lvl===5) hp=2;
+  else if(lvl===6) hp=3;
+  else if(lvl===7) hp=3;
+  else if(lvl<=9)  hp=4;
+  else if(lvl===10)hp=5;
+  else             hp=6; // Mort Subite
+
+  // ── Gros monstre (big enemy) ──
+  const bigChance=getBigEnemyChance(lvl);
+  const isBig = bigChance>0 && Math.random()<bigChance;
+  if(isBig){
+    hp+=2;           // encore plus de HP
+    vx*=0.7; vy*=0.7; // un peu plus lent mais plus gros
+  }
+
+  // ── Elite (💀) : 1/10 à partir du niveau 9 ──
+  const isElite=lvl>=9&&(++eliteCounter%10===0);
+  if(isElite){hp+=3;vx*=1.4;vy*=1.4;}
+
+  return{x,y,vx,vy,hp,maxHp:hp,t:0,wobble:Math.random()*Math.PI*2,elite:isElite,big:isBig};
 }
 function spawnCoin(lvl){
   const sp=(1.2+lvl*0.1)*(isMobile?0.45:1.0); // much slower on mobile
@@ -699,25 +738,31 @@ function drawChickenSprite(x,y,inv,anim){
   ctx.restore();
 }
 
-function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite){
+function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big){
   ctx.save(); ctx.translate(x,y); ctx.scale(SCALE,SCALE);
   const dx=player?player.x-x:0, dy=player?player.y-y:0;
   ctx.rotate(Math.atan2(dy,dx));
   ctx.translate(0,Math.sin(t*0.18+wobble)*3);
-  const sc=elite?1.35:1.0;
+  // Taille : gros=1.7x, elite=1.35x, normal=1x
+  const sc=elite?1.35:big?1.7:1.0;
   ctx.scale(sc,sc);
   if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}
+  if(big&&!elite){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}
   ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  ctx.fillStyle=hp<maxHp?(elite?'#cc2200':'#9b1a1a'):(elite?'#aa1800':'#8b1a1a');ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=elite?'#5a0000':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();
+  // Couleur : elite=rouge vif, big=bordeaux foncé, normal=rouge sombre
+  ctx.fillStyle=hp<maxHp?(elite?'#cc2200':big?'#7a0a0a':'#9b1a1a'):(elite?'#aa1800':big?'#6a0808':'#8b1a1a');
+  ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=elite?'#5a0000':big?'#3a0505':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.ellipse(8,-18,10,4,0,0,Math.PI*2);ctx.fill();ctx.fillRect(2,-18,12,5);
-  ctx.fillStyle=elite?'#ff6600':'#ff0000';ctx.beginPath();ctx.arc(8,-14,2,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=elite?'#ff4400':'#ffdd00';ctx.beginPath();ctx.arc(10,-13,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=elite?'#ff6600':big?'#cc0000':'#ff0000';ctx.beginPath();ctx.arc(8,-14,2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=elite?'#ff4400':big?'#ff2200':'#ffdd00';ctx.beginPath();ctx.arc(10,-13,4,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#111';ctx.beginPath();ctx.arc(11,-13,2,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#cc4400';ctx.beginPath();ctx.moveTo(17,-11);ctx.lineTo(23,-11);ctx.lineTo(17,-8);ctx.fill();
   ctx.fillStyle='#cc0000';ctx.beginPath();ctx.ellipse(12,-7,4,3,0.3,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle=elite?'#ff4400':'#8b4513';ctx.lineWidth=elite?4:3;ctx.beginPath();ctx.moveTo(16,-4);ctx.lineTo(32,-4);ctx.stroke();
+  ctx.strokeStyle=elite?'#ff4400':big?'#cc2200':'#8b4513';ctx.lineWidth=elite?4:big?3.5:3;ctx.beginPath();ctx.moveTo(16,-4);ctx.lineTo(32,-4);ctx.stroke();
   if(elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💀',-10,-18);}
+  if(big&&!elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💢',-10,-18);}
+  // Barre de vie uniquement si HP > 1 ET niveau >= 4 (arme débloquée)
   if(maxHp>1){
     const bw=36,bh=5,bx=-18,by=20;
     ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx,by,bw,bh);
@@ -770,21 +815,31 @@ function update(){
   updateProgressBar();
 
   // Spawn rates
-  // Niveau 1 = moitié moins d'ennemis pour la découverte
+  // Niveau 1    : très rare (découverte)
+  // Niveau 4    : on accélère car l'arme arrive
+  // Niveaux 5+  : de plus en plus intense
   const effectiveLvl = isMortSubite(lvl) ? getMortSubiteTier() : lvl;
-  const mBonus = isMobile ? 24 : 0;
+  const mBonus = isMobile ? 20 : 0;
   let base;
-  if(effectiveLvl===1)        base=70+mBonus;          // niveau 1 = très peu d'ennemis
-  else if(effectiveLvl<=6)    base=Math.max(18,38-(effectiveLvl-1)*3.5)+mBonus;
-  else if(effectiveLvl===7)   base=26+mBonus;           // respiration niveau 7
-  else                        base=Math.max(8,26-(effectiveLvl-7)*3.5)+mBonus;
+  if(effectiveLvl===1)        base=70+mBonus;
+  else if(effectiveLvl===2)   base=55+mBonus;
+  else if(effectiveLvl===3)   base=42+mBonus;
+  else if(effectiveLvl===4)   base=32+mBonus;  // arme débloquée → plus d'ennemis
+  else if(effectiveLvl===5)   base=26+mBonus;
+  else if(effectiveLvl===6)   base=22+mBonus;
+  else if(effectiveLvl===7)   base=20+mBonus;  // respiration relative
+  else if(effectiveLvl===8)   base=16+mBonus;
+  else if(effectiveLvl===9)   base=13+mBonus;
+  else if(effectiveLvl===10)  base=10+mBonus;
+  else                        base=Math.max(6,10-(effectiveLvl-11)*0.8)+mBonus; // Mort Subite
 
   if(frameCount%Math.floor(base)===0) enemies.push(spawnEnemy(lvl));
-  // Vagues supplémentaires — décalées d'un niveau vs avant
-  if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*1.6)===0) enemies.push(spawnEnemy(lvl));
-  if(effectiveLvl>=(isMobile?11:10)&&frameCount%Math.floor(base*2.2)===0) enemies.push(spawnEnemy(lvl));
-  // Mort Subite — 3e vague croissante
-  if(isMortSubite(lvl)&&getMortSubiteTier()>=(isMobile?13:12)&&frameCount%Math.floor(base*3)===0) enemies.push(spawnEnemy(lvl));
+  // 2e vague à partir du niveau 5
+  if(effectiveLvl>=5&&frameCount%Math.floor(base*1.8)===0) enemies.push(spawnEnemy(lvl));
+  // 3e vague à partir du niveau 8
+  if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0) enemies.push(spawnEnemy(lvl));
+  // 4e vague en Mort Subite
+  if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0) enemies.push(spawnEnemy(lvl));
   if(Math.random()<0.012+Math.min(lvl,15)*0.003) coins.push(spawnCoin(lvl));
 
   // Player anim
@@ -820,7 +875,7 @@ function update(){
     if(b.life<=0||b.x<-20||b.x>canvas.width+20||b.y<-20||b.y>canvas.height+20) return false;
     for(let i=enemies.length-1;i>=0;i--){
       const e=enemies[i];
-      if(Math.hypot(b.x-e.x,b.y-e.y)<24*SCALE){
+      if(Math.hypot(b.x-e.x,b.y-e.y)<(e.big?38:24)*SCALE){
         e.hp--; spawnParticles(b.x,b.y,'#ff4400',4);
         if(e.hp<=0){spawnParticles(e.x,e.y,'#8b1a1a',12,true);spawnParticles(e.x,e.y,'#ff4400',8);addFloatText(e.x,e.y-20,'💀',null,28);playSound('kill');enemies.splice(i,1);}
         return false;
@@ -836,7 +891,7 @@ function update(){
     const spd=(e.elite?1.5:1)*getEnemySpeed(lvl);
     if(lvl>=6){e.x+=edx/ed*spd;e.y+=edy/ed*spd;}
     else{e.x+=e.vx;e.y+=e.vy;if(lvl>=4){e.x+=edx/ed*0.4;e.y+=edy/ed*0.4;}}
-    if(Math.hypot(player.x-e.x,player.y-e.y)<32*SCALE&&player.inv<=0){
+    if(Math.hypot(player.x-e.x,player.y-e.y)<(e.big?42:32)*SCALE&&player.inv<=0){
       lives--; player.inv=50; playSound('hit'); triggerShake(10,22);
       spawnParticles(player.x,player.y,'#ffcc00',12); playerAnim.squish=0.7;
       updateLivesBar(lives);
@@ -936,7 +991,7 @@ function draw(){
   }
   if(gameState==='play'||gameState==='dying'){
     coins.forEach(c=>drawCoinSprite(c.x,c.y,c.t,c.bob));
-    enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite));
+    enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite,e.big));
     bullets.forEach(b=>drawBullet(b));
     particles.forEach(p=>drawParticle(p));
     if(player) drawChickenSprite(player.x,player.y,player.inv,playerAnim);
