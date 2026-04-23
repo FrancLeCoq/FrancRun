@@ -130,6 +130,7 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
         <b style="color:#FFD700">5 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs</span>
       </div>
     </div>
+    <div id="francBadge" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"></div>
   </div>
 </div>
 
@@ -241,9 +242,19 @@ const MORT_SUBITE = 11; // niveau infini final
 function getLevel(sc){ return Math.min(MAX_LEVEL, Math.floor(sc/EGGS_PER_LEVEL)+1); }
 function isMortSubite(lvl){ return lvl>=MORT_SUBITE; }
 
-// Armes débloquées au niveau 4 (décalé d'un cran)
-function getWeapon(lvl){ return lvl>=8?'gatling':lvl>=4?'pistol':'none'; }
-function getShootRate(lvl){ return lvl>=8?3:lvl>=6?6:lvl>=4?16:0; }
+// Une seule arme — le pistol — à partir du niveau 4
+// La cadence de tir augmente avec les niveaux pour compenser
+function getWeapon(lvl){ return lvl>=4?'pistol':'none'; }
+function getShootRate(lvl){
+  if(lvl<4)  return 0;
+  if(lvl===4) return 22; // lent — découverte
+  if(lvl===5) return 18;
+  if(lvl===6) return 15;
+  if(lvl===7) return 12;
+  if(lvl===8) return 10;
+  if(lvl===9) return 8;
+  return 6; // niveau 10 + Mort Subite
+}
 function getLevelEggs(sc){ return sc%EGGS_PER_LEVEL; }
 function getLevelProgress(sc){ return getLevel(sc)>=MAX_LEVEL?100:(getLevelEggs(sc)/EGGS_PER_LEVEL)*100; }
 
@@ -258,6 +269,18 @@ function getEnemySpeed(lvl){
     s+=Math.floor(beyond/30)*0.12;
   }
   return s*MOBILE_SPD;
+}
+
+// Ratio d'IA homing par niveau (0=libre, 1=100% vers joueur)
+function getHomingRatio(lvl){
+  if(lvl<=3)  return 0;    // libre
+  if(lvl===4) return 0.25;
+  if(lvl===5) return 0.40;
+  if(lvl===6) return 0.60;
+  if(lvl===7) return 0.70;
+  if(lvl===8) return 0.80;
+  if(lvl===9) return 0.90;
+  return 1.0; // niveau 10 + Mort Subite = 100% homing
 }
 
 // Tier pour la Mort Subite (escalade infinie)
@@ -302,11 +325,15 @@ async function detectFranc(){
 function showFrancStatus(){
   const el=document.getElementById('francStatus');
   if(!el) return;
+  // On ne remplace pas le HTML du panel — on ajoute juste un badge de statut en haut
+  const badge=document.getElementById('francBadge');
+  if(!badge) return;
   if(hasFranc){
     const bonus=Math.floor(totalEggsEver/100);
-    el.innerHTML=`<span style="color:#a3e635">💚 $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;
+    badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;
+    badge.style.display='block';
   } else {
-    el.innerHTML=`<span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br><span style="color:#c9aaee;font-size:10px">Hold $FRANC + connect wallet for 5 lives</span>`;
+    badge.style.display='none';
   }
 }
 
@@ -436,7 +463,11 @@ function spawnEnemy(lvl){
   const isElite=lvl>=9&&(++eliteCounter%10===0);
   if(isElite){hp+=3;vx*=1.4;vy*=1.4;}
 
-  return{x,y,vx,vy,hp,maxHp:hp,t:0,wobble:Math.random()*Math.PI*2,elite:isElite,big:isBig};
+  // Décide si cet ennemi est homing ou libre selon le ratio du niveau
+  const ratio = getHomingRatio(lvl);
+  const isHoming = Math.random() < ratio;
+
+  return{x,y,vx,vy,hp,maxHp:hp,t:0,wobble:Math.random()*Math.PI*2,elite:isElite,big:isBig,homing:isHoming};
 }
 function spawnCoin(lvl){
   const sp=(1.2+lvl*0.1)*(isMobile?0.45:1.0); // much slower on mobile
@@ -481,7 +512,6 @@ function showLevelUp(lvl){
   playSound('levelup');
   const w=getWeapon(lvl);
   if(w==='pistol'&&lvl===4){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
-  if(w==='gatling'&&lvl===8){weaponEl.textContent='💥 GATLING GUN UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
   if(isMortSubite(lvl)){weaponEl.textContent='💀 SUDDEN DEATH — SURVIVE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);}
 }
 function updateProgressBar(){
@@ -890,10 +920,9 @@ function update(){
       let cl=null,md=Infinity;
       enemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});
       if(cl){
-        const ddx=cl.x-player.x,ddy=cl.y-player.y,ang=Math.atan2(ddy,ddx),spd=weapon==='gatling'?14:10;
-        bullets.push({x:player.x,y:player.y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,angle:ang,type:weapon,life:70});
-        if(weapon==='gatling'){[-0.15,0.15].forEach(da=>bullets.push({x:player.x,y:player.y,vx:Math.cos(ang+da)*spd,vy:Math.sin(ang+da)*spd,angle:ang+da,type:weapon,life:60}));}
-        shootCooldown=getShootRate(lvl); playSound(weapon==='gatling'?'shoot2':'shoot'); playerAnim.squish=0.82;
+        const ddx=cl.x-player.x,ddy=cl.y-player.y,ang=Math.atan2(ddy,ddx),spd=10;
+        bullets.push({x:player.x,y:player.y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,angle:ang,type:'pistol',life:70});
+        shootCooldown=getShootRate(lvl); playSound('shoot'); playerAnim.squish=0.82;
       }
     }
     if(enemies.length>0){let cl=null,md=Infinity;enemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});if(cl)player.angle=Math.atan2(cl.y-player.y,cl.x-player.x);}
@@ -919,8 +948,13 @@ function update(){
     e.t++;
     const edx=player.x-e.x,edy=player.y-e.y,ed=Math.hypot(edx,edy)||1;
     const spd=(e.elite?1.5:1)*getEnemySpeed(lvl);
-    if(lvl>=6){e.x+=edx/ed*spd;e.y+=edy/ed*spd;}
-    else{e.x+=e.vx;e.y+=e.vy;if(lvl>=4){e.x+=edx/ed*0.4;e.y+=edy/ed*0.4;}}
+    if(e.homing){
+      // IA homing : se dirige directement vers le joueur
+      e.x+=edx/ed*spd; e.y+=edy/ed*spd;
+    } else {
+      // Libre : suit sa trajectoire initiale
+      e.x+=e.vx; e.y+=e.vy;
+    }
     if(Math.hypot(player.x-e.x,player.y-e.y)<(e.big?42:32)*SCALE&&player.inv<=0){
       lives--; player.inv=50; playSound('hit'); triggerShake(10,22);
       spawnParticles(player.x,player.y,'#ffcc00',12); playerAnim.squish=0.7;
