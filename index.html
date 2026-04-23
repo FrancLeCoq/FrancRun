@@ -915,22 +915,18 @@ function update(){
   const weapon=getWeapon(lvl);
   if(weapon!=='none'){
     if(shootCooldown>0) shootCooldown--;
-    if(shootCooldown<=0&&enemies.length>0){
-      // Vise uniquement les ennemis homing — sinon le plus proche
-      const homingEnemies=enemies.filter(e=>e.homing);
-      const targets=homingEnemies.length>0?homingEnemies:enemies;
+    const homingEnemies=enemies.filter(e=>e.homing);
+    if(shootCooldown<=0&&homingEnemies.length>0){
       let cl=null,md=Infinity;
-      targets.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});
+      homingEnemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});
       if(cl){
         const ddx=cl.x-player.x,ddy=cl.y-player.y,ang=Math.atan2(ddy,ddx),spd=10;
         bullets.push({x:player.x,y:player.y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,angle:ang,type:'pistol',life:70});
         shootCooldown=getShootRate(lvl); playSound('shoot'); playerAnim.squish=0.82;
       }
     }
-    // Oriente le personnage vers les homing en priorité
-    const homingEnemies2=enemies.filter(e=>e.homing);
-    const aimTargets=homingEnemies2.length>0?homingEnemies2:enemies;
-    if(aimTargets.length>0){let cl=null,md=Infinity;aimTargets.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});if(cl)player.angle=Math.atan2(cl.y-player.y,cl.x-player.x);}
+    // Oriente le personnage vers le homing le plus proche
+    if(homingEnemies.length>0){let cl=null,md=Infinity;homingEnemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});if(cl)player.angle=Math.atan2(cl.y-player.y,cl.x-player.x);}
   }
 
   // Bullets
