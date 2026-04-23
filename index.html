@@ -899,6 +899,12 @@ function update(){
   if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0) enemies.push(spawnEnemy(lvl));
   // 4e vague en Mort Subite
   if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0) enemies.push(spawnEnemy(lvl));
+  // Ennemis "libres" supplémentaires à partir du niveau 6 (+10% population, obstacles)
+  if(effectiveLvl>=6&&frameCount%Math.floor(base*0.9)===0){
+    const e=spawnEnemy(lvl);
+    e.homing=false; // forcé libre — obstacle uniquement
+    enemies.push(e);
+  }
   if(Math.random()<0.012+Math.min(lvl,15)*0.003) coins.push(spawnCoin(lvl));
 
   // Player anim
@@ -984,8 +990,8 @@ function update(){
       score++; playSound('coin');
       spawnParticles(c.x,c.y,'#FFD700',10); spawnParticles(c.x,c.y,'#fff',4);
       addFloatText(c.x,c.y-20,'+1',null,20); playerAnim.squish=1.25;
-      // +1 vie tous les 100 œufs collectés EN COURS DE PARTIE (holders $FRANC uniquement)
-      if(hasFranc && score>0 && score%100===0){
+      // +1 vie tous les 100 œufs EN COURS DE PARTIE (holders $FRANC uniquement, jamais en mourant)
+      if(hasFranc && score>0 && score%100===0 && lives>0 && gameState==='play'){
         lives=Math.min(lives+1, MAX_LIVES+1);
         MAX_LIVES=Math.max(MAX_LIVES,lives);
         addFloatText(player.x,player.y-50,'❤️ +1 LIFE!','#ff4444',20);
