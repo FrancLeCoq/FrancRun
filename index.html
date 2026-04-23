@@ -797,7 +797,7 @@ function drawChickenSprite(x,y,inv,anim){
   ctx.restore();
 }
 
-function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big){
+function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){
   ctx.save(); ctx.translate(x,y); ctx.scale(SCALE,SCALE);
   const dx=player?player.x-x:0, dy=player?player.y-y:0;
   ctx.rotate(Math.atan2(dy,dx));
@@ -821,8 +821,8 @@ function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big){
   ctx.strokeStyle=elite?'#ff4400':big?'#cc2200':'#8b4513';ctx.lineWidth=elite?4:big?3.5:3;ctx.beginPath();ctx.moveTo(16,-4);ctx.lineTo(32,-4);ctx.stroke();
   if(elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💀',-10,-18);}
   if(big&&!elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💢',-10,-18);}
-  // Barre de vie uniquement si HP > 1 ET niveau >= 4 (arme débloquée)
-  if(maxHp>1){
+  // Barre de vie uniquement sur les homing (ceux qui peuvent être tués par le pistolet)
+  if(maxHp>1 && homing){
     const bw=36,bh=5,bx=-18,by=20;
     ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx,by,bw,bh);
     ctx.fillStyle=hp/maxHp>0.5?'#22cc44':hp/maxHp>0.25?'#ffaa00':'#ff2222';
@@ -916,13 +916,18 @@ function update(){
   if(weapon!=='none'){
     if(shootCooldown>0) shootCooldown--;
     const homingEnemies=enemies.filter(e=>e.homing);
+    // Cadence adaptée au % de homing présents à l'écran
+    // 10% homing → tir lent / 50% homing → mitraillette rapide
+    const homingRatio=enemies.length>0?homingEnemies.length/enemies.length:0;
+    const baseRate=getShootRate(lvl);
+    const adaptedRate=Math.max(2, Math.round(baseRate*(1-homingRatio*0.7)));
     if(shootCooldown<=0&&homingEnemies.length>0){
       let cl=null,md=Infinity;
       homingEnemies.forEach(e=>{const d=Math.hypot(player.x-e.x,player.y-e.y);if(d<md){md=d;cl=e;}});
       if(cl){
         const ddx=cl.x-player.x,ddy=cl.y-player.y,ang=Math.atan2(ddy,ddx),spd=10;
         bullets.push({x:player.x,y:player.y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,angle:ang,type:'pistol',life:70});
-        shootCooldown=getShootRate(lvl); playSound('shoot'); playerAnim.squish=0.82;
+        shootCooldown=adaptedRate; playSound('shoot'); playerAnim.squish=0.82;
       }
     }
     // Oriente le personnage vers le homing le plus proche
@@ -979,14 +984,13 @@ function update(){
       score++; playSound('coin');
       spawnParticles(c.x,c.y,'#FFD700',10); spawnParticles(c.x,c.y,'#fff',4);
       addFloatText(c.x,c.y-20,'+1',null,20); playerAnim.squish=1.25;
-      // $FRANC bonus life — award mid-game when crossing each 100-egg threshold
-      if(hasFranc){
-        const newLives=5+Math.floor((totalEggsEver+score)/100);
-        if(newLives>MAX_LIVES){
-          MAX_LIVES=newLives; lives=Math.min(lives+1,MAX_LIVES);
-          addFloatText(player.x,player.y-50,'❤️ +1 LIFE!','#ff4444',20);
-          updateLivesBar(lives);
-        }
+      // +1 vie tous les 100 œufs collectés EN COURS DE PARTIE (holders $FRANC uniquement)
+      if(hasFranc && score>0 && score%100===0){
+        lives=Math.min(lives+1, MAX_LIVES+1);
+        MAX_LIVES=Math.max(MAX_LIVES,lives);
+        addFloatText(player.x,player.y-50,'❤️ +1 LIFE!','#ff4444',20);
+        updateLivesBar(lives);
+        showLifeGain();
       }
       return false;
     }
@@ -1056,7 +1060,7 @@ function draw(){
   }
   if(gameState==='play'||gameState==='dying'){
     coins.forEach(c=>drawCoinSprite(c.x,c.y,c.t,c.bob));
-    enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite,e.big));
+    enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite,e.big,e.homing));
     bullets.forEach(b=>drawBullet(b));
     particles.forEach(p=>drawParticle(p));
     if(player) drawChickenSprite(player.x,player.y,player.inv,playerAnim);
