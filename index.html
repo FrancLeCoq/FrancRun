@@ -22,8 +22,11 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 #lvlProgress .bar-label{text-align:center;font-size:10px;color:#b89fd4;margin-top:3px}
 #msg{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);font-size:76px;color:#fff;text-shadow:0 0 40px #fff;opacity:0;transition:.3s;z-index:15;pointer-events:none;white-space:nowrap;font-family:'Bangers',cursive;letter-spacing:5px}
 #msg.show{opacity:1}
-#msg.gameover{color:#cc0000;text-shadow:0 0 30px #ff0000,0 0 60px #880000,0 0 100px #440000;font-size:72px;animation:bloodPulse 0.8s ease-in-out infinite alternate}
-@keyframes bloodPulse{0%{text-shadow:0 0 30px #ff0000,0 0 60px #880000;color:#cc0000}100%{text-shadow:0 0 50px #ff2200,0 0 90px #aa0000,0 0 140px #660000;color:#ff1111}}
+#msg.gameover{color:#cc0000;text-shadow:0 0 30px #ff0000,0 0 60px #880000,0 0 100px #440000;font-size:72px;animation:bloodPulse 0.5s ease-in-out infinite alternate}
+@keyframes bloodPulse{
+  0%{text-shadow:0 0 50px #ff0000,0 0 100px #cc0000,0 0 150px #880000,0 0 200px #440000;color:#880000;transform:translate(-50%,-50%) scale(0.92) skewX(-1deg)}
+  100%{text-shadow:0 0 80px #ff2200,0 0 150px #ff0000,0 0 220px #cc0000,0 0 300px #880000;color:#ff0000;transform:translate(-50%,-50%) scale(1.08) skewX(1deg)}
+}
 #levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:4px}
 #levelup.show{opacity:1}
 /* Panel */
@@ -456,7 +459,8 @@ function spawnEnemy(lvl){
   }
 
   // ── Elite (💀) : 1/10 à partir du niveau 9 ──
-  const isElite=lvl>=9&&(++eliteCounter%10===0);
+  const eliteRate = isMortSubite(lvl) ? 10 : 20;
+  const isElite=lvl>=9&&(++eliteCounter%eliteRate===0);
   if(isElite){hp+=3;vx*=1.4;vy*=1.4;}
 
   // Décide si cet ennemi est homing ou libre selon le ratio du niveau
@@ -715,7 +719,7 @@ function updatePlayerMovement(){
         const ang=Math.atan2(joyDY,joyDX);
         const speed=curve*JOY_SPEED_MAX;
         player.x=Math.max(20,Math.min(canvas.width-20,  player.x+Math.cos(ang)*speed));
-        player.y=Math.max(50,Math.min(canvas.height-40, player.y+Math.sin(ang)*speed));
+        player.y=Math.max(20,Math.min(canvas.height-40, player.y+Math.sin(ang)*speed));
       }
     } else {
       // Drag mode — player follows finger with vertical offset upward
@@ -725,7 +729,7 @@ function updatePlayerMovement(){
         player.x+=(dragTouchX - player.x)*DRAG_LERP;
         player.y+=((dragTouchY - FINGER_OFFSET_Y) - player.y)*DRAG_LERP;
         player.x=Math.max(20,Math.min(canvas.width-20,  player.x));
-        player.y=Math.max(50,Math.min(canvas.height-40, player.y));
+        player.y=Math.max(20,Math.min(canvas.height-40, player.y));
       }
     }
     // Fade finger ring when released
@@ -733,6 +737,8 @@ function updatePlayerMovement(){
   } else {
     player.x+=(targetX-player.x)*0.22;
     player.y+=(targetY-player.y)*0.22;
+    player.x=Math.max(20,Math.min(canvas.width-20,  player.x));
+    player.y=Math.max(20,Math.min(canvas.height-40, player.y));
   }
 }
 
@@ -849,14 +855,16 @@ function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){
   const sc=elite?1.35:big?1.7:1.0;
   ctx.scale(sc,sc);
   if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}
-  else if(homing&&big){ctx.shadowColor='#cc3300';ctx.shadowBlur=14;}
-  else if(homing){ctx.shadowColor='#ff6600';ctx.shadowBlur=10+Math.sin(t*0.1)*3;} // homing = halo orange
+  else if(homing){ctx.shadowColor='#ddaa00';ctx.shadowBlur=10+Math.sin(t*0.1)*3;}
   else if(big){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}
   ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  // Couleur : elite=rouge vif, homing=orange-rouge, big=bordeaux, libre=rouge sombre
+  // 3 couleurs uniquement :
+  // Rouge sombre  → libre (ne peut pas être tué)
+  // Jaune foncé   → homing (peut être tué, ciblé par le pistolet)
+  // Rouge vif     → élite (rare, très dangereux)
   const bodyCol=hp<maxHp
-    ?(elite?'#cc2200':homing&&big?'#8a2200':homing?'#c43a00':big?'#7a0a0a':'#9b1a1a')
-    :(elite?'#aa1800':homing&&big?'#7a1e00':homing?'#b03200':big?'#6a0808':'#8b1a1a');
+    ?(elite?'#cc2200':homing?'#b08800':'#9b1a1a')
+    :(elite?'#aa1800':homing?'#9a7700':'#8b1a1a');
   ctx.fillStyle=bodyCol;
   ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle=elite?'#5a0000':big?'#3a0505':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();
@@ -1187,6 +1195,14 @@ function draw(){
     });
     drawWeaponHUD(getLevel(score));
     drawMobileHints();
+  // Overlay rouge sang en état dying/gameover
+  if(gameState==='dying'||gameState==='gameover'){
+    const vig=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.height*0.2,canvas.width/2,canvas.height/2,canvas.height*0.9);
+    vig.addColorStop(0,'rgba(120,0,0,0.0)');
+    vig.addColorStop(0.5,'rgba(180,0,0,0.3)');
+    vig.addColorStop(1,'rgba(80,0,0,0.85)');
+    ctx.save(); ctx.fillStyle=vig; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.restore();
+  }
   }
   ctx.restore();
 }
