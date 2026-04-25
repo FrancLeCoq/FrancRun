@@ -72,7 +72,7 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 #modeBtn:active{opacity:0.7}
 @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.8)}70%{transform:scale(0.9)}100%{transform:scale(1)}}
 @keyframes lifeGain{0%{opacity:0;transform:translate(-50%,-20px) scale(0.5)}30%{opacity:1;transform:translate(-50%,-40px) scale(1.2)}80%{opacity:1;transform:translate(-50%,-60px) scale(1)}100%{opacity:0;transform:translate(-50%,-80px) scale(0.8)}}
-#lifeGainMsg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-family:'Bangers',cursive;letter-spacing:3px;color:#ff4444;text-shadow:0 0 20px #ff0000,0 0 40px #ffaaaa;z-index:25;pointer-events:none;opacity:0;white-space:nowrap}
+#lifeGainMsg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-family:'Bangers',cursive;letter-spacing:3px;color:#ff4444;text-shadow:0 0 20px #ff0000,0 0 40px #ffaaaa;z-index:25;pointer-events:none;opacity:0;display:none;white-space:nowrap}
   #panel{width:88vw;padding:16px 14px}
   #panel h2{font-size:22px}
   .btn{font-size:14px;padding:13px}
@@ -382,19 +382,23 @@ function updateLivesBar(l){
   livesBar.innerHTML=`<span style="font-size:22px;filter:drop-shadow(0 0 6px #ff4444)">❤️</span><span style="font-size:20px;font-family:'Bangers',cursive;color:#ff4444;letter-spacing:1px;text-shadow:0 0 8px #ff4444;margin-left:4px">${Math.max(0,l)}</span>`;
 }
 
-let lifeGainTimeout=null;
 function showLifeGain(){
   const el=document.getElementById('lifeGainMsg');
-  if(!el) return;
+  if(!el||gameState!=='play') return;
   el.textContent='❤️ +1 LIFE!';
+  el.style.display='block';
+  el.style.opacity='0';
   el.style.animation='none';
-  el.offsetHeight; // reflow
-  el.style.animation='lifeGain 1.8s ease-out forwards';
+  void el.offsetHeight; // reflow
+  el.style.animation='lifeGain 1.8s ease-out';
   clearTimeout(lifeGainTimeout);
-  lifeGainTimeout=setTimeout(()=>{ el.style.animation='none'; },1900);
-  // Fait pulser le cœur unique
+  lifeGainTimeout=setTimeout(()=>{
+    el.style.animation='none';
+    el.style.opacity='0';
+    el.style.display='none';
+  },1900);
   const heart=livesBar.querySelector('span');
-  if(heart){ heart.style.animation='none'; heart.offsetHeight; heart.style.animation='heartPop 0.5s ease-out'; }
+  if(heart){ heart.style.animation='none'; void heart.offsetHeight; heart.style.animation='heartPop 0.5s ease-out'; }
   playSound('coin');
 }
 
@@ -822,7 +826,7 @@ function startGame(){
   // Annule toute animation de vie en cours
   clearTimeout(lifeGainTimeout);
   const lgEl=document.getElementById('lifeGainMsg');
-  if(lgEl){ lgEl.style.animation='none'; lgEl.style.opacity='0'; }
+  if(lgEl){ lgEl.style.animation='none'; lgEl.style.opacity='0'; lgEl.style.display='none'; }
 
   gameState='play'; score=0; lastLifeBonusScore=-1;
   enemies=[]; coins=[]; bullets=[]; particles=[]; floatingTexts=[];
@@ -1077,7 +1081,7 @@ function update(){
         floatingTexts=[]; particles=[];
         clearTimeout(lifeGainTimeout);
         const lgEl=document.getElementById('lifeGainMsg');
-        if(lgEl) lgEl.style.animation='none';
+        if(lgEl){ lgEl.style.animation='none'; lgEl.style.opacity='0'; lgEl.style.display='none'; }
         saveCumulativeEggs(score); saveScore(score,getLevel(score));
         gameState='dying'; setTouchOverlay(false);
         showMsg('GAME OVER',99999,'gameover');
