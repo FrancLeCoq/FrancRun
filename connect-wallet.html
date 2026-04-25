@@ -91,10 +91,28 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
 
   <!-- Connect buttons (shown when no wallet linked) -->
   <div id="connectSection">
-    <button class="btn btn-phantom"  onclick="connectPhantom()">👻 Connect Phantom</button>
-    <button class="btn btn-solflare" onclick="connectSolflare()">☀️ Connect Solflare</button>
+    <!-- Phantom deep link — ouvre l'app Phantom directement -->
+    <button class="btn btn-phantom" onclick="connectPhantomDeepLink()">👻 Connect Phantom</button>
+    <button class="btn btn-solflare" onclick="connectSolflareDeepLink()">☀️ Connect Solflare</button>
+
     <hr class="divider">
-    <button class="btn btn-gray"     onclick="goToGame()">🎮 Play with 1 life →</button>
+
+    <!-- Saisie manuelle de l'adresse -->
+    <div style="margin:10px 0 6px;font-size:12px;color:#c9aaee;text-align:left">
+      📋 Or paste your Solana wallet address:
+    </div>
+    <input id="manualAddress"
+      type="text"
+      placeholder="e.g. 7xKXtg2CW87d..."
+      style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(168,85,247,0.4);border-radius:10px;color:#fff;font-size:12px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box"
+      oninput="this.style.borderColor=this.value.length>30?'rgba(163,230,53,0.6)':'rgba(168,85,247,0.4)'"
+    />
+    <button class="btn btn-green" onclick="connectManual()" style="margin-top:8px">
+      ✅ Link this address
+    </button>
+
+    <hr class="divider">
+    <button class="btn btn-gray" onclick="goToGame()">🎮 Play with 1 life →</button>
   </div>
 
   <!-- Wallet linked — actions -->
@@ -173,66 +191,43 @@ function setLoading(msg){ loadingMsg.textContent=msg; }
 function showConnect(){ connectSection.style.display='block'; linkedSection.style.display='none'; }
 function showLinked() { connectSection.style.display='none';  linkedSection.style.display='block'; }
 
-// ── Connect Phantom ─────────────────────────────────
-async function connectPhantom(){
-  const provider = window.phantom?.solana || window.solana;
-  if(!provider || !provider.isPhantom){
-    alert('Phantom wallet not found!\n\nInstall Phantom from phantom.app and open this page in Phantom\'s browser, or use Solflare.');
-    return;
-  }
-  await doConnect(provider, 'Phantom');
+// ── Phantom deep link ───────────────────────────────
+function connectPhantomDeepLink(){
+  window.open('https://phantom.app', '_blank');
+  setStatus('unknown','👻 Open Phantom app → copy your wallet address → paste it below.');
 }
 
-// ── Connect Solflare ────────────────────────────────
-async function connectSolflare(){
-  const provider = window.solflare;
-  if(!provider){
-    alert('Solflare wallet not found!\n\nInstall Solflare from solflare.com and open this page in Solflare\'s browser.');
-    return;
-  }
-  await doConnect(provider, 'Solflare');
+// ── Solflare deep link ──────────────────────────────
+function connectSolflareDeepLink(){
+  window.open('https://solflare.com', '_blank');
+  setStatus('unknown','☀️ Open Solflare app → copy your wallet address → paste it below.');
 }
 
-// ── Generic connect + link ──────────────────────────
-async function doConnect(provider, name){
-  setLoading(`Connecting ${name}...`);
+// ── Connexion manuelle ──────────────────────────────
+async function connectManual(){
+  const address = (document.getElementById('manualAddress')?.value||'').trim();
+  if(!address || address.length < 32){
+    alert('Please enter a valid Solana address (32-44 characters).');
+    return;
+  }
+  if(!tg?.initData){
+    alert('Open this page inside Telegram.');
+    return;
+  }
+  setLoading('Linking wallet...');
   try{
-    const resp = await provider.connect();
-    const address = resp.publicKey.toString();
-
-    setLoading(`Linking wallet to your Telegram account...`);
-
-    if(!tg?.initData){
-      setLoading('');
-      alert('Not in Telegram — cannot link wallet.');
-      return;
-    }
-
     const res = await fetch(BACKEND+'/link-wallet',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        initData: tg.initData,
-        wallet:   address
-      })
+      body: JSON.stringify({ initData: tg.initData, wallet: address })
     });
-
     const data = await res.json();
     setLoading('');
-
-    if(data.ok){
-      // Refresh status
-      await checkStatus();
-    } else {
-      alert('Error linking wallet: '+data.error);
-    }
+    if(data.ok) await checkStatus();
+    else alert('Error: '+(data.error||'Unknown'));
   } catch(e){
     setLoading('');
-    if(e.message?.includes('User rejected')){
-      setStatus('unknown','❌ Connection cancelled.');
-    } else {
-      alert('Connection error: '+e.message);
-    }
+    alert('Error: '+e.message);
   }
 }
 
@@ -255,11 +250,8 @@ async function unlinkWallet(){
 
 // ── Go to game ──────────────────────────────────────
 function goToGame(){
-  if(tg){
-    tg.openLink(GAME_URL);
-  } else {
-    window.location.href = GAME_URL;
-  }
+  if(tg) tg.openLink(GAME_URL);
+  else window.location.href = GAME_URL;
 }
 </script>
 </body>
