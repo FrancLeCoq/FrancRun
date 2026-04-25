@@ -297,11 +297,12 @@ let secretBuffer='';
 document.addEventListener('keydown', e=>{
   secretBuffer=(secretBuffer+e.key).slice(-5).toUpperCase();
   if(secretBuffer==='FRANC'){
-    hasFranc=true; MAX_LIVES=10; lives=Math.min(lives+10,10);
+    hasFranc=true;
+    MAX_LIVES=10; lives=10;
     updateLivesBar(lives);
     const el=document.getElementById('francStatus');
     if(el) el.innerHTML='<span style="color:#FFD700">🔑 MODE TEST — 10 vies</span>';
-    alert('🔑 Mode test activé ! 10 vies débloquées.');
+    alert('🔑 Mode test activé ! 10 vies débloquées.\nPlay Again donnera toujours 10 vies.');
     secretBuffer='';
   }
 });
@@ -482,7 +483,7 @@ function spawnCoin(lvl){
 // ══════════════════════════════════════════════
 //  GAME STATE
 // ══════════════════════════════════════════════
-let gameState='menu', score=0, lives=1, player=null;
+let lastLifeBonusScore=-1; // empêche le double déclenchement sur le même score
 let enemies=[], coins=[], bullets=[];
 let lastLevel=1, shootCooldown=0, frameCount=0;
 let msgTimeout=null, levelupTimeout=null;
@@ -812,7 +813,17 @@ function startGame(){
   panel.classList.add('hidden');
   setTouchOverlay(true);
   if(isMobile) applyInputMode();
-  gameState='play'; score=0; lives=MAX_LIVES;
+
+  // Remet MAX_LIVES à sa valeur de base selon $FRANC — sans accumuler
+  MAX_LIVES = hasFranc ? 10 : 1;
+  lives = MAX_LIVES;
+
+  // Annule toute animation de vie en cours
+  clearTimeout(lifeGainTimeout);
+  const lgEl=document.getElementById('lifeGainMsg');
+  if(lgEl){ lgEl.style.animation='none'; lgEl.style.opacity='0'; }
+
+  gameState='play'; score=0; lastLifeBonusScore=-1;
   enemies=[]; coins=[]; bullets=[]; particles=[]; floatingTexts=[];
   lastLevel=1; shootCooldown=0; frameCount=0; eliteCounter=0;
   targetX=canvas.width/2; targetY=canvas.height/2;
@@ -1086,7 +1097,8 @@ function update(){
       // +1 vie tous les 100 œufs EN COURS DE PARTIE
       // Uniquement : holders $FRANC + niveaux 1-10 (pas en Sudden Death) + joueur encore vivant
       const curLvl=getLevel(score);
-      if(hasFranc && score>0 && score%100===0 && lives>1 && gameState==='play' && !isMortSubite(curLvl)){
+      if(hasFranc && score>0 && score%100===0 && score!==lastLifeBonusScore && lives>1 && gameState==='play' && !isMortSubite(curLvl)){
+        lastLifeBonusScore=score;
         lives=Math.min(lives+1, MAX_LIVES+1);
         MAX_LIVES=Math.max(MAX_LIVES,lives);
         updateLivesBar(lives);
