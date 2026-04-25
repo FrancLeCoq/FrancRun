@@ -210,6 +210,32 @@ function getScores(){ try{return JSON.parse(localStorage.getItem('lcfScores')||'
 function saveScore(s,lvl){ let sc=getScores();sc.push({score:s,level:lvl,date:new Date().toLocaleDateString('en')});sc.sort((a,b)=>b.score-a.score);sc=sc.slice(0,10);try{localStorage.setItem('lcfScores',JSON.stringify(sc))}catch(e){} }
 function renderScores(listEl){
   if(!listEl) return;
+  listEl.innerHTML='<li style="color:#c9aaee;font-size:11px;padding:8px">⏳ Loading global leaderboard...</li>';
+  fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'leaderboard',game_id:'francrun',limit:10})
+  })
+  .then(r=>r.ok?r.json():null)
+  .then(data=>{
+    const rows=data?.leaderboard||[];
+    if(!rows.length){ renderLocalScores(listEl); return; }
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+    listEl.innerHTML='';
+    rows.forEach((r,i)=>{
+      const li=document.createElement('li');
+      const name=r.telegram_name||r.telegram_username||'Player';
+      const franc=r.has_franc?'<span style="color:#FFD700"> 💎</span>':'';
+      li.innerHTML=`<span>${medals[i]||'#'+(i+1)} <b>${name}</b>${franc}</span><span style="color:#FFD700">${r.best_score} 🥚</span>`;
+      if(i<3) li.style.color=['#FFD700','#C0C0C0','#CD7F32'][i];
+      listEl.appendChild(li);
+    });
+  })
+  .catch(()=>renderLocalScores(listEl));
+}
+
+function renderLocalScores(listEl){
+  if(!listEl) return;
   const sc=getScores(); listEl.innerHTML='';
   if(!sc.length){listEl.innerHTML='<li style="color:#888;padding:8px">No scores yet</li>';return;}
   const medals=['🥇','🥈','🥉'];
@@ -291,21 +317,7 @@ function getHomingRatio(lvl){
 // Tier pour la Mort Subite (escalade infinie)
 function getMortSubiteTier(){ return Math.min(20, MORT_SUBITE+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30)); }
 
-// ── MODE TEST SECRET ──────────────────────────
-// Tape "FRANC" sur le clavier en mode menu pour activer 5 vies
-let secretBuffer='';
-document.addEventListener('keydown', e=>{
-  secretBuffer=(secretBuffer+e.key).slice(-5).toUpperCase();
-  if(secretBuffer==='FRANC'){
-    hasFranc=true;
-    MAX_LIVES=10; lives=10;
-    updateLivesBar(lives);
-    const el=document.getElementById('francStatus');
-    if(el) el.innerHTML='<span style="color:#FFD700">🔑 MODE TEST — 10 vies</span>';
-    alert('🔑 Mode test activé ! 10 vies débloquées.\nPlay Again donnera toujours 10 vies.');
-    secretBuffer='';
-  }
-});
+// Mode test supprimé — production ready
 
 // ══════════════════════════════════════════════
 //  $FRANC / TELEGRAM
