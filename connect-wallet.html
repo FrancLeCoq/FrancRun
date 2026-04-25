@@ -76,7 +76,7 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
 
   <div class="logo">🐓</div>
   <h1>LE COQ FRANC</h1>
-  <p class="sub">Connect your Solana wallet to unlock<br><b style="color:#FFD700">5 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs!</p>
+  <p class="sub">Connect your Solana wallet to unlock<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs!</p>
 
   <!-- Dynamic status -->
   <div class="status unknown" id="statusBox">
@@ -106,7 +106,7 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
   <div class="rules">
     <div class="title">💎 $FRANC RULES</div>
     <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
-    <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">5 lives</b> to start<br>
+    <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">10 lives</b> to start<br>
     &nbsp;&nbsp;→ <b style="color:#FFD700">+1 life</b> every 100 eggs collected
   </div>
 
@@ -149,13 +149,13 @@ async function checkStatus(){
     setLoading('');
 
     if(!data.walletLinked){
-      setStatus('no-wallet','🔗 No wallet connected yet.\nConnect your Solana wallet below to unlock 5 lives!');
+      setStatus('no-wallet','🔗 No wallet connected yet.\nConnect your Solana wallet below to unlock 10 lives!');
       showConnect();
     } else if(data.hasFranc){
-      setStatus('has-franc',`✅ $FRANC detected!\nWallet: ${data.walletAddress}\nBalance: ${data.balance?.toFixed(2)} $FRANC\n\n🎮 You have ${5+Math.floor((data.totalEggs||0)/100)} lives!`);
+      setStatus('has-franc',`✅ $FRANC detected!\nWallet: ${data.walletAddress}\nBalance: ${data.balance?.toFixed(2)} $FRANC\n\n🎮 You have ${10+Math.floor((data.totalEggs||0)/100)} lives!`);
       showLinked();
     } else {
-      setStatus('no-franc',`⚠️ Wallet connected but no $FRANC found.\nWallet: ${data.walletAddress}\n\nBuy $FRANC to unlock 5 lives!`);
+      setStatus('no-franc',`⚠️ Wallet connected but no $FRANC found.\nWallet: ${data.walletAddress}\n\nBuy $FRANC to unlock 10 lives!`);
       showLinked();
     }
   } catch(e){
@@ -238,7 +238,7 @@ async function doConnect(provider, name){
 
 // ── Unlink wallet ───────────────────────────────────
 async function unlinkWallet(){
-  if(!confirm('Disconnect your wallet? You will lose your 5 lives bonus.')) return;
+  if(!confirm('Disconnect your wallet? You will lose your 10 lives bonus.')) return;
   setLoading('Unlinking...');
   try{
     await fetch(BACKEND+'/unlink-wallet',{
