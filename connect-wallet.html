@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Connect Wallet — Le Coq Franc</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:linear-gradient(160deg,#0d0520,#1a0840);
+  font-family:'Fredoka One',cursive;
+  min-height:100vh;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.card{
+  width:100%;max-width:360px;
+  background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));
+  border:2px solid rgba(180,100,255,0.35);
+  border-radius:24px;padding:32px 24px;
+  box-shadow:0 0 60px rgba(120,40,200,0.4);
+  text-align:center;
+}
+.logo{font-size:52px;margin-bottom:8px}
+h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px;text-shadow:0 0 20px #FFD700;margin-bottom:6px}
+.sub{font-size:13px;color:#c9aaee;margin-bottom:28px;line-height:1.5}
+
+/* Status badge */
+.status{
+  padding:10px 16px;border-radius:12px;font-size:13px;
+  margin-bottom:20px;line-height:1.5;
+}
+.status.unknown {background:rgba(100,100,100,0.2);border:1px solid rgba(150,150,150,0.3);color:#aaa}
+.status.no-wallet{background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#fca5a5}
+.status.has-franc{background:rgba(80,220,80,0.1);border:1px solid rgba(80,220,80,0.3);color:#86efac}
+.status.no-franc  {background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);color:#fcd34d}
+
+/* Wallet info */
+.wallet-info{
+  background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
+  border-radius:12px;padding:12px;margin-bottom:20px;
+  font-size:12px;color:#c084fc;word-break:break-all;display:none;
+}
+
+/* Buttons */
+.btn{
+  width:100%;padding:16px;border:none;border-radius:14px;
+  font-size:17px;font-family:'Bangers',cursive;letter-spacing:2px;
+  cursor:pointer;color:#fff;margin-top:10px;
+  touch-action:manipulation;-webkit-appearance:none;
+  transition:all 0.15s;
+}
+.btn:active{transform:scale(0.97);opacity:0.85}
+.btn-phantom {background:linear-gradient(135deg,#ab9ff2,#7c5cbf);box-shadow:0 4px 20px rgba(171,159,242,0.4)}
+.btn-solflare{background:linear-gradient(135deg,#fc8c03,#e06b00);box-shadow:0 4px 20px rgba(252,140,3,0.4)}
+.btn-green   {background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px rgba(22,163,74,0.4)}
+.btn-purple  {background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 20px rgba(109,40,217,0.4)}
+.btn-gray    {background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
+
+/* Rules box */
+.rules{
+  margin-top:22px;padding:14px;
+  background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);
+  border-radius:12px;text-align:left;font-size:11.5px;color:#c9aaee;line-height:1.8;
+}
+.rules .title{font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:6px}
+
+.loading{color:#c9aaee;font-size:13px;margin:10px 0;min-height:18px}
+.divider{border:none;border-top:1px solid rgba(168,85,247,0.2);margin:16px 0}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <div class="logo">🐓</div>
+  <h1>LE COQ FRANC</h1>
+  <p class="sub">Connect your Solana wallet to unlock<br><b style="color:#FFD700">5 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs!</p>
+
+  <!-- Dynamic status -->
+  <div class="status unknown" id="statusBox">
+    🔄 Checking your status...
+  </div>
+
+  <!-- Wallet address display -->
+  <div class="wallet-info" id="walletInfo"></div>
+
+  <!-- Loading indicator -->
+  <div class="loading" id="loadingMsg"></div>
+
+  <!-- Connect buttons (shown when no wallet linked) -->
+  <div id="connectSection">
+    <button class="btn btn-phantom"  onclick="connectPhantom()">👻 Connect Phantom</button>
+    <button class="btn btn-solflare" onclick="connectSolflare()">☀️ Connect Solflare</button>
+    <hr class="divider">
+    <button class="btn btn-gray"     onclick="goToGame()">🎮 Play with 1 life →</button>
+  </div>
+
+  <!-- Wallet linked — actions -->
+  <div id="linkedSection" style="display:none">
+    <button class="btn btn-green"  onclick="goToGame()">🎮 PLAY NOW</button>
+    <button class="btn btn-gray"   onclick="unlinkWallet()" style="margin-top:8px;font-size:13px">🔗 Change wallet</button>
+  </div>
+
+  <div class="rules">
+    <div class="title">💎 $FRANC RULES</div>
+    <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
+    <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">5 lives</b> to start<br>
+    &nbsp;&nbsp;→ <b style="color:#FFD700">+1 life</b> every 100 eggs collected
+  </div>
+
+</div>
+
+<script>
+const BACKEND = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1'; 
+const GAME_URL = 'https://franclecoq.github.io/FrancRun/';
+
+const tg = window.Telegram?.WebApp;
+if(tg){ tg.ready(); tg.expand(); }
+
+const statusBox      = document.getElementById('statusBox');
+const walletInfo     = document.getElementById('walletInfo');
+const loadingMsg     = document.getElementById('loadingMsg');
+const connectSection = document.getElementById('connectSection');
+const linkedSection  = document.getElementById('linkedSection');
+
+let currentStatus = null;
+
+// ── On load: check current status ──────────────────
+window.addEventListener('load', async ()=>{
+  if(!tg?.initData){
+    setStatus('unknown','⚠️ Open this page inside Telegram to connect your wallet.');
+    return;
+  }
+  await checkStatus();
+});
+
+async function checkStatus(){
+  setLoading('Checking your $FRANC status...');
+  try{
+    const res = await fetch(BACKEND+'/check-franc',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData })
+    });
+    const data = await res.json();
+    currentStatus = data;
+    setLoading('');
+
+    if(!data.walletLinked){
+      setStatus('no-wallet','🔗 No wallet connected yet.\nConnect your Solana wallet below to unlock 5 lives!');
+      showConnect();
+    } else if(data.hasFranc){
+      setStatus('has-franc',`✅ $FRANC detected!\nWallet: ${data.walletAddress}\nBalance: ${data.balance?.toFixed(2)} $FRANC\n\n🎮 You have ${5+Math.floor((data.totalEggs||0)/100)} lives!`);
+      showLinked();
+    } else {
+      setStatus('no-franc',`⚠️ Wallet connected but no $FRANC found.\nWallet: ${data.walletAddress}\n\nBuy $FRANC to unlock 5 lives!`);
+      showLinked();
+    }
+  } catch(e){
+    setLoading('');
+    setStatus('unknown','❌ Could not reach server. Check your connection.');
+    showConnect();
+  }
+}
+
+function setStatus(type, msg){
+  statusBox.className='status '+type;
+  statusBox.textContent=msg;
+}
+function setLoading(msg){ loadingMsg.textContent=msg; }
+function showConnect(){ connectSection.style.display='block'; linkedSection.style.display='none'; }
+function showLinked() { connectSection.style.display='none';  linkedSection.style.display='block'; }
+
+// ── Connect Phantom ─────────────────────────────────
+async function connectPhantom(){
+  const provider = window.phantom?.solana || window.solana;
+  if(!provider || !provider.isPhantom){
+    alert('Phantom wallet not found!\n\nInstall Phantom from phantom.app and open this page in Phantom\'s browser, or use Solflare.');
+    return;
+  }
+  await doConnect(provider, 'Phantom');
+}
+
+// ── Connect Solflare ────────────────────────────────
+async function connectSolflare(){
+  const provider = window.solflare;
+  if(!provider){
+    alert('Solflare wallet not found!\n\nInstall Solflare from solflare.com and open this page in Solflare\'s browser.');
+    return;
+  }
+  await doConnect(provider, 'Solflare');
+}
+
+// ── Generic connect + link ──────────────────────────
+async function doConnect(provider, name){
+  setLoading(`Connecting ${name}...`);
+  try{
+    const resp = await provider.connect();
+    const address = resp.publicKey.toString();
+
+    setLoading(`Linking wallet to your Telegram account...`);
+
+    if(!tg?.initData){
+      setLoading('');
+      alert('Not in Telegram — cannot link wallet.');
+      return;
+    }
+
+    const res = await fetch(BACKEND+'/link-wallet',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        initData: tg.initData,
+        wallet:   address
+      })
+    });
+
+    const data = await res.json();
+    setLoading('');
+
+    if(data.ok){
+      // Refresh status
+      await checkStatus();
+    } else {
+      alert('Error linking wallet: '+data.error);
+    }
+  } catch(e){
+    setLoading('');
+    if(e.message?.includes('User rejected')){
+      setStatus('unknown','❌ Connection cancelled.');
+    } else {
+      alert('Connection error: '+e.message);
+    }
+  }
+}
+
+// ── Unlink wallet ───────────────────────────────────
+async function unlinkWallet(){
+  if(!confirm('Disconnect your wallet? You will lose your 5 lives bonus.')) return;
+  setLoading('Unlinking...');
+  try{
+    await fetch(BACKEND+'/unlink-wallet',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: tg.initData })
+    });
+    setLoading('');
+    await checkStatus();
+  } catch(e){
+    setLoading('');
+  }
+}
+
+// ── Go to game ──────────────────────────────────────
+function goToGame(){
+  if(tg){
+    tg.openLink(GAME_URL);
+  } else {
+    window.location.href = GAME_URL;
+  }
+}
+</script>
+</body>
+</html>
