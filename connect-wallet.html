@@ -5,56 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Connect Wallet — Le Coq Franc</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script type="module">
-  import { createAppKit } from 'https://esm.sh/@reown/appkit@1.7.7';
-  import { SolanaAdapter } from 'https://esm.sh/@reown/appkit-adapter-solana@1.7.7';
-  import { solana } from 'https://esm.sh/@reown/appkit/networks';
-  import { PhantomWalletAdapter, SolflareWalletAdapter } from 'https://esm.sh/@solana/wallet-adapter-wallets@0.19.32';
 
-  const PROJECT_ID = '27b5ad8cd3dfcf75c907ed60d51f8a4c';
-
-  const solanaAdapter = new SolanaAdapter({
-    wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()]
-  });
-
-  const modal = createAppKit({
-    adapters: [solanaAdapter],
-    projectId: PROJECT_ID,
-    networks: [solana],
-    metadata: {
-      name: 'FrancRun',
-      description: 'Connect your Solana wallet to unlock 10 lives!',
-      url: 'https://franclecoq.github.io/FrancRun/',
-      icons: ['https://franclecoq.github.io/FrancRun/favicon.ico']
-    },
-    features: { email: false, socials: false }
-  });
-
-  // Expose globally for onclick
-  window._wcModal = modal;
-
-  // Listen for wallet connection
-  modal.subscribeAccount(async (account) => {
-    if(account?.address && window._wcPending){
-      window._wcPending = false;
-      const address = account.address;
-      const tg = window.Telegram?.WebApp;
-      if(!tg?.initData) return;
-      try{
-        const res = await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/link-wallet',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ initData: tg.initData, wallet: address, verified: true })
-        });
-        const data = await res.json();
-        if(data.ok){
-          modal.close();
-          window.checkStatus && window.checkStatus();
-        }
-      } catch(e){ console.error(e); }
-    }
-  });
-</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -147,31 +98,27 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
 
     <hr class="divider">
 
-    <!-- Phantom -->
-    <button class="btn btn-phantom" onclick="connectPhantom()" style="margin-top:4px">
-      👻 Connect Phantom
-    </button>
-
-    <!-- Solflare -->
-    <button class="btn btn-solflare" onclick="connectSolflare()" style="margin-top:10px">
-      ☀️ Connect Solflare
-    </button>
-
-    <!-- WalletConnect -->
-    <button class="btn" onclick="connectWalletConnect()" style="margin-top:10px;background:linear-gradient(135deg,#1a6b9e,#0d4f7a);box-shadow:0 4px 20px rgba(26,107,158,0.4)">
-      🔗 WalletConnect
-    </button>
-    <!-- Fallback champ manuel si WC pas chargé -->
-    <div id="wcFallback" style="display:none;margin-top:12px">
-      <div style="background:rgba(26,107,158,0.1);border:1px solid rgba(26,107,158,0.3);border-radius:12px;padding:12px;margin-bottom:10px;font-size:11px;color:#c9aaee;line-height:1.7;text-align:left">
-        Paste your Solana address below:
-      </div>
-      <input id="manualAddress" type="text" placeholder="Solana address..."
-        style="width:100%;padding:11px 13px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(26,107,158,0.4);border-radius:12px;color:#fff;font-size:12px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-bottom:8px"
-        oninput="this.style.borderColor=this.value.length>30?'rgba(163,230,53,0.7)':'rgba(26,107,158,0.6)'"
-      />
-      <button class="btn btn-green" onclick="connectManual()">✅ Link my wallet</button>
+    <!-- Instructions -->
+    <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;padding:12px;margin-bottom:12px;font-size:11px;color:#c9aaee;line-height:1.8;text-align:left">
+      <b style="color:#c084fc;font-size:12px">🔗 Connect your Solana wallet</b><br>
+      1️⃣ Open <b style="color:#FFD700">Phantom</b> or <b style="color:#FFD700">Solflare</b> app<br>
+      2️⃣ Copy your wallet address<br>
+      3️⃣ Paste it below ↓
     </div>
+
+    <!-- Champ adresse -->
+    <input id="walletAddress" type="text"
+      placeholder="Paste your Solana address here..."
+      style="width:100%;padding:12px 14px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(168,85,247,0.4);border-radius:12px;color:#fff;font-size:13px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-bottom:10px"
+      oninput="validateAddress(this)"
+    />
+    <div id="addrHint" style="font-size:10px;color:#888;margin:-6px 0 10px;text-align:right">
+      Enter a valid Solana address (32-44 chars)
+    </div>
+    <button id="linkBtn" class="btn btn-green" onclick="connectManual()" disabled
+      style="opacity:0.5">
+      ✅ Link my wallet
+    </button>
 
   </div>
 
@@ -191,7 +138,7 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
 </div>
 
 <script>
-const BACKEND = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1'; 
+const BACKEND = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
 const GAME_URL = 'https://franclecoq.github.io/FrancRun/';
 
 const tg = window.Telegram?.WebApp;
@@ -203,17 +150,7 @@ const loadingMsg     = document.getElementById('loadingMsg');
 const connectSection = document.getElementById('connectSection');
 const linkedSection  = document.getElementById('linkedSection');
 
-let currentStatus = null;
-
-// ── On load: check current status ──────────────────
 window.addEventListener('load', async ()=>{
-  // Si on est dans le browser Phantom ou Solflare → connexion auto
-  setTimeout(autoConnectInjected, 500);
-
-  if(window.location.search.includes('phantom_return')){
-    await handlePhantomReturn();
-    return;
-  }
   if(!tg?.initData){
     setStatus('unknown','⚠️ Open this page inside Telegram to connect your wallet.');
     return;
@@ -222,7 +159,7 @@ window.addEventListener('load', async ()=>{
 });
 
 async function checkStatus(){
-  window.checkStatus = checkStatus; // expose globally
+  window.checkStatus = checkStatus;
   setLoading('Checking your $FRANC status...');
   try{
     const res = await fetch(BACKEND+'/check-franc',{
@@ -231,9 +168,7 @@ async function checkStatus(){
       body: JSON.stringify({ initData: tg.initData })
     });
     const data = await res.json();
-    currentStatus = data;
     setLoading('');
-
     if(!data.walletLinked){
       setStatus('no-wallet','🔗 No wallet connected yet.\nConnect your Solana wallet below to unlock 10 lives!');
       showConnect();
@@ -259,188 +194,39 @@ function setLoading(msg){ loadingMsg.textContent=msg; }
 function showConnect(){ connectSection.style.display='block'; linkedSection.style.display='none'; }
 function showLinked() { connectSection.style.display='none';  linkedSection.style.display='block'; }
 
-// ── Phantom — ouvre la page dans le browser Phantom ────
-function connectPhantom(){
-  const pageUrl = 'https://franclecoq.github.io/FrancRun/connect-wallet.html';
-  // Ce deep link ouvre l'URL DANS le browser intégré de Phantom
-  // Phantom injecte window.solana → la connexion se fait directement
-  const deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(pageUrl)}?ref=${encodeURIComponent(pageUrl)}`;
-
-  setStatus('unknown', '👻 Opening page in Phantom browser...\nPhantom will connect automatically.');
-
-  // Tente le scheme natif d'abord (iOS/Android)
-  const native = `phantom://ul/browse/${encodeURIComponent(pageUrl)}?ref=${encodeURIComponent(pageUrl)}`;
-  window.location.href = native;
-  setTimeout(()=>{
-    // Fallback HTTPS si l'app n'est pas installée
-    window.location.href = deepLink;
-  }, 1500);
-}
-
-// ── Solflare — même approche browse ────────────────
-function connectSolflare(){
-  const pageUrl = 'https://franclecoq.github.io/FrancRun/connect-wallet.html';
-  const deepLink = `https://solflare.com/ul/browse/${encodeURIComponent(pageUrl)}?ref=${encodeURIComponent(pageUrl)}`;
-  const native   = `solflare://browse/${encodeURIComponent(pageUrl)}`;
-
-  setStatus('unknown', '☀️ Opening page in Solflare browser...\nSolflare will connect automatically.');
-
-  window.location.href = native;
-  setTimeout(()=>{ window.location.href = deepLink; }, 1500);
-}
-
-// ── Détection auto si Phantom/Solflare injecté ─────
-// Quand on est dans le browser de Phantom/Solflare, window.solana existe
-async function autoConnectInjected(){
-  if(window.solana?.isPhantom || window.solana?.isSolflare || window.solflare){
-    const provider = window.solana || window.solflare;
-    try{
-      setLoading('Connecting wallet...');
-      const resp = await provider.connect();
-      const address = resp.publicKey.toString();
-      if(!tg?.initData){ setLoading(''); return; }
-      const res = await fetch(BACKEND+'/link-wallet',{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ initData: tg.initData, wallet: address, verified: true })
-      });
-      const data = await res.json();
-      setLoading('');
-      if(data.ok) await checkStatus();
-      else setStatus('unknown','❌ Error: '+(data.error||'Unknown'));
-    } catch(e){
-      setLoading('');
-      if(!e.message?.includes('rejected'))
-        setStatus('unknown','❌ Error: '+e.message);
-    }
+// ── Validation adresse Solana ───────────────────────
+function validateAddress(input){
+  const val = input.value.trim();
+  const valid = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
+  const btn = document.getElementById('linkBtn');
+  const hint = document.getElementById('addrHint');
+  if(valid){
+    input.style.borderColor = 'rgba(163,230,53,0.7)';
+    hint.textContent = '✅ Valid Solana address';
+    hint.style.color = '#86efac';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  } else {
+    input.style.borderColor = val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';
+    hint.textContent = val.length>5?'❌ Invalid address':'Enter a valid Solana address (32-44 chars)';
+    hint.style.color = val.length>5?'#fca5a5':'#888';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
   }
 }
 
-// ── WalletConnect — QR code universel ──────────────
-function connectWalletConnect(){
-  if(!window._wcModal){
-    // Fallback : affiche un champ manuel si WalletConnect pas chargé
-    const div = document.getElementById('wcFallback');
-    if(div) div.style.display = div.style.display==='none'?'block':'none';
-    return;
-  }
-  window._wcPending = true;
-  window._wcModal.open();
-}
-
-// ── Retour de Phantom après signature ──────────────
-async function handlePhantomReturn(){
-  const params = new URLSearchParams(window.location.search);
-  if(!params.get('phantom_return')) return;
-
-  const pubkey    = params.get('phantom_account') || params.get('pubkey') || params.get('publicKey');
-  const signature = params.get('signature');
-  const nonce     = sessionStorage.getItem('phantom_nonce');
-
-  if(!pubkey){
-    setStatus('unknown', '❌ Phantom did not return a wallet address.\nPlease try again.');
-    return;
-  }
-
-  setLoading('Verifying signature...');
-
-  // Vérifie la signature côté backend
-  try{
-    const res = await fetch(BACKEND+'/link-wallet',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        initData:  tg?.initData,
-        wallet:    pubkey,
-        signature: signature || null,
-        nonce:     nonce || null,
-        verified:  !!signature // true si Phantom a signé
-      })
-    });
-    const data = await res.json();
-    setLoading('');
-    if(data.ok){
-      sessionStorage.removeItem('phantom_nonce');
-      // Nettoie l'URL
-      window.history.replaceState({}, '', window.location.pathname);
-      await checkStatus();
-    } else {
-      setStatus('unknown', '❌ Error: '+(data.error||'Unknown'));
-    }
-  } catch(e){
-    setLoading('');
-    setStatus('unknown', '❌ Connection error. Please try again.');
-  }
-}
-
-// ── Solflare deep link avec signature ──────────────
-function connectSolflare(){
-  const tgId = tg?.initDataUnsafe?.user?.id || 'unknown';
-  const nonce = btoa(`francrun:${tgId}:${Date.now()}`).replace(/=/g,'');
-  sessionStorage.setItem('phantom_nonce', nonce);
-
-  const message = encodeURIComponent(`FrancRun wallet verification\nNonce: ${nonce}`);
-  const redirectUrl = encodeURIComponent(window.location.href + '?phantom_return=1');
-
-  const nativeLink = `solflare://signMessage?message=${message}&redirect=${redirectUrl}`;
-  const webLink    = `https://solflare.com/ul/v1/signMessage?message=${message}&redirect_link=${redirectUrl}`;
-
-  setStatus('unknown', '☀️ Opening Solflare to verify ownership...\nApprove the signature request.');
-  setLoading('Redirecting to Solflare...');
-
-  window.location.href = nativeLink;
-  setTimeout(()=>{ window.location.href = webLink; setLoading(''); }, 2000);
-}
-
-// ── WalletConnect modal ─────────────────────────────
-function connectWalletConnect(){
-  if(!window._wcModal){
-    alert('WalletConnect loading... please try again in a moment.');
-    return;
-  }
-  window._wcPending = true;
-  window._wcModal.open();
-}
+// ── Connexion manuelle ───────────────────────────────
 async function connectManual(){
-  const address = (document.getElementById('manualAddress')?.value||'').trim();
-  if(!address || address.length < 32){
-    alert('Please enter a valid Solana address (32-44 characters).');
+  const address = (document.getElementById('walletAddress')?.value||'').trim();
+  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)){
+    alert('Please enter a valid Solana address.');
     return;
   }
   if(!tg?.initData){
     alert('Open this page inside Telegram.');
     return;
   }
-  setLoading('Linking wallet...');
-  try{
-    const res = await fetch(BACKEND+'/link-wallet',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        initData: tg.initData,
-        wallet:   address,
-        verified: false // pas de signature — accès basique
-      })
-    });
-    const data = await res.json();
-    setLoading('');
-    if(data.ok) await checkStatus();
-    else alert('Error: '+(data.error||'Unknown'));
-  } catch(e){
-    setLoading('');
-    alert('Error: '+e.message);
-  }
-}
-async function connectManual(){
-  const address = (document.getElementById('manualAddress')?.value||'').trim();
-  if(!address || address.length < 32){
-    alert('Please enter a valid Solana address (32-44 characters).');
-    return;
-  }
-  if(!tg?.initData){
-    alert('Open this page inside Telegram.');
-    return;
-  }
-  setLoading('Linking wallet...');
+  setLoading('Linking wallet to your Telegram account...');
   try{
     const res = await fetch(BACKEND+'/link-wallet',{
       method:'POST',
@@ -450,10 +236,10 @@ async function connectManual(){
     const data = await res.json();
     setLoading('');
     if(data.ok) await checkStatus();
-    else alert('Error: '+(data.error||'Unknown'));
+    else alert('Error: '+(data.error||'Unknown error'));
   } catch(e){
     setLoading('');
-    alert('Error: '+e.message);
+    alert('Connection error. Please try again.');
   }
 }
 
@@ -469,9 +255,7 @@ async function unlinkWallet(){
     });
     setLoading('');
     await checkStatus();
-  } catch(e){
-    setLoading('');
-  }
+  } catch(e){ setLoading(''); }
 }
 
 // ── Go to game ──────────────────────────────────────
