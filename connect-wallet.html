@@ -5,6 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Connect Wallet — Le Coq Franc</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script type="module">
+  import { createAppKit } from 'https://esm.sh/@reown/appkit@1.7.7';
+  import { SolanaAdapter } from 'https://esm.sh/@reown/appkit-adapter-solana@1.7.7';
+  import { solana } from 'https://esm.sh/@reown/appkit/networks';
+  import { PhantomWalletAdapter, SolflareWalletAdapter } from 'https://esm.sh/@solana/wallet-adapter-wallets@0.19.32';
+
+  const PROJECT_ID = '27b5ad8cd3dfcf75c907ed60d51f8a4c';
+
+  const solanaAdapter = new SolanaAdapter({
+    wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()]
+  });
+
+  const modal = createAppKit({
+    adapters: [solanaAdapter],
+    projectId: PROJECT_ID,
+    networks: [solana],
+    metadata: {
+      name: 'FrancRun',
+      description: 'Connect your Solana wallet to unlock 10 lives!',
+      url: 'https://franclecoq.github.io/FrancRun/',
+      icons: ['https://franclecoq.github.io/FrancRun/favicon.ico']
+    },
+    features: { email: false, socials: false }
+  });
+
+  // Expose globally for onclick
+  window._wcModal = modal;
+
+  // Listen for wallet connection
+  modal.subscribeAccount(async (account) => {
+    if(account?.address && window._wcPending){
+      window._wcPending = false;
+      const address = account.address;
+      const tg = window.Telegram?.WebApp;
+      if(!tg?.initData) return;
+      try{
+        const res = await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/link-wallet',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ initData: tg.initData, wallet: address, verified: true })
+        });
+        const data = await res.json();
+        if(data.ok){
+          modal.close();
+          window.checkStatus && window.checkStatus();
+        }
+      } catch(e){ console.error(e); }
+    }
+  });
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -92,8 +142,13 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
   <!-- Connect buttons (shown when no wallet linked) -->
   <div id="connectSection">
 
+    <!-- Play sans wallet en premier -->
+    <button class="btn btn-gray" onclick="goToGame()">🎮 Play with 1 life (free)</button>
+
+    <hr class="divider">
+
     <!-- Phantom -->
-    <button class="btn btn-phantom" onclick="connectPhantom()">
+    <button class="btn btn-phantom" onclick="connectPhantom()" style="margin-top:4px">
       👻 Connect Phantom
     </button>
 
@@ -102,26 +157,11 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
       ☀️ Connect Solflare
     </button>
 
-    <!-- WalletConnect / Other -->
-    <button class="btn" onclick="connectOther()" style="margin-top:10px;background:linear-gradient(135deg,#1a6b9e,#0d4f7a);box-shadow:0 4px 20px rgba(26,107,158,0.4)">
-      🔗 Other Wallet
+    <!-- WalletConnect -->
+    <button class="btn" onclick="connectWalletConnect()" style="margin-top:10px;background:linear-gradient(135deg,#1a6b9e,#0d4f7a);box-shadow:0 4px 20px rgba(26,107,158,0.4)">
+      🔗 WalletConnect
     </button>
 
-    <!-- Champ manuel — affiché après clic sur Other Wallet -->
-    <div id="otherSection" style="display:none;margin-top:12px">
-      <div style="background:rgba(26,107,158,0.1);border:1px solid rgba(26,107,158,0.3);border-radius:12px;padding:12px;margin-bottom:10px;font-size:11px;color:#c9aaee;line-height:1.7;text-align:left">
-        Open your wallet app → copy your <b style="color:#fff">Solana address</b> → paste below
-      </div>
-      <input id="manualAddress" type="text"
-        placeholder="Paste your Solana address..."
-        style="width:100%;padding:11px 13px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(26,107,158,0.4);border-radius:12px;color:#fff;font-size:12px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-bottom:8px"
-        oninput="this.style.borderColor=this.value.length>30?'rgba(163,230,53,0.7)':'rgba(26,107,158,0.6)'"
-      />
-      <button class="btn btn-green" onclick="connectManual()">✅ Link my wallet</button>
-    </div>
-
-    <hr class="divider">
-    <button class="btn btn-gray" onclick="goToGame()">🎮 Play with 1 life →</button>
   </div>
 
   <!-- Wallet linked — actions -->
@@ -169,6 +209,7 @@ window.addEventListener('load', async ()=>{
 });
 
 async function checkStatus(){
+  window.checkStatus = checkStatus; // expose globally
   setLoading('Checking your $FRANC status...');
   try{
     const res = await fetch(BACKEND+'/check-franc',{
@@ -295,10 +336,14 @@ function connectSolflare(){
   setTimeout(()=>{ window.location.href = webLink; setLoading(''); }, 2000);
 }
 
-// ── Other Wallet — affiche le champ manuel ──────────
-function connectOther(){
-  const s = document.getElementById('otherSection');
-  s.style.display = s.style.display==='none' ? 'block' : 'none';
+// ── WalletConnect modal ─────────────────────────────
+function connectWalletConnect(){
+  if(!window._wcModal){
+    alert('WalletConnect loading... please try again in a moment.');
+    return;
+  }
+  window._wcPending = true;
+  window._wcModal.open();
 }
 async function connectManual(){
   const address = (document.getElementById('manualAddress')?.value||'').trim();
