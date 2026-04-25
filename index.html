@@ -483,7 +483,8 @@ function spawnCoin(lvl){
 // ══════════════════════════════════════════════
 //  GAME STATE
 // ══════════════════════════════════════════════
-let lastLifeBonusScore=-1; // empêche le double déclenchement sur le même score
+let gameState='menu', score=0, lives=1, player=null;
+let lastLifeBonusScore=-1; // empêche le double déclenchement
 let enemies=[], coins=[], bullets=[];
 let lastLevel=1, shootCooldown=0, frameCount=0;
 let msgTimeout=null, levelupTimeout=null;
