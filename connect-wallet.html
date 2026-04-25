@@ -92,26 +92,33 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
   <!-- Connect buttons (shown when no wallet linked) -->
   <div id="connectSection">
 
-    <!-- Phantom — deep link avec signature -->
+    <!-- Phantom -->
     <button class="btn btn-phantom" onclick="connectPhantom()">
-      👻 Connect with Phantom
+      👻 Connect Phantom
     </button>
 
-    <div style="margin:10px 0;font-size:11px;color:#888;text-align:center">
-      ── or ──
-    </div>
+    <!-- Solflare -->
+    <button class="btn btn-solflare" onclick="connectSolflare()" style="margin-top:10px">
+      ☀️ Connect Solflare
+    </button>
 
-    <!-- Autres wallets — saisie manuelle sécurisée par nonce -->
-    <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;padding:12px;margin-bottom:10px;font-size:11px;color:#c9aaee;line-height:1.7;text-align:left">
-      <b style="color:#c084fc">Other wallets</b> (Solflare, BestWallet…)<br>
-      Open your app → copy your Solana address → paste below
+    <!-- WalletConnect / Other -->
+    <button class="btn" onclick="connectOther()" style="margin-top:10px;background:linear-gradient(135deg,#1a6b9e,#0d4f7a);box-shadow:0 4px 20px rgba(26,107,158,0.4)">
+      🔗 Other Wallet
+    </button>
+
+    <!-- Champ manuel — affiché après clic sur Other Wallet -->
+    <div id="otherSection" style="display:none;margin-top:12px">
+      <div style="background:rgba(26,107,158,0.1);border:1px solid rgba(26,107,158,0.3);border-radius:12px;padding:12px;margin-bottom:10px;font-size:11px;color:#c9aaee;line-height:1.7;text-align:left">
+        Open your wallet app → copy your <b style="color:#fff">Solana address</b> → paste below
+      </div>
+      <input id="manualAddress" type="text"
+        placeholder="Paste your Solana address..."
+        style="width:100%;padding:11px 13px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(26,107,158,0.4);border-radius:12px;color:#fff;font-size:12px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-bottom:8px"
+        oninput="this.style.borderColor=this.value.length>30?'rgba(163,230,53,0.7)':'rgba(26,107,158,0.6)'"
+      />
+      <button class="btn btn-green" onclick="connectManual()">✅ Link my wallet</button>
     </div>
-    <input id="manualAddress" type="text"
-      placeholder="Paste your Solana address..."
-      style="width:100%;padding:11px 13px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(168,85,247,0.4);border-radius:12px;color:#fff;font-size:12px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-bottom:8px"
-      oninput="this.style.borderColor=this.value.length>30?'rgba(163,230,53,0.7)':'rgba(168,85,247,0.4)'"
-    />
-    <button class="btn btn-green" onclick="connectManual()">✅ Link my wallet</button>
 
     <hr class="divider">
     <button class="btn btn-gray" onclick="goToGame()">🎮 Play with 1 life →</button>
@@ -199,34 +206,29 @@ function showConnect(){ connectSection.style.display='block'; linkedSection.styl
 function showLinked() { connectSection.style.display='none';  linkedSection.style.display='block'; }
 
 // ── Phantom deep link avec signature ───────────────
-// Génère un nonce unique, envoie vers Phantom pour signature
-// Phantom redirige vers cette page avec la signature + pubkey
 function connectPhantom(){
   const tgId = tg?.initDataUnsafe?.user?.id || 'unknown';
-  // Nonce = telegramId + timestamp pour unicité
-  const nonce = btoa(`francrun:${tgId}:${Date.now()}`).replace(/=/g,'');
-  // Stocke le nonce en sessionStorage pour vérification au retour
+  const nonce = btoa(`francrun:${tgId}:${Date.now()}`).replace(/[=+/]/g,'');
   sessionStorage.setItem('phantom_nonce', nonce);
 
   const message = encodeURIComponent(`FrancRun wallet verification\nNonce: ${nonce}`);
-  const redirectUrl = encodeURIComponent(window.location.href + '?phantom_return=1');
-  const appUrl = encodeURIComponent(window.location.href);
+  const redirectUrl = encodeURIComponent(
+    'https://franclecoq.github.io/FrancRun/connect-wallet.html?phantom_return=1'
+  );
+  const appUrl = encodeURIComponent('https://franclecoq.github.io/FrancRun/connect-wallet.html');
 
-  // Deep link Phantom universel (iOS + Android)
-  const deepLink = `https://phantom.app/ul/v1/signMessage?encoding=utf8&message=${message}&redirect_link=${redirectUrl}&app_url=${appUrl}&dapp_encryption_public_key=`;
+  // HTTPS universal link — fonctionne dans tous les WebViews
+  // iOS et Android redirigent automatiquement vers l'app Phantom si installée
+  const link = `https://phantom.app/ul/v1/signMessage?encoding=utf8&message=${message}&redirect_link=${redirectUrl}&app_url=${appUrl}`;
 
-  // Essaie d'abord le scheme natif, fallback sur HTTPS
-  const nativeLink = `phantom://ul/v1/signMessage?encoding=utf8&message=${message}&redirect_link=${redirectUrl}`;
+  setStatus('unknown', '👻 Redirecting to Phantom...\nApprove the signature to verify ownership.');
+  setLoading('Opening Phantom...');
 
-  setStatus('unknown', '👻 Opening Phantom to verify ownership...\nApprove the signature request in Phantom.');
-  setLoading('Redirecting to Phantom...');
+  // Ouvre dans le navigateur externe — Telegram ne peut pas gérer phantom://
+  if(tg) tg.openLink(link);
+  else window.open(link, '_blank');
 
-  // Tente d'ouvrir l'app native, fallback web après 2s
-  window.location.href = nativeLink;
-  setTimeout(()=>{
-    window.location.href = deepLink;
-    setLoading('');
-  }, 2000);
+  setLoading('');
 }
 
 // ── Retour de Phantom après signature ──────────────
@@ -274,7 +276,30 @@ async function handlePhantomReturn(){
   }
 }
 
-// ── Connexion manuelle (autres wallets) ────────────
+// ── Solflare deep link avec signature ──────────────
+function connectSolflare(){
+  const tgId = tg?.initDataUnsafe?.user?.id || 'unknown';
+  const nonce = btoa(`francrun:${tgId}:${Date.now()}`).replace(/=/g,'');
+  sessionStorage.setItem('phantom_nonce', nonce);
+
+  const message = encodeURIComponent(`FrancRun wallet verification\nNonce: ${nonce}`);
+  const redirectUrl = encodeURIComponent(window.location.href + '?phantom_return=1');
+
+  const nativeLink = `solflare://signMessage?message=${message}&redirect=${redirectUrl}`;
+  const webLink    = `https://solflare.com/ul/v1/signMessage?message=${message}&redirect_link=${redirectUrl}`;
+
+  setStatus('unknown', '☀️ Opening Solflare to verify ownership...\nApprove the signature request.');
+  setLoading('Redirecting to Solflare...');
+
+  window.location.href = nativeLink;
+  setTimeout(()=>{ window.location.href = webLink; setLoading(''); }, 2000);
+}
+
+// ── Other Wallet — affiche le champ manuel ──────────
+function connectOther(){
+  const s = document.getElementById('otherSection');
+  s.style.display = s.style.display==='none' ? 'block' : 'none';
+}
 async function connectManual(){
   const address = (document.getElementById('manualAddress')?.value||'').trim();
   if(!address || address.length < 32){
