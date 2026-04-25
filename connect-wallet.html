@@ -161,6 +161,17 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
     <button class="btn" onclick="connectWalletConnect()" style="margin-top:10px;background:linear-gradient(135deg,#1a6b9e,#0d4f7a);box-shadow:0 4px 20px rgba(26,107,158,0.4)">
       🔗 WalletConnect
     </button>
+    <!-- Fallback champ manuel si WC pas chargé -->
+    <div id="wcFallback" style="display:none;margin-top:12px">
+      <div style="background:rgba(26,107,158,0.1);border:1px solid rgba(26,107,158,0.3);border-radius:12px;padding:12px;margin-bottom:10px;font-size:11px;color:#c9aaee;line-height:1.7;text-align:left">
+        Paste your Solana address below:
+      </div>
+      <input id="manualAddress" type="text" placeholder="Solana address..."
+        style="width:100%;padding:11px 13px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(26,107,158,0.4);border-radius:12px;color:#fff;font-size:12px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-bottom:8px"
+        oninput="this.style.borderColor=this.value.length>30?'rgba(163,230,53,0.7)':'rgba(26,107,158,0.6)'"
+      />
+      <button class="btn btn-green" onclick="connectManual()">✅ Link my wallet</button>
+    </div>
 
   </div>
 
@@ -196,7 +207,9 @@ let currentStatus = null;
 
 // ── On load: check current status ──────────────────
 window.addEventListener('load', async ()=>{
-  // Vérifie si on revient de Phantom avec une signature
+  // Si on est dans le browser Phantom ou Solflare → connexion auto
+  setTimeout(autoConnectInjected, 500);
+
   if(window.location.search.includes('phantom_return')){
     await handlePhantomReturn();
     return;
@@ -246,30 +259,72 @@ function setLoading(msg){ loadingMsg.textContent=msg; }
 function showConnect(){ connectSection.style.display='block'; linkedSection.style.display='none'; }
 function showLinked() { connectSection.style.display='none';  linkedSection.style.display='block'; }
 
-// ── Phantom deep link avec signature ───────────────
+// ── Phantom — ouvre la page dans le browser Phantom ────
 function connectPhantom(){
-  const tgId = tg?.initDataUnsafe?.user?.id || 'unknown';
-  const nonce = btoa(`francrun:${tgId}:${Date.now()}`).replace(/[=+/]/g,'');
-  sessionStorage.setItem('phantom_nonce', nonce);
+  const pageUrl = 'https://franclecoq.github.io/FrancRun/connect-wallet.html';
+  // Ce deep link ouvre l'URL DANS le browser intégré de Phantom
+  // Phantom injecte window.solana → la connexion se fait directement
+  const deepLink = `https://phantom.app/ul/browse/${encodeURIComponent(pageUrl)}?ref=${encodeURIComponent(pageUrl)}`;
 
-  const message = encodeURIComponent(`FrancRun wallet verification\nNonce: ${nonce}`);
-  const redirectUrl = encodeURIComponent(
-    'https://franclecoq.github.io/FrancRun/connect-wallet.html?phantom_return=1'
-  );
-  const appUrl = encodeURIComponent('https://franclecoq.github.io/FrancRun/connect-wallet.html');
+  setStatus('unknown', '👻 Opening page in Phantom browser...\nPhantom will connect automatically.');
 
-  // HTTPS universal link — fonctionne dans tous les WebViews
-  // iOS et Android redirigent automatiquement vers l'app Phantom si installée
-  const link = `https://phantom.app/ul/v1/signMessage?encoding=utf8&message=${message}&redirect_link=${redirectUrl}&app_url=${appUrl}`;
+  // Tente le scheme natif d'abord (iOS/Android)
+  const native = `phantom://ul/browse/${encodeURIComponent(pageUrl)}?ref=${encodeURIComponent(pageUrl)}`;
+  window.location.href = native;
+  setTimeout(()=>{
+    // Fallback HTTPS si l'app n'est pas installée
+    window.location.href = deepLink;
+  }, 1500);
+}
 
-  setStatus('unknown', '👻 Redirecting to Phantom...\nApprove the signature to verify ownership.');
-  setLoading('Opening Phantom...');
+// ── Solflare — même approche browse ────────────────
+function connectSolflare(){
+  const pageUrl = 'https://franclecoq.github.io/FrancRun/connect-wallet.html';
+  const deepLink = `https://solflare.com/ul/browse/${encodeURIComponent(pageUrl)}?ref=${encodeURIComponent(pageUrl)}`;
+  const native   = `solflare://browse/${encodeURIComponent(pageUrl)}`;
 
-  // Ouvre dans le navigateur externe — Telegram ne peut pas gérer phantom://
-  if(tg) tg.openLink(link);
-  else window.open(link, '_blank');
+  setStatus('unknown', '☀️ Opening page in Solflare browser...\nSolflare will connect automatically.');
 
-  setLoading('');
+  window.location.href = native;
+  setTimeout(()=>{ window.location.href = deepLink; }, 1500);
+}
+
+// ── Détection auto si Phantom/Solflare injecté ─────
+// Quand on est dans le browser de Phantom/Solflare, window.solana existe
+async function autoConnectInjected(){
+  if(window.solana?.isPhantom || window.solana?.isSolflare || window.solflare){
+    const provider = window.solana || window.solflare;
+    try{
+      setLoading('Connecting wallet...');
+      const resp = await provider.connect();
+      const address = resp.publicKey.toString();
+      if(!tg?.initData){ setLoading(''); return; }
+      const res = await fetch(BACKEND+'/link-wallet',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ initData: tg.initData, wallet: address, verified: true })
+      });
+      const data = await res.json();
+      setLoading('');
+      if(data.ok) await checkStatus();
+      else setStatus('unknown','❌ Error: '+(data.error||'Unknown'));
+    } catch(e){
+      setLoading('');
+      if(!e.message?.includes('rejected'))
+        setStatus('unknown','❌ Error: '+e.message);
+    }
+  }
+}
+
+// ── WalletConnect — QR code universel ──────────────
+function connectWalletConnect(){
+  if(!window._wcModal){
+    // Fallback : affiche un champ manuel si WalletConnect pas chargé
+    const div = document.getElementById('wcFallback');
+    if(div) div.style.display = div.style.display==='none'?'block':'none';
+    return;
+  }
+  window._wcPending = true;
+  window._wcModal.open();
 }
 
 // ── Retour de Phantom après signature ──────────────
