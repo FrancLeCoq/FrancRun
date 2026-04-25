@@ -351,8 +351,8 @@ function saveCumulativeEggs(n){
     const prevLives=10+Math.floor(prevEggs/100);
     const newLives =10+Math.floor(totalEggsEver/100);
     MAX_LIVES=newLives;
-    // Animation +1 vie si palier 100 œufs franchi
-    if(newLives>prevLives && gameState==='play'){
+    // Animation +1 vie uniquement si encore en vie (pas appelé au moment de mourir)
+    if(newLives>prevLives && gameState==='play' && lives>0){
       lives=Math.min(lives+1, MAX_LIVES);
       updateLivesBar(lives);
       showLifeGain();
@@ -1243,11 +1243,16 @@ function showGameOver(){
       <ul class="slist" id="scoreList2" style="margin-top:6px"></ul>
     </div>`;
   panel.classList.remove('hidden');
-  const scores=getScores(), rank=scores.findIndex(s=>s.score===score)+1;
+  // saveScore a déjà été appelé — on cherche la position dans le classement
+  const scores=getScores();
+  const currentScore=score; // capture la valeur avant tout reset
+  const rankIdx=scores.findIndex(s=>s.score===currentScore);
+  const rank=rankIdx+1; // 1-based, 0 si pas trouvé
   const rankEl=panel.querySelector('#rankInfo');
   if(rank===1) rankEl.innerHTML='<span style="color:#FFD700;font-size:15px">🥇 NEW RECORD!</span>';
-  else if(rank<=3) rankEl.textContent='Podium #'+rank+'!';
-  else if(rank>0) rankEl.textContent='Rank: #'+rank;
+  else if(rank>=2&&rank<=3) rankEl.textContent='🏅 Podium #'+rank+'!';
+  else if(rank>3) rankEl.textContent='Rank: #'+rank+' / '+scores.length;
+  else rankEl.textContent=''; // pas dans le top 10
   renderScores(panel.querySelector('#scoreList2'));
 }
 
