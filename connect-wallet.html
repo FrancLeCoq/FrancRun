@@ -28,7 +28,6 @@ body{
 h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px;text-shadow:0 0 20px #FFD700;margin-bottom:6px}
 .sub{font-size:13px;color:#c9aaee;margin-bottom:28px;line-height:1.5}
 
-/* Status badge */
 .status{
   padding:10px 16px;border-radius:12px;font-size:13px;
   margin-bottom:20px;line-height:1.5;
@@ -38,14 +37,12 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
 .status.has-franc{background:rgba(80,220,80,0.1);border:1px solid rgba(80,220,80,0.3);color:#86efac}
 .status.no-franc  {background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);color:#fcd34d}
 
-/* Wallet info */
 .wallet-info{
   background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
   border-radius:12px;padding:12px;margin-bottom:20px;
   font-size:12px;color:#c084fc;word-break:break-all;display:none;
 }
 
-/* Buttons */
 .btn{
   width:100%;padding:16px;border:none;border-radius:14px;
   font-size:17px;font-family:'Bangers',cursive;letter-spacing:2px;
@@ -60,7 +57,6 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
 .btn-purple  {background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 20px rgba(109,40,217,0.4)}
 .btn-gray    {background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
 
-/* Rules box */
 .rules{
   margin-top:22px;padding:14px;
   background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);
@@ -79,45 +75,46 @@ h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px
   <h1>LE COQ FRANC</h1>
   <p class="sub">Connect your Solana wallet to unlock<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs!</p>
 
-  <!-- Dynamic status -->
   <div class="status unknown" id="statusBox">
     🔄 Checking your status...
   </div>
 
-  <!-- Wallet address display -->
   <div class="wallet-info" id="walletInfo"></div>
-
-  <!-- Loading indicator -->
   <div class="loading" id="loadingMsg"></div>
 
-  <!-- Connect buttons (shown when no wallet linked) -->
+  <!-- Connect buttons -->
   <div id="connectSection">
 
-    <!-- Play sans wallet en premier -->
+    <!-- 1. Play gratuit -->
     <button class="btn btn-gray" onclick="goToGame()">🎮 Play with 1 life (free)</button>
 
     <hr class="divider">
 
-    <!-- Instructions -->
-    <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;padding:12px;margin-bottom:12px;font-size:11px;color:#c9aaee;line-height:1.8;text-align:left">
-      <b style="color:#c084fc;font-size:12px">🔗 Connect your Solana wallet</b><br>
-      1️⃣ Open <b style="color:#FFD700">Phantom</b> or <b style="color:#FFD700">Solflare</b> app<br>
-      2️⃣ Copy your wallet address<br>
-      3️⃣ Paste it below ↓
-    </div>
+    <!-- 1. Phantom -->
+    <button class="btn btn-phantom" onclick="connectPhantom()">
+      👻 Connect Phantom
+    </button>
 
-    <!-- Champ adresse -->
-    <input id="walletAddress" type="text"
-      placeholder="Paste your Solana address here..."
-      style="width:100%;padding:12px 14px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(168,85,247,0.4);border-radius:12px;color:#fff;font-size:13px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-bottom:10px"
-      oninput="validateAddress(this)"
-    />
-    <div id="addrHint" style="font-size:10px;color:#888;margin:-6px 0 10px;text-align:right">
-      Enter a valid Solana address (32-44 chars)
+    <!-- 2. Solflare -->
+    <button class="btn btn-solflare" onclick="connectSolflare()">
+      ☀️ Connect Solflare
+    </button>
+
+    <!-- 3. WalletConnect -->
+    <button class="btn" onclick="connectWalletConnect()" style="background:linear-gradient(135deg,#1a6b9e,#0d4f7a);box-shadow:0 4px 20px rgba(26,107,158,0.4)">
+      🔗 WalletConnect
+    </button>
+
+    <hr class="divider">
+
+    <!-- 4. Connect via Bot -->
+    <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);border-radius:12px;padding:12px;margin-bottom:12px;font-size:11px;color:#c9aaee;line-height:1.6;text-align:center">
+      <div style="font-size:13px;color:#c084fc;font-family:'Bangers',cursive;letter-spacing:2px;margin-bottom:4px">🤖 VIA BOT</div>
+      Send <b style="color:#FFD700">/connect</b> to <b style="color:#fff">@FrancRunBot</b><br>
+      and paste your address in the chat
     </div>
-    <button id="linkBtn" class="btn btn-green" onclick="connectManual()" disabled
-      style="opacity:0.5">
-      ✅ Link my wallet
+    <button class="btn btn-purple" onclick="openBot()">
+      🤖 Connect via Bot
     </button>
 
   </div>
@@ -186,64 +183,32 @@ async function checkStatus(){
   }
 }
 
-function setStatus(type, msg){
-  statusBox.className='status '+type;
-  statusBox.textContent=msg;
-}
+function setStatus(type, msg){ statusBox.className='status '+type; statusBox.textContent=msg; }
 function setLoading(msg){ loadingMsg.textContent=msg; }
 function showConnect(){ connectSection.style.display='block'; linkedSection.style.display='none'; }
 function showLinked() { connectSection.style.display='none';  linkedSection.style.display='block'; }
 
-// ── Validation adresse Solana ───────────────────────
-function validateAddress(input){
-  const val = input.value.trim();
-  const valid = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
-  const btn = document.getElementById('linkBtn');
-  const hint = document.getElementById('addrHint');
-  if(valid){
-    input.style.borderColor = 'rgba(163,230,53,0.7)';
-    hint.textContent = '✅ Valid Solana address';
-    hint.style.color = '#86efac';
-    btn.disabled = false;
-    btn.style.opacity = '1';
-  } else {
-    input.style.borderColor = val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';
-    hint.textContent = val.length>5?'❌ Invalid address':'Enter a valid Solana address (32-44 chars)';
-    hint.style.color = val.length>5?'#fca5a5':'#888';
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-  }
+function openBot(){
+  const botUrl = 'https://t.me/FrancRunBot?start=connect';
+  if(tg) tg.openTelegramLink(botUrl);
+  else window.open(botUrl, '_blank');
 }
 
-// ── Connexion manuelle ───────────────────────────────
-async function connectManual(){
-  const address = (document.getElementById('walletAddress')?.value||'').trim();
-  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)){
-    alert('Please enter a valid Solana address.');
-    return;
-  }
-  if(!tg?.initData){
-    alert('Open this page inside Telegram.');
-    return;
-  }
-  setLoading('Linking wallet to your Telegram account...');
-  try{
-    const res = await fetch(BACKEND+'/link-wallet',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ initData: tg.initData, wallet: address })
-    });
-    const data = await res.json();
-    setLoading('');
-    if(data.ok) await checkStatus();
-    else alert('Error: '+(data.error||'Unknown error'));
-  } catch(e){
-    setLoading('');
-    alert('Connection error. Please try again.');
-  }
+function connectPhantom(){
+  const url = encodeURIComponent('https://franclecoq.github.io/FrancRun/connect-wallet.html');
+  window.location.href = `https://phantom.app/ul/browse/${url}?ref=${url}`;
 }
 
-// ── Unlink wallet ───────────────────────────────────
+function connectSolflare(){
+  const url = encodeURIComponent('https://franclecoq.github.io/FrancRun/connect-wallet.html');
+  window.location.href = `https://solflare.com/ul/browse/${url}?ref=${url}`;
+}
+
+function connectWalletConnect(){
+  if(window._wcModal){ window._wcPending=true; window._wcModal.open(); return; }
+  setStatus('unknown','WalletConnect unavailable — please use Connect via Bot below.');
+}
+
 async function unlinkWallet(){
   if(!confirm('Disconnect your wallet? You will lose your 10 lives bonus.')) return;
   setLoading('Unlinking...');
@@ -258,7 +223,6 @@ async function unlinkWallet(){
   } catch(e){ setLoading(''); }
 }
 
-// ── Go to game ──────────────────────────────────────
 function goToGame(){
   if(tg) tg.openLink(GAME_URL);
   else window.location.href = GAME_URL;
