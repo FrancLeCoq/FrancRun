@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🐓 Le Coq Franc</title>
+<title>🐓 FrancRun</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
@@ -35,13 +35,13 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 #panel p{font-size:13px;color:#c9aaee;margin-bottom:14px;line-height:1.5}
 .btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:16px;cursor:pointer;color:#fff;margin-top:8px;font-family:'Bangers',cursive;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;display:block;transition:all 0.15s}
 .btn:active{opacity:0.8;transform:scale(0.97)}
-.btn-play {background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 15px rgba(22,163,74,0.4)}
-.btn-gold {background:linear-gradient(135deg,#b45309,#d97706);box-shadow:0 4px 15px rgba(217,119,6,0.5)}
-.btn-blue {background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 15px rgba(109,40,217,0.5)}
-.btn-cyan {background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 4px 15px rgba(14,165,233,0.4)}
-.btn-bot  {background:linear-gradient(135deg,#7c3aed,#5b21b6);box-shadow:0 4px 15px rgba(124,58,237,0.5)}
-.btn-red  {background:linear-gradient(135deg,#8b0000,#cc0000);box-shadow:0 4px 15px rgba(180,0,0,0.4)}
-.btn-gray {background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
+.btn-play{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 15px rgba(22,163,74,0.4)}
+.btn-gold{background:linear-gradient(135deg,#b45309,#d97706);box-shadow:0 4px 15px rgba(217,119,6,0.5)}
+.btn-blue{background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 15px rgba(109,40,217,0.5)}
+.btn-cyan{background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 4px 15px rgba(14,165,233,0.4)}
+.btn-bot{background:linear-gradient(135deg,#7c3aed,#5b21b6);box-shadow:0 4px 15px rgba(124,58,237,0.5)}
+.btn-red{background:linear-gradient(135deg,#8b0000,#cc0000);box-shadow:0 4px 15px rgba(180,0,0,0.4)}
+.btn-gray{background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
 .divider{border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0}
 .slist{text-align:left;margin:8px 0;max-height:160px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between}
@@ -68,46 +68,35 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 <button id="modeBtn" onclick="toggleMode()">🕹️ JOYSTICK</button>
 
 <div id="ui">
-  <div class="label">SCORE</div>
-  <div class="val" id="scoreEl">0</div>
-  <div class="label" style="margin-top:3px">LEVEL</div>
-  <div class="val" id="levelEl">1</div>
+  <div class="label">SCORE</div><div class="val" id="scoreEl">0</div>
+  <div class="label" style="margin-top:3px">LEVEL</div><div class="val" id="levelEl">1</div>
 </div>
-
 <div id="lifeGainMsg"></div>
 <div id="livesBar"></div>
 <div id="weaponInfo"></div>
 <div id="msg"></div>
 <div id="levelup"></div>
-
 <div id="lvlProgress">
   <div class="bar-bg"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
   <div class="bar-label" id="barLabel">0 / 30 eggs → Level 2</div>
 </div>
 
-<!-- ══ MAIN PANEL ══ -->
 <div id="panel">
   <h2>🐓 FRANC RUN</h2>
   <p>Collect golden eggs &amp; dodge enemies!<br>
   <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
   <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
 
-  <!-- 1. Play (1 life) -->
   <button class="btn btn-play" onclick="startGame()">▶ PLAY — 1 life</button>
-
-  <!-- 2. Play (10 lives) — vers connect wallet -->
   <button class="btn btn-gold" onclick="goToWallet()">🌟 PLAY — 10 lives + bonuses</button>
 
   <hr class="divider">
-
-  <!-- High Scores -->
   <button class="btn btn-blue" onclick="togglePanel('scorePanel','scoreList')">🏆 High Scores</button>
   <div id="scorePanel" style="display:none;margin-top:10px">
     <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px">TOP 10</b>
     <ul class="slist" id="scoreList"></ul>
   </div>
 
-  <!-- $FRANC status -->
   <div class="franc-box">
     <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
     <div id="francStatus" style="font-size:12px;color:#c9aaee;line-height:2">
@@ -128,44 +117,6 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-//  WALLET NAVIGATION
-// ══════════════════════════════════════════════
-function goToWallet(){
-  const tg=window.Telegram?.WebApp;
-  const url='https://franclecoq.github.io/FrancRun/connect-wallet.html';
-  if(tg&&tg.openLink) tg.openLink(url);
-  else window.location.href=url;
-}
-function openWalletBot(){
-  const tg=window.Telegram?.WebApp;
-  const url='https://t.me/FrancRunBot?start=connect';
-  if(tg&&tg.openTelegramLink) tg.openTelegramLink(url);
-  else window.open(url,'_blank');
-}
-function validateManualAddr(input){
-  const val=input.value.trim();const valid=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
-  const btn=document.getElementById('manualLinkBtn');const hint=document.getElementById('manualAddrHint');
-  if(valid){input.style.borderColor='rgba(163,230,53,0.7)';hint.textContent='✅ Valid address';hint.style.color='#86efac';btn.disabled=false;btn.style.opacity='1';}
-  else{input.style.borderColor=val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';hint.textContent=val.length>5?'❌ Invalid address':'Valid Solana address (32–44 characters)';hint.style.color=val.length>5?'#fca5a5':'#888';btn.disabled=true;btn.style.opacity='0.5';}
-}
-async function linkManualWallet(){
-  const address=(document.getElementById('manualWalletAddr')?.value||'').trim();
-  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)){alert('Please enter a valid Solana address.');return;}
-  const tg=window.Telegram?.WebApp;
-  if(!tg?.initData){alert('Open this page inside Telegram to link your wallet.');return;}
-  const btn=document.getElementById('manualLinkBtn');btn.textContent='⏳ Linking...';btn.disabled=true;btn.style.opacity='0.6';
-  try{
-    const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/link-wallet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,wallet:address})});
-    const data=await res.json();
-    if(data.ok){await detectFranc();document.getElementById('walletInputSection').style.display='none';document.getElementById('manualWalletAddr').value='';}
-    else{alert('Error: '+(data.error||'Unknown error'));btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';}
-  }catch(e){alert('Connection error. Please try again.');btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';}
-}
-function toggleWalletInput(){
-  const s=document.getElementById('walletInputSection');s.style.display=s.style.display==='none'?'block':'none';
-}
-
 // ══════════════════════════════════════════════
 //  CANVAS SETUP
 // ══════════════════════════════════════════════
@@ -191,26 +142,31 @@ const joystickBase=document.getElementById('joystick-base');
 const joystickStick=document.getElementById('joystick-stick');
 
 // ══════════════════════════════════════════════
-//  IMAGES
+//  IMAGES — chemins absolus GitHub
 // ══════════════════════════════════════════════
-const chickenImg=new Image();const coinImg=new Image();
-chickenImg.src='coq_pilote.png';coinImg.src='piece_1f.png';
+const chickenImg=new Image();
+const coinImg=new Image();
+chickenImg.src='https://franclecoq.github.io/FrancRun/coq_pilote.png';
+coinImg.src='https://franclecoq.github.io/FrancRun/piece_1f.png';
 
 // ══════════════════════════════════════════════
 //  MOBILE DETECTION
 // ══════════════════════════════════════════════
 const isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||window.innerWidth<700;
-const SCALE=isMobile?0.58:1.0;const MOBILE_SPD=isMobile?0.35:1.0;
+const SCALE=isMobile?0.58:1.0;
+const MOBILE_SPD=isMobile?0.35:1.0;
 
 // ══════════════════════════════════════════════
 //  AUDIO
 // ══════════════════════════════════════════════
 const AC=new(window.AudioContext||window.webkitAudioContext)();
 function unlockAudio(){AC.resume();}
-document.addEventListener('click',unlockAudio,{once:true});document.addEventListener('touchstart',unlockAudio,{once:true});
+document.addEventListener('click',unlockAudio,{once:true});
+document.addEventListener('touchstart',unlockAudio,{once:true});
 function playSound(type){
   if(AC.state==='suspended')AC.resume();
-  const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);const t=AC.currentTime;
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.connect(g);g.connect(AC.destination);const t=AC.currentTime;
   if(type==='shoot'){o.type='square';o.frequency.setValueAtTime(600,t);o.frequency.exponentialRampToValueAtTime(200,t+0.08);g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.1);o.start(t);o.stop(t+0.1);}
   else if(type==='coin'){o.type='sine';o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(1320,t+0.15);g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.start(t);o.stop(t+0.2);}
   else if(type==='hit'){o.type='sawtooth';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(80,t+0.2);g.gain.setValueAtTime(0.25,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.25);o.start(t);o.stop(t+0.25);}
@@ -263,6 +219,59 @@ function getHomingRatio(lvl){if(lvl<=3)return 0;if(lvl===4)return 0.10;if(lvl===
 function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30));}
 
 // ══════════════════════════════════════════════
+//  WALLET — navigation + liaison manuelle
+// ══════════════════════════════════════════════
+function goToWallet(){
+  const tg=window.Telegram?.WebApp;
+  const url='https://franclecoq.github.io/FrancRun/connect-wallet.html';
+  if(tg&&tg.openLink) tg.openLink(url);
+  else window.location.href=url;
+}
+function openWalletBot(){
+  const tg=window.Telegram?.WebApp;
+  const url='https://t.me/FrancRunBot?start=connect';
+  if(tg&&tg.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url,'_blank');
+}
+function toggleWalletInput(){
+  const s=document.getElementById('walletInputSection');if(!s)return;
+  s.style.display=s.style.display==='none'?'block':'none';
+}
+function validateManualAddr(input){
+  const val=input.value.trim();const valid=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
+  const btn=document.getElementById('manualLinkBtn');const hint=document.getElementById('manualAddrHint');
+  if(valid){input.style.borderColor='rgba(163,230,53,0.7)';hint.textContent='✅ Valid address';hint.style.color='#86efac';btn.disabled=false;btn.style.opacity='1';}
+  else{input.style.borderColor=val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';hint.textContent=val.length>5?'❌ Invalid address':'Valid Solana address (32–44 chars)';hint.style.color=val.length>5?'#fca5a5':'#888';btn.disabled=true;btn.style.opacity='0.5';}
+}
+async function linkManualWallet(){
+  const address=(document.getElementById('manualWalletAddr')?.value||'').trim();
+  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)){alert('Please enter a valid Solana address.');return;}
+  const tg=window.Telegram?.WebApp;
+  if(!tg?.initData){alert('Please open this game inside Telegram to link your wallet.\n\nAlternatively, send /connect to @FrancRunBot in Telegram.');return;}
+  const btn=document.getElementById('manualLinkBtn');
+  btn.textContent='⏳ Linking...';btn.disabled=true;btn.style.opacity='0.6';
+  try{
+    const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/link-wallet',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({initData:tg.initData,wallet:address})
+    });
+    const data=await res.json();
+    if(data.ok){
+      await detectFranc();
+      document.getElementById('walletInputSection').style.display='none';
+      document.getElementById('manualWalletAddr').value='';
+      alert('✅ Wallet linked! Your bonuses are now active.');
+    } else {
+      alert('Error: '+(data.error||'Unknown error'));
+      btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';
+    }
+  }catch(e){
+    alert('Connection error. Please try again.');
+    btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';
+  }
+}
+
+// ══════════════════════════════════════════════
 //  $FRANC / TELEGRAM
 // ══════════════════════════════════════════════
 let MAX_LIVES=1,hasFranc=false,totalEggsEver=0;
@@ -270,8 +279,12 @@ async function detectFranc(){
   const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
   try{totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0');}catch(e){}
   if(!tg||!tg.initData){MAX_LIVES=1;hasFranc=false;showFrancStatus();return;}
-  try{const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun'})});if(res.ok){const d=await res.json();hasFranc=d.hasFranc||false;MAX_LIVES=d.lives||1;}}catch(e){hasFranc=false;}
-  MAX_LIVES=hasFranc?10+Math.floor(totalEggsEver/100):1;showFrancStatus();
+  try{
+    const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun'})});
+    if(res.ok){const d=await res.json();hasFranc=d.hasFranc||false;MAX_LIVES=d.lives||1;}
+  }catch(e){hasFranc=false;}
+  MAX_LIVES=hasFranc?10+Math.floor(totalEggsEver/100):1;
+  showFrancStatus();
 }
 function showFrancStatus(){
   const badge=document.getElementById('francBadge');if(!badge)return;
@@ -281,7 +294,8 @@ function showFrancStatus(){
 function saveCumulativeEggs(n){
   const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
   if(hasFranc){const prevLives=10+Math.floor(prevEggs/100);const newLives=10+Math.floor(totalEggsEver/100);MAX_LIVES=newLives;if(newLives>prevLives&&gameState==='play'&&lives>0){lives=Math.min(lives+1,MAX_LIVES);updateLivesBar(lives);showLifeGain();}}
-  const tg=window.Telegram?.WebApp;if(tg?.initData){fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
+  const tg=window.Telegram?.WebApp;
+  if(tg?.initData){fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
 }
 detectFranc();
 
@@ -292,7 +306,8 @@ function updateLivesBar(l){livesBar.innerHTML=`<span style="font-size:22px;filte
 let lifeGainTimeout=null;
 function showLifeGain(){
   const el=document.getElementById('lifeGainMsg');if(!el||gameState!=='play')return;
-  el.textContent='❤️ +1 LIFE!';el.style.display='block';el.style.opacity='0';el.style.animation='none';void el.offsetHeight;el.style.animation='lifeGain 1.8s ease-out';
+  el.textContent='❤️ +1 LIFE!';el.style.display='block';el.style.opacity='0';el.style.animation='none';
+  void el.offsetHeight;el.style.animation='lifeGain 1.8s ease-out';
   clearTimeout(lifeGainTimeout);lifeGainTimeout=setTimeout(()=>{el.style.animation='none';el.style.opacity='0';el.style.display='none';},1900);
   const heart=livesBar.querySelector('span');if(heart){heart.style.animation='none';void heart.offsetHeight;heart.style.animation='heartPop 0.5s ease-out';}
   playSound('coin');
@@ -313,7 +328,7 @@ function getBigEnemyChance(lvl){if(lvl>=11)return 4/5;if(lvl>=10)return 2/5;if(l
 function spawnEnemy(lvl){
   const sp=getEnemySpeed(lvl);let x,y,vx=0,vy=0;const s=Math.random()*4|0;
   if(s===0){x=-45;y=Math.random()*canvas.height;vx=sp;}else if(s===1){x=canvas.width+45;y=Math.random()*canvas.height;vx=-sp;}else if(s===2){x=Math.random()*canvas.width;y=-45;vy=sp;}else{x=Math.random()*canvas.width;y=canvas.height+45;vy=-sp;}
-  let hp;if(lvl<=3)hp=1;else if(lvl<=5)hp=2;else if(lvl<=7)hp=3;else if(lvl<=9)hp=4;else if(lvl===10)hp=5;else hp=6;
+  let hp;if(lvl<=3)hp=1;else if(lvl===4)hp=2;else if(lvl===5)hp=2;else if(lvl===6)hp=3;else if(lvl===7)hp=3;else if(lvl<=9)hp=4;else if(lvl===10)hp=5;else hp=6;
   const bigChance=getBigEnemyChance(lvl);const isBig=bigChance>0&&Math.random()<bigChance;if(isBig){hp+=2;vx*=0.7;vy*=0.7;}
   const eliteRate=isMortSubite(lvl)?10:20;const isElite=lvl>=9&&(++eliteCounter%eliteRate===0);if(isElite){hp+=3;vx*=1.4;vy*=1.4;}
   const isHoming=Math.random()<getHomingRatio(lvl);
@@ -338,7 +353,11 @@ function clearEnemiesExplosion(c1,c2){enemies.forEach(e=>{spawnParticles(e.x,e.y
 function showLevelUp(lvl){
   clearTimeout(levelupTimeout);
   if(isMortSubite(lvl)){levelupEl.textContent='💀 SUDDEN DEATH!';levelupEl.style.color='#ff2222';levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';clearEnemiesExplosion('#ff4400','#ffaa00');setTimeout(()=>{weaponEl.style.fontSize='13px';weaponEl.textContent='🏆 WELL DONE — FIGHT TO THE DEATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);},600);}
-  else{levelupEl.textContent='⭐ LEVEL '+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';if(lvl===7){clearEnemiesExplosion('#a855f7','#FFD700');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! CATCH YOUR BREATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! LAST CHANCE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}if(lvl===10){clearEnemiesExplosion('#ff0000','#cc0000');setTimeout(()=>{weaponEl.textContent='☠️ SUDDEN DEATH AWAITS!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3500);},400);}}
+  else{levelupEl.textContent='⭐ LEVEL '+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
+    if(lvl===7){clearEnemiesExplosion('#a855f7','#FFD700');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! CATCH YOUR BREATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
+    if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! LAST CHANCE TO BREATHE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
+    if(lvl===10){clearEnemiesExplosion('#ff0000','#cc0000');setTimeout(()=>{weaponEl.textContent='☠️ ALMOST THERE — SUDDEN DEATH AWAITS!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3500);},400);}
+  }
   levelupEl.className='show';levelupTimeout=setTimeout(()=>{levelupEl.className='';},2500);playSound('levelup');
   if(getWeapon(lvl)==='pistol'&&lvl===4){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
 }
@@ -383,9 +402,9 @@ function updatePlayerMovement(){
 function drawMobileHints(){
   if(!isMobile)return;ctx.save();
   if(inputMode==='drag'){
-    if(player&&(fingerRing.active||fingerRing.alpha>0)){const a=fingerRing.active?Math.min(1,fingerRing.alpha):fingerRing.alpha;const pulse=1+0.08*Math.sin(frameCount*0.22);ctx.globalAlpha=a*0.35;ctx.strokeStyle='#a855f7';ctx.lineWidth=3;ctx.beginPath();ctx.arc(player.x,player.y+18,46*pulse*SCALE,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=a*0.18;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(player.x,player.y+18,36*SCALE,0,Math.PI*2);ctx.fill();}
+    if(player&&(fingerRing.active||fingerRing.alpha>0)){const a=fingerRing.active?Math.min(1,fingerRing.alpha):fingerRing.alpha;const pulse=1+0.08*Math.sin(frameCount*0.22);ctx.globalAlpha=a*0.35;ctx.strokeStyle='#a855f7';ctx.lineWidth=3;ctx.beginPath();ctx.arc(player.x,player.y+18,46*pulse*SCALE,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=a*0.18;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(player.x,player.y+18,36*SCALE,0,Math.PI*2);ctx.fill();if(fingerRing.active&&(Math.abs(fingerRing.x-player.x)>15||Math.abs(fingerRing.y-player.y)>15)){ctx.globalAlpha=a*0.4;ctx.strokeStyle='#FFD700';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(fingerRing.x,fingerRing.y,22,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=a*0.2;ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(player.x,player.y+18);ctx.lineTo(fingerRing.x,fingerRing.y);ctx.stroke();ctx.setLineDash([]);}}
     if(!dragActive){ctx.globalAlpha=0.15;ctx.strokeStyle='#c084fc';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(canvas.width/2,canvas.height-60,32,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#c084fc';ctx.font='10px Fredoka One,cursive';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('DRAG',canvas.width/2,canvas.height-60);}
-  }else{const jcx=canvas.width/2,jcy=canvas.height-95;const activeAlpha=joyActive?0.55:0.22;ctx.globalAlpha=activeAlpha;ctx.strokeStyle=joyActive?'#c084fc':'#a855f7';ctx.lineWidth=joyActive?3:2.5;ctx.beginPath();ctx.arc(jcx,jcy,72,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=joyActive?'rgba(220,160,255,0.6)':'rgba(168,85,247,0.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(jcx,jcy,28,0,Math.PI*2);ctx.stroke();ctx.fillStyle=joyActive?'rgba(220,170,255,0.8)':'rgba(192,132,252,0.4)';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('▲',jcx,jcy-52);ctx.fillText('▼',jcx,jcy+52);ctx.fillText('◀',jcx-52,jcy);ctx.fillText('▶',jcx+52,jcy);ctx.globalAlpha=joyActive?0.6:0.28;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(jcx,jcy,14,0,Math.PI*2);ctx.fill();}
+  }else{const jcx=canvas.width/2,jcy=canvas.height-95;const aa=joyActive?0.55:0.22;ctx.globalAlpha=aa;ctx.strokeStyle=joyActive?'#c084fc':'#a855f7';ctx.lineWidth=joyActive?3:2.5;ctx.beginPath();ctx.arc(jcx,jcy,72,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=joyActive?'rgba(220,160,255,0.6)':'rgba(168,85,247,0.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(jcx,jcy,28,0,Math.PI*2);ctx.stroke();ctx.fillStyle=joyActive?'rgba(220,170,255,0.8)':'rgba(192,132,252,0.4)';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('▲',jcx,jcy-52);ctx.fillText('▼',jcx,jcy+52);ctx.fillText('◀',jcx-52,jcy);ctx.fillText('▶',jcx+52,jcy);ctx.globalAlpha=joyActive?0.6:0.28;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(jcx,jcy,14,0,Math.PI*2);ctx.fill();}
   ctx.restore();
 }
 
@@ -408,10 +427,93 @@ function startGame(){
 // ══════════════════════════════════════════════
 //  DRAW SPRITES
 // ══════════════════════════════════════════════
-function drawChickenSprite(x,y,inv,anim){ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);ctx.translate(0,Math.sin(anim.bobPhase)*3);ctx.rotate(anim.tiltAngle*0.15);const bs=1+Math.sin(anim.breathe)*0.015;ctx.scale(bs*anim.squish,bs*(2-anim.squish));if(inv>0&&Math.floor(inv/4)%2===0)ctx.globalAlpha=0.35;ctx.save();ctx.scale(1,0.25);ctx.translate(0,160);ctx.globalAlpha*=0.25;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,28,10,0,0,Math.PI*2);ctx.fill();ctx.restore();if(chickenImg.complete&&chickenImg.naturalWidth>0){if(anim.tiltAngle<-0.1)ctx.scale(-1,1);ctx.drawImage(chickenImg,-38,-49,76,76);}else{ctx.fillStyle='#c87941';ctx.beginPath();ctx.ellipse(0,0,22,18,0,0,Math.PI*2);ctx.fill();}ctx.restore();}
-function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);const dx=player?player.x-x:0,dy=player?player.y-y:0;ctx.rotate(Math.atan2(dy,dx));ctx.translate(0,Math.sin(t*0.18+wobble)*3);const sc=elite?1.35:big?1.7:1.0;ctx.scale(sc,sc);if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}else if(homing){ctx.shadowColor='#ddaa00';ctx.shadowBlur=10+Math.sin(t*0.1)*3;}else if(big){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();const bodyCol=hp<maxHp?(elite?'#cc2200':homing?'#b08800':'#9b1a1a'):(elite?'#aa1800':homing?'#9a7700':'#8b1a1a');ctx.fillStyle=bodyCol;ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=elite?'#5a0000':big?'#3a0505':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.ellipse(8,-18,10,4,0,0,Math.PI*2);ctx.fill();ctx.fillRect(2,-18,12,5);ctx.fillStyle=elite?'#ff6600':big?'#cc0000':'#ff0000';ctx.beginPath();ctx.arc(8,-14,2,0,Math.PI*2);ctx.fill();ctx.fillStyle=elite?'#ff4400':big?'#ff2200':'#ffdd00';ctx.beginPath();ctx.arc(10,-13,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(11,-13,2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#cc4400';ctx.beginPath();ctx.moveTo(17,-11);ctx.lineTo(23,-11);ctx.lineTo(17,-8);ctx.fill();ctx.fillStyle='#cc0000';ctx.beginPath();ctx.ellipse(12,-7,4,3,0.3,0,Math.PI*2);ctx.fill();ctx.strokeStyle=elite?'#ff4400':big?'#cc2200':'#8b4513';ctx.lineWidth=elite?4:big?3.5:3;ctx.beginPath();ctx.moveTo(16,-4);ctx.lineTo(32,-4);ctx.stroke();if(elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💀',-10,-18);}if(big&&!elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💢',-10,-18);}if(maxHp>1&&homing){const bw=36,bh=5,bx=-18,by=20;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx,by,bw,bh);ctx.fillStyle=hp/maxHp>0.5?'#22cc44':hp/maxHp>0.25?'#ffaa00':'#ff2222';ctx.fillRect(bx,by,bw*(hp/maxHp),bh);ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=0.5;ctx.strokeRect(bx,by,bw,bh);}ctx.restore();}
-function drawCoinSprite(x,y,t,bob){ctx.save();ctx.translate(x,y+Math.sin(t*0.06+bob)*5);ctx.scale(SCALE,SCALE);ctx.scale(Math.abs(Math.cos(t*0.07))*0.6+0.4,1);ctx.shadowColor='#FFD700';ctx.shadowBlur=14+Math.sin(t*0.1)*5;if(coinImg.complete&&coinImg.naturalWidth>0){ctx.drawImage(coinImg,-22,-22,44,44);}else{ctx.fillStyle='#FFD700';ctx.beginPath();ctx.ellipse(0,0,16,20,0,0,Math.PI*2);ctx.fill();}ctx.restore();}
-function drawBullet(b){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);const col=b.type==='pistol3'?'#00ff88':b.type==='pistol2'?'#00eeff':'#FFD700';ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(0,0,8,3,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=0.4;ctx.beginPath();ctx.ellipse(-10,0,6,2,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+function drawChickenSprite(x,y,inv,anim){
+  ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);
+  ctx.translate(0,Math.sin(anim.bobPhase)*3);
+  ctx.rotate(anim.tiltAngle*0.15);
+  const bs=1+Math.sin(anim.breathe)*0.015;
+  ctx.scale(bs*anim.squish,bs*(2-anim.squish));
+  if(inv>0&&Math.floor(inv/4)%2===0)ctx.globalAlpha=0.35;
+  // Ombre sol
+  ctx.save();ctx.scale(1,0.25);ctx.translate(0,160);ctx.globalAlpha*=0.25;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,28,10,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  if(chickenImg.complete&&chickenImg.naturalWidth>0){
+    if(anim.tiltAngle<-0.1)ctx.scale(-1,1);
+    ctx.drawImage(chickenImg,-38,-49,76,76);
+  } else {
+    // ── Fallback : coq pilote dessiné en canvas ──────────────────────────
+    const flip=anim.tiltAngle<-0.1?-1:1;
+    ctx.scale(flip,1);
+    // Corps
+    ctx.fillStyle='#c87941';ctx.beginPath();ctx.ellipse(0,4,20,16,0,0,Math.PI*2);ctx.fill();
+    // Aile
+    ctx.fillStyle='#8b4513';ctx.beginPath();ctx.ellipse(-2,6,13,8,-0.3,0,Math.PI*2);ctx.fill();
+    // Plumes de queue
+    ctx.fillStyle='#a0522d';ctx.beginPath();ctx.ellipse(-20,2,10,4,-0.8,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#8b1a1a';ctx.beginPath();ctx.ellipse(-21,-2,9,3,-1.0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#6b0f0f';ctx.beginPath();ctx.ellipse(-20,6,8,3,-0.5,0,Math.PI*2);ctx.fill();
+    // Tête
+    ctx.fillStyle='#c87941';ctx.beginPath();ctx.arc(12,-10,11,0,Math.PI*2);ctx.fill();
+    // Casque pilote
+    ctx.fillStyle='#5c3317';ctx.beginPath();ctx.arc(12,-12,11,Math.PI,0);ctx.lineTo(23,-8);ctx.lineTo(1,-8);ctx.closePath();ctx.fill();
+    // Lunettes — montures
+    ctx.fillStyle='#2a1a08';ctx.beginPath();ctx.ellipse(8,-10,5,4,0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(17,-10,5,4,-0.2,0,Math.PI*2);ctx.fill();
+    // Lunettes — verres
+    ctx.fillStyle='rgba(100,180,255,0.5)';ctx.beginPath();ctx.ellipse(8,-10,4,3,0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(17,-10,4,3,-0.2,0,Math.PI*2);ctx.fill();
+    // Reflets
+    ctx.fillStyle='rgba(255,255,255,0.6)';ctx.beginPath();ctx.ellipse(7,-11,1.5,1,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(16,-11,1.5,1,0,0,Math.PI*2);ctx.fill();
+    // Pont lunettes
+    ctx.strokeStyle='#2a1a08';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(12,-10);ctx.lineTo(13,-10);ctx.stroke();
+    // Crête
+    ctx.fillStyle='#cc2200';ctx.beginPath();ctx.ellipse(10,-22,4,6,0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(14,-21,3,5,-0.1,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(18,-20,3,4,-0.3,0,Math.PI*2);ctx.fill();
+    // Bec
+    ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.moveTo(23,-9);ctx.lineTo(30,-10);ctx.lineTo(23,-7);ctx.closePath();ctx.fill();
+    // Barbillon
+    ctx.fillStyle='#dc2626';ctx.beginPath();ctx.ellipse(22,-6,4,5,0.3,0,Math.PI*2);ctx.fill();
+    // Pattes
+    ctx.strokeStyle='#f59e0b';ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-4,18);ctx.lineTo(-6,28);ctx.stroke();ctx.beginPath();ctx.moveTo(-6,28);ctx.lineTo(-10,32);ctx.stroke();ctx.beginPath();ctx.moveTo(-6,28);ctx.lineTo(-4,33);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(4,18);ctx.lineTo(6,28);ctx.stroke();ctx.beginPath();ctx.moveTo(6,28);ctx.lineTo(10,32);ctx.stroke();ctx.beginPath();ctx.moveTo(6,28);ctx.lineTo(7,33);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){
+  ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);
+  const dx=player?player.x-x:0,dy=player?player.y-y:0;ctx.rotate(Math.atan2(dy,dx));ctx.translate(0,Math.sin(t*0.18+wobble)*3);
+  const sc=elite?1.35:big?1.7:1.0;ctx.scale(sc,sc);
+  if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}else if(homing){ctx.shadowColor='#ddaa00';ctx.shadowBlur=10+Math.sin(t*0.1)*3;}else if(big){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}
+  ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  const bodyCol=hp<maxHp?(elite?'#cc2200':homing?'#b08800':'#9b1a1a'):(elite?'#aa1800':homing?'#9a7700':'#8b1a1a');
+  ctx.fillStyle=bodyCol;ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=elite?'#5a0000':big?'#3a0505':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.ellipse(8,-18,10,4,0,0,Math.PI*2);ctx.fill();ctx.fillRect(2,-18,12,5);
+  ctx.fillStyle=elite?'#ff6600':big?'#cc0000':'#ff0000';ctx.beginPath();ctx.arc(8,-14,2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=elite?'#ff4400':big?'#ff2200':'#ffdd00';ctx.beginPath();ctx.arc(10,-13,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#111';ctx.beginPath();ctx.arc(11,-13,2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#cc4400';ctx.beginPath();ctx.moveTo(17,-11);ctx.lineTo(23,-11);ctx.lineTo(17,-8);ctx.fill();
+  ctx.fillStyle='#cc0000';ctx.beginPath();ctx.ellipse(12,-7,4,3,0.3,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=elite?'#ff4400':big?'#cc2200':'#8b4513';ctx.lineWidth=elite?4:big?3.5:3;ctx.beginPath();ctx.moveTo(16,-4);ctx.lineTo(32,-4);ctx.stroke();
+  if(elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💀',-10,-18);}
+  if(big&&!elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💢',-10,-18);}
+  if(maxHp>1&&homing){const bw=36,bh=5,bx=-18,by=20;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx,by,bw,bh);ctx.fillStyle=hp/maxHp>0.5?'#22cc44':hp/maxHp>0.25?'#ffaa00':'#ff2222';ctx.fillRect(bx,by,bw*(hp/maxHp),bh);ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=0.5;ctx.strokeRect(bx,by,bw,bh);}
+  ctx.restore();
+}
+
+function drawCoinSprite(x,y,t,bob){
+  ctx.save();ctx.translate(x,y+Math.sin(t*0.06+bob)*5);ctx.scale(SCALE,SCALE);ctx.scale(Math.abs(Math.cos(t*0.07))*0.6+0.4,1);
+  ctx.shadowColor='#FFD700';ctx.shadowBlur=14+Math.sin(t*0.1)*5;
+  if(coinImg.complete&&coinImg.naturalWidth>0){ctx.drawImage(coinImg,-22,-22,44,44);}
+  else{ctx.fillStyle='#FFD700';ctx.beginPath();ctx.ellipse(0,0,16,20,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#FFA500';ctx.beginPath();ctx.ellipse(0,0,12,15,0,0,Math.PI*2);ctx.fill();}
+  ctx.restore();
+}
+
+function drawBullet(b){
+  ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);
+  const col=b.type==='pistol3'?'#00ff88':b.type==='pistol2'?'#00eeff':'#FFD700';
+  ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(0,0,8,3,0,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=0.4;ctx.beginPath();ctx.ellipse(-10,0,6,2,0,0,Math.PI*2);ctx.fill();ctx.restore();
+}
+
 function drawParticle(p){ctx.save();ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=4;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(p.life/p.maxLife),0,Math.PI*2);ctx.fill();ctx.restore();}
 
 // ══════════════════════════════════════════════
@@ -424,7 +526,11 @@ function update(){
   updateProgressBar();
   const effectiveLvl=isMortSubite(lvl)?getMortSubiteTier():lvl;const mBonus=isMobile?20:0;
   let base;if(effectiveLvl===1)base=70+mBonus;else if(effectiveLvl===2)base=55+mBonus;else if(effectiveLvl===3)base=42+mBonus;else if(effectiveLvl===4)base=32+mBonus;else if(effectiveLvl===5)base=26+mBonus;else if(effectiveLvl===6)base=22+mBonus;else if(effectiveLvl===7)base=20+mBonus;else if(effectiveLvl===8)base=16+mBonus;else if(effectiveLvl===9)base=13+mBonus;else if(effectiveLvl===10)base=10+mBonus;else base=Math.max(6,10-(effectiveLvl-11)*0.8)+mBonus;
-  if(frameCount%Math.floor(base)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=5&&frameCount%Math.floor(base*1.8)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0)enemies.push(spawnEnemy(lvl));if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=6&&frameCount%Math.floor(base*0.95)===0){const e=spawnEnemy(lvl);e.homing=false;enemies.push(e);}
+  if(frameCount%Math.floor(base)===0)enemies.push(spawnEnemy(lvl));
+  if(effectiveLvl>=5&&frameCount%Math.floor(base*1.8)===0)enemies.push(spawnEnemy(lvl));
+  if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0)enemies.push(spawnEnemy(lvl));
+  if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0)enemies.push(spawnEnemy(lvl));
+  if(effectiveLvl>=6&&frameCount%Math.floor(base*0.95)===0){const e=spawnEnemy(lvl);e.homing=false;enemies.push(e);}
   if(Math.random()<0.012+Math.min(lvl,15)*0.003)coins.push(spawnCoin(lvl));
   const dxa=player.x-playerAnim.lastX,dya=player.y-playerAnim.lastY;playerAnim.speed=Math.hypot(dxa,dya);playerAnim.lastX=player.x;playerAnim.lastY=player.y;playerAnim.targetTilt=dxa*0.5;playerAnim.tiltAngle+=(playerAnim.targetTilt-playerAnim.tiltAngle)*0.15;playerAnim.bobPhase+=playerAnim.speed>1?0.18:0.04;playerAnim.breathe+=0.04;playerAnim.squish+=(1-playerAnim.squish)*0.2;
   const weapon=getWeapon(lvl);
@@ -470,7 +576,9 @@ function draw(){
   ctx.save();if(shakeDur>0)applyShake();drawBg();
   if(gameState==='menu'){ctx.fillStyle='rgba(13,5,32,0.75)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();return;}
   if(gameState==='play'||gameState==='dying'){
-    coins.forEach(c=>drawCoinSprite(c.x,c.y,c.t,c.bob));enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite,e.big,e.homing));bullets.forEach(b=>drawBullet(b));particles.forEach(p=>drawParticle(p));
+    coins.forEach(c=>drawCoinSprite(c.x,c.y,c.t,c.bob));
+    enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite,e.big,e.homing));
+    bullets.forEach(b=>drawBullet(b));particles.forEach(p=>drawParticle(p));
     if(player)drawChickenSprite(player.x,player.y,player.inv,playerAnim);
     if(player&&player.inv>0){const secsLeft=Math.ceil(player.inv/60);const alpha=Math.min(1,player.inv/60);ctx.save();ctx.globalAlpha=alpha*0.85;ctx.strokeStyle='#00eeff';ctx.lineWidth=2;ctx.shadowColor='#00eeff';ctx.shadowBlur=12+Math.sin(frameCount*0.3)*4;ctx.beginPath();ctx.arc(player.x,player.y,36*SCALE,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=alpha;ctx.fillStyle='#00eeff';ctx.font=`bold ${14*SCALE}px Bangers,cursive`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowBlur=8;ctx.fillText('🛡️ '+secsLeft+'s',player.x,player.y-48*SCALE);ctx.restore();}
     floatingTexts.forEach(ft=>{ctx.save();ctx.globalAlpha=ft.life/ft.maxLife;ctx.fillStyle=ft.color||'#FFD700';ctx.font=`bold ${ft.size}px Bangers,cursive`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor=ft.color||'#FFD700';ctx.shadowBlur=8;ctx.fillText(ft.text,ft.x,ft.y);ctx.restore();});
@@ -483,6 +591,22 @@ function draw(){
 // ══════════════════════════════════════════════
 //  GAME OVER & MENU
 // ══════════════════════════════════════════════
+function walletSection(){
+  // Affiché uniquement si pas encore connecté
+  if(hasFranc) return '';
+  return `
+    <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
+    <button class="btn btn-cyan" onclick="toggleWalletInput()">✍️ Enter wallet address</button>
+    <div id="walletInputSection" style="display:none;margin-top:8px">
+      <input class="input-field" id="manualWalletAddr" type="text"
+        placeholder="Paste your Solana address..."
+        oninput="validateManualAddr(this)"/>
+      <div class="addr-hint" id="manualAddrHint">Valid Solana address (32–44 chars)</div>
+      <button id="manualLinkBtn" class="btn btn-play" onclick="linkManualWallet()" disabled style="opacity:0.5;margin-top:6px">✅ Link my wallet</button>
+    </div>
+    <button class="btn btn-bot" onclick="openWalletBot()" style="margin-top:8px">🤖 Connect via @FrancRunBot</button>`;
+}
+
 function showGameOver(){
   panel.style.borderColor='rgba(200,0,0,0.6)';panel.style.boxShadow='0 0 80px rgba(180,0,0,0.7)';
   panel.innerHTML=`
@@ -492,6 +616,7 @@ function showGameOver(){
     <div style="margin:8px 0;font-size:13px;color:#aaa" id="rankInfo"></div>
     <button class="btn btn-red" onclick="startGame()">🔄 Play Again — 1 life</button>
     <button class="btn btn-gold" onclick="goToWallet()">🌟 Play with 10 lives + bonuses</button>
+    ${walletSection()}
     <button class="btn btn-gray" onclick="goMenu()" style="margin-top:8px;font-size:13px">🏠 Menu</button>
     <div style="margin-top:12px">
       <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">TOP 10</b>
@@ -516,6 +641,7 @@ function goMenu(){
     <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
     <button class="btn btn-play" onclick="startGame()">▶ PLAY — 1 life</button>
     <button class="btn btn-gold" onclick="goToWallet()">🌟 PLAY — 10 lives + bonuses</button>
+    ${walletSection()}
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
     <button class="btn btn-blue" onclick="togglePanel('scorePanel2','scoreList3')">🏆 High Scores</button>
     <div id="scorePanel2" style="display:none;margin-top:10px">
