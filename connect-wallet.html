@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Connect Wallet — Le Coq Franc</title>
+<title>Connect Wallet — Le Coq Francis</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -20,129 +19,122 @@ body{
   width:100%;max-width:360px;
   background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));
   border:2px solid rgba(180,100,255,0.35);
-  border-radius:24px;padding:32px 24px;
+  border-radius:24px;padding:28px 22px;
   box-shadow:0 0 60px rgba(120,40,200,0.4);
   text-align:center;
 }
-.logo{font-size:52px;margin-bottom:8px}
-h1{font-family:'Bangers',cursive;font-size:28px;color:#FFD700;letter-spacing:3px;text-shadow:0 0 20px #FFD700;margin-bottom:6px}
-.sub{font-size:13px;color:#c9aaee;margin-bottom:28px;line-height:1.5}
-
-.status{
-  padding:10px 16px;border-radius:12px;font-size:13px;
-  margin-bottom:20px;line-height:1.5;
+/* Back button */
+.back-btn{
+  display:flex;align-items:center;gap:6px;
+  background:none;border:none;color:#a78bfa;
+  font-size:13px;font-family:'Fredoka One',cursive;
+  cursor:pointer;margin-bottom:16px;padding:4px 0;
+  opacity:0.8;transition:opacity 0.15s;
 }
+.back-btn:active{opacity:0.5}
+.back-btn::before{content:'←';font-size:16px;}
+
+.logo{font-size:48px;margin-bottom:6px}
+h1{font-family:'Bangers',cursive;font-size:26px;color:#FFD700;letter-spacing:3px;text-shadow:0 0 20px #FFD700;margin-bottom:8px}
+.sub{font-size:13px;color:#c9aaee;margin-bottom:20px;line-height:1.6}
+.sub b{color:#FFD700}
+
+.status{padding:10px 14px;border-radius:12px;font-size:12px;margin-bottom:16px;line-height:1.6;white-space:pre-line;text-align:left}
 .status.unknown {background:rgba(100,100,100,0.2);border:1px solid rgba(150,150,150,0.3);color:#aaa}
 .status.no-wallet{background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);color:#fca5a5}
 .status.has-franc{background:rgba(80,220,80,0.1);border:1px solid rgba(80,220,80,0.3);color:#86efac}
-.status.no-franc  {background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);color:#fcd34d}
-
-.wallet-info{
-  background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
-  border-radius:12px;padding:12px;margin-bottom:20px;
-  font-size:12px;color:#c084fc;word-break:break-all;display:none;
-}
+.status.no-franc{background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);color:#fcd34d}
 
 .btn{
-  width:100%;padding:16px;border:none;border-radius:14px;
-  font-size:17px;font-family:'Bangers',cursive;letter-spacing:2px;
+  width:100%;padding:15px;border:none;border-radius:14px;
+  font-size:16px;font-family:'Bangers',cursive;letter-spacing:2px;
   cursor:pointer;color:#fff;margin-top:10px;
   touch-action:manipulation;-webkit-appearance:none;
-  transition:all 0.15s;
+  transition:all 0.15s;display:block;
 }
 .btn:active{transform:scale(0.97);opacity:0.85}
-.btn-phantom {background:linear-gradient(135deg,#ab9ff2,#7c5cbf);box-shadow:0 4px 20px rgba(171,159,242,0.4)}
-.btn-solflare{background:linear-gradient(135deg,#fc8c03,#e06b00);box-shadow:0 4px 20px rgba(252,140,3,0.4)}
-.btn-green   {background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px rgba(22,163,74,0.4)}
-.btn-purple  {background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 20px rgba(109,40,217,0.4)}
-.btn-gray    {background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
+.btn-play  {background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px rgba(22,163,74,0.4)}
+.btn-cyan  {background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 4px 20px rgba(14,165,233,0.4)}
+.btn-bot   {background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 20px rgba(109,40,217,0.4)}
+.btn-green {background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px rgba(22,163,74,0.4)}
+.btn-gray  {background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
 
-.rules{
-  margin-top:22px;padding:14px;
-  background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);
-  border-radius:12px;text-align:left;font-size:11.5px;color:#c9aaee;line-height:1.8;
+.divider{border:none;border-top:1px solid rgba(168,85,247,0.2);margin:14px 0}
+
+/* Manual input — always visible below the button */
+.manual-block{margin-top:10px;text-align:left}
+.manual-block input{
+  width:100%;padding:12px 14px;
+  background:rgba(255,255,255,0.07);
+  border:1.5px solid rgba(168,85,247,0.4);
+  border-radius:12px;color:#fff;
+  font-size:12px;font-family:'Fredoka One',cursive;
+  outline:none;box-sizing:border-box;margin-top:4px;
 }
-.rules .title{font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:6px}
+.hint{font-size:10px;color:#888;margin-top:5px;text-align:right}
 
-.loading{color:#c9aaee;font-size:13px;margin:10px 0;min-height:18px}
-.divider{border:none;border-top:1px solid rgba(168,85,247,0.2);margin:16px 0}
+.loading{color:#c9aaee;font-size:13px;margin:8px 0;min-height:18px;text-align:center}
 </style>
 </head>
 <body>
 <div class="card">
 
+  <!-- Back button -->
+  <button class="back-btn" onclick="goBack()">Back to game</button>
+
   <div class="logo">🐓</div>
-  <h1>LE COQ FRANC</h1>
-  <p class="sub">Connect your Solana wallet to unlock<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs!</p>
+  <h1>LE COQ FRANCIS</h1>
+  <p class="sub">
+    Connect your Solana address.<br>
+    If you hold <b>$FRANC</b>, unlock all bonuses for free!<br>
+    <span style="font-size:12px">→ <b>10 lives</b> &bull; <b>+1 life</b> every 100 eggs &bull; <b style="color:#00eeff">triple shot</b></span>
+  </p>
 
-  <div class="status unknown" id="statusBox">
-    🔄 Checking your status...
-  </div>
-
-  <div class="wallet-info" id="walletInfo"></div>
+  <div class="status unknown" id="statusBox">🔄 Checking your status...</div>
   <div class="loading" id="loadingMsg"></div>
 
-  <!-- Connect buttons -->
+  <!-- Not connected -->
   <div id="connectSection">
 
-    <!-- 1. Play gratuit -->
-    <button class="btn btn-gray" onclick="goToGame()">🎮 Play with 1 life (free)</button>
+    <!-- 1. Manual entry — always visible with field below -->
+    <button class="btn btn-cyan" onclick="toggleManual()">✍️ Enter wallet address manually</button>
+    <div class="manual-block" id="manualSection" style="display:none">
+      <input id="walletAddress" type="text"
+        placeholder="Paste your Solana address here..."
+        oninput="validateAddress(this)"
+      />
+      <div class="hint" id="addrHint">Valid Solana address (32–44 characters)</div>
+      <button id="linkBtn" class="btn btn-green" onclick="connectManual()" disabled style="opacity:0.5;margin-top:8px">
+        ✅ Link my wallet
+      </button>
+    </div>
 
     <hr class="divider">
 
-    <!-- 1. Phantom -->
-    <button class="btn btn-phantom" onclick="connectPhantom()">
-      👻 Connect Phantom
-    </button>
-
-    <!-- 2. Solflare -->
-    <button class="btn btn-solflare" onclick="connectSolflare()">
-      ☀️ Connect Solflare
-    </button>
-
-    <!-- 3. WalletConnect -->
-    <button class="btn" onclick="connectWalletConnect()" style="background:linear-gradient(135deg,#1a6b9e,#0d4f7a);box-shadow:0 4px 20px rgba(26,107,158,0.4)">
-      🔗 WalletConnect
-    </button>
-
-    <hr class="divider">
-
-    <!-- 4. Connect via Bot -->
-    <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);border-radius:12px;padding:12px;margin-bottom:12px;font-size:11px;color:#c9aaee;line-height:1.6;text-align:center">
-      <div style="font-size:13px;color:#c084fc;font-family:'Bangers',cursive;letter-spacing:2px;margin-bottom:4px">🤖 VIA BOT</div>
+    <!-- 2. Via Bot -->
+    <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);border-radius:12px;padding:12px;margin-bottom:10px;font-size:11px;color:#c9aaee;line-height:1.6;text-align:center">
+      <div style="font-size:13px;color:#c084fc;font-family:'Bangers',cursive;letter-spacing:2px;margin-bottom:4px">🤖 VIA TELEGRAM BOT</div>
       Send <b style="color:#FFD700">/connect</b> to <b style="color:#fff">@FrancRunBot</b><br>
       and paste your address in the chat
     </div>
-    <button class="btn btn-purple" onclick="openBot()">
-      🤖 Connect via Bot
-    </button>
+    <button class="btn btn-bot" onclick="openBot()">🤖 Connect via Bot</button>
 
   </div>
 
-  <!-- Wallet linked — actions -->
+  <!-- Already connected -->
   <div id="linkedSection" style="display:none">
-    <button class="btn btn-green"  onclick="goToGame()">🎮 PLAY NOW</button>
-    <button class="btn btn-gray"   onclick="unlinkWallet()" style="margin-top:8px;font-size:13px">🔗 Change wallet</button>
-  </div>
-
-  <div class="rules">
-    <div class="title">💎 $FRANC RULES</div>
-    <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
-    <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">10 lives</b> to start<br>
-    &nbsp;&nbsp;→ <b style="color:#FFD700">+1 life</b> every 100 eggs collected
+    <button class="btn btn-play" onclick="goBack()">🎮 Back to game</button>
+    <button class="btn btn-gray" onclick="unlinkWallet()" style="margin-top:8px;font-size:13px">🔗 Change wallet</button>
   </div>
 
 </div>
-
 <script>
-const BACKEND = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
+const BACKEND  = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
 const GAME_URL = 'https://franclecoq.github.io/FrancRun/';
-
 const tg = window.Telegram?.WebApp;
 if(tg){ tg.ready(); tg.expand(); }
 
 const statusBox      = document.getElementById('statusBox');
-const walletInfo     = document.getElementById('walletInfo');
 const loadingMsg     = document.getElementById('loadingMsg');
 const connectSection = document.getElementById('connectSection');
 const linkedSection  = document.getElementById('linkedSection');
@@ -156,76 +148,69 @@ window.addEventListener('load', async ()=>{
 });
 
 async function checkStatus(){
-  window.checkStatus = checkStatus;
   setLoading('Checking your $FRANC status...');
   try{
-    const res = await fetch(BACKEND+'/check-franc',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ initData: tg.initData })
-    });
-    const data = await res.json();
-    setLoading('');
+    const res=await fetch(BACKEND+'/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})});
+    const data=await res.json();setLoading('');
     if(!data.walletLinked){
-      setStatus('no-wallet','🔗 No wallet connected yet.\nConnect your Solana wallet below to unlock 10 lives!');
-      showConnect();
+      setStatus('no-wallet','🔗 No wallet connected yet.\nConnect below to unlock all bonuses!');showConnect();
     } else if(data.hasFranc){
-      setStatus('has-franc',`✅ $FRANC detected!\nWallet: ${data.walletAddress}\nBalance: ${data.balance?.toFixed(2)} $FRANC\n\n🎮 You have ${10+Math.floor((data.totalEggs||0)/100)} lives!`);
-      showLinked();
+      setStatus('has-franc',`✅ $FRANC detected!\nWallet: ${data.walletAddress}\nBalance: ${data.balance?.toFixed(2)} $FRANC\n\n🎮 You have ${10+Math.floor((data.totalEggs||0)/100)} lives + triple shot!`);showLinked();
     } else {
-      setStatus('no-franc',`⚠️ Wallet connected but no $FRANC found.\nWallet: ${data.walletAddress}\n\nBuy $FRANC to unlock 10 lives!`);
-      showLinked();
+      setStatus('no-franc',`⚠️ Wallet connected — no $FRANC found.\nWallet: ${data.walletAddress}\n\nBuy $FRANC to unlock all bonuses!`);showLinked();
     }
-  } catch(e){
-    setLoading('');
-    setStatus('unknown','❌ Could not reach server. Check your connection.');
-    showConnect();
-  }
+  }catch(e){setLoading('');setStatus('unknown','❌ Could not reach server.');showConnect();}
 }
 
-function setStatus(type, msg){ statusBox.className='status '+type; statusBox.textContent=msg; }
-function setLoading(msg){ loadingMsg.textContent=msg; }
-function showConnect(){ connectSection.style.display='block'; linkedSection.style.display='none'; }
-function showLinked() { connectSection.style.display='none';  linkedSection.style.display='block'; }
+function setStatus(type,msg){statusBox.className='status '+type;statusBox.textContent=msg;}
+function setLoading(msg){loadingMsg.textContent=msg;}
+function showConnect(){connectSection.style.display='block';linkedSection.style.display='none';}
+function showLinked(){connectSection.style.display='none';linkedSection.style.display='block';}
+
+function toggleManual(){
+  const s=document.getElementById('manualSection');
+  s.style.display=s.style.display==='none'?'block':'none';
+  if(s.style.display==='block') document.getElementById('walletAddress').focus();
+}
+
+function validateAddress(input){
+  const val=input.value.trim();const valid=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
+  const btn=document.getElementById('linkBtn');const hint=document.getElementById('addrHint');
+  if(valid){input.style.borderColor='rgba(163,230,53,0.7)';hint.textContent='✅ Valid address';hint.style.color='#86efac';btn.disabled=false;btn.style.opacity='1';}
+  else{input.style.borderColor=val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';hint.textContent=val.length>5?'❌ Invalid address':'Valid Solana address (32–44 characters)';hint.style.color=val.length>5?'#fca5a5':'#888';btn.disabled=true;btn.style.opacity='0.5';}
+}
+
+async function connectManual(){
+  const address=(document.getElementById('walletAddress')?.value||'').trim();
+  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)){alert('Please enter a valid Solana address.');return;}
+  if(!tg?.initData){alert('Open this page inside Telegram.');return;}
+  setLoading('Linking wallet...');
+  try{
+    const res=await fetch(BACKEND+'/link-wallet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,wallet:address})});
+    const data=await res.json();setLoading('');
+    if(data.ok) await checkStatus();
+    else alert('Error: '+(data.error||'Unknown error'));
+  }catch(e){setLoading('');alert('Connection error. Please try again.');}
+}
 
 function openBot(){
-  const botUrl = 'https://t.me/FrancRunBot?start=connect';
-  if(tg) tg.openTelegramLink(botUrl);
-  else window.open(botUrl, '_blank');
-}
-
-function connectPhantom(){
-  const url = encodeURIComponent('https://franclecoq.github.io/FrancRun/connect-wallet.html');
-  window.location.href = `https://phantom.app/ul/browse/${url}?ref=${url}`;
-}
-
-function connectSolflare(){
-  const url = encodeURIComponent('https://franclecoq.github.io/FrancRun/connect-wallet.html');
-  window.location.href = `https://solflare.com/ul/browse/${url}?ref=${url}`;
-}
-
-function connectWalletConnect(){
-  if(window._wcModal){ window._wcPending=true; window._wcModal.open(); return; }
-  setStatus('unknown','WalletConnect unavailable — please use Connect via Bot below.');
+  const url='https://t.me/FrancRunBot?start=connect';
+  if(tg) tg.openTelegramLink(url);
+  else window.open(url,'_blank');
 }
 
 async function unlinkWallet(){
-  if(!confirm('Disconnect your wallet? You will lose your 10 lives bonus.')) return;
+  if(!confirm('Disconnect your wallet? You will lose your bonuses.')) return;
   setLoading('Unlinking...');
   try{
-    await fetch(BACKEND+'/unlink-wallet',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ initData: tg.initData })
-    });
-    setLoading('');
-    await checkStatus();
-  } catch(e){ setLoading(''); }
+    await fetch(BACKEND+'/unlink-wallet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})});
+    setLoading('');await checkStatus();
+  }catch(e){setLoading('');}
 }
 
-function goToGame(){
-  if(tg) tg.openLink(GAME_URL);
-  else window.location.href = GAME_URL;
+function goBack(){
+  if(tg) tg.close();
+  else window.location.href=GAME_URL;
 }
 </script>
 </body>
