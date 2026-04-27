@@ -23,10 +23,7 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 #msg{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);font-size:76px;color:#fff;text-shadow:0 0 40px #fff;opacity:0;transition:.3s;z-index:15;pointer-events:none;white-space:nowrap;font-family:'Bangers',cursive;letter-spacing:5px}
 #msg.show{opacity:1}
 #msg.gameover{color:#cc0000;text-shadow:0 0 30px #ff0000,0 0 60px #880000,0 0 100px #440000;font-size:72px;animation:bloodPulse 0.5s ease-in-out infinite alternate}
-@keyframes bloodPulse{
-  0%{text-shadow:0 0 50px #ff0000,0 0 100px #cc0000,0 0 150px #880000,0 0 200px #440000;color:#880000;transform:translate(-50%,-50%) scale(0.92) skewX(-1deg)}
-  100%{text-shadow:0 0 80px #ff2200,0 0 150px #ff0000,0 0 220px #cc0000,0 0 300px #880000;color:#ff0000;transform:translate(-50%,-50%) scale(1.08) skewX(1deg)}
-}
+@keyframes bloodPulse{0%{text-shadow:0 0 50px #ff0000,0 0 100px #cc0000,0 0 150px #880000,0 0 200px #440000;color:#880000;transform:translate(-50%,-50%) scale(0.92) skewX(-1deg)}100%{text-shadow:0 0 80px #ff2200,0 0 150px #ff0000,0 0 220px #cc0000,0 0 300px #880000;color:#ff0000;transform:translate(-50%,-50%) scale(1.08) skewX(1deg)}}
 #levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:4px}
 #levelup.show{opacity:1}
 #panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;max-height:92vh;overflow-y:auto;background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));color:#fff;padding:26px 22px;border-radius:22px;z-index:20;border:2px solid rgba(180,100,255,0.35);box-shadow:0 0 60px rgba(120,40,200,0.4);text-align:center}
@@ -38,16 +35,19 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .btn-play{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 15px rgba(22,163,74,0.4)}
 .btn-gold{background:linear-gradient(135deg,#b45309,#d97706);box-shadow:0 4px 15px rgba(217,119,6,0.5)}
 .btn-blue{background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 15px rgba(109,40,217,0.5)}
-.btn-cyan{background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 4px 15px rgba(14,165,233,0.4)}
-.btn-bot{background:linear-gradient(135deg,#7c3aed,#5b21b6);box-shadow:0 4px 15px rgba(124,58,237,0.5)}
 .btn-red{background:linear-gradient(135deg,#8b0000,#cc0000);box-shadow:0 4px 15px rgba(180,0,0,0.4)}
 .btn-gray{background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
 .divider{border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0}
-.slist{text-align:left;margin:8px 0;max-height:160px;overflow-y:auto}
+.slist{text-align:left;margin:8px 0;max-height:180px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between}
 .franc-box{margin-top:12px;padding:11px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left}
-.input-field{width:100%;padding:11px 13px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(168,85,247,0.4);border-radius:12px;color:#fff;font-size:12px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;margin-top:8px}
-.addr-hint{font-size:10px;color:#888;margin-top:4px;text-align:right}
+/* Wallet status badge */
+.wallet-badge{width:100%;padding:10px 14px;border-radius:10px;font-size:13px;margin-top:8px;display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;border:none;font-family:'Fredoka One',cursive;transition:all 0.15s}
+.wallet-badge:active{opacity:0.8;transform:scale(0.97)}
+.wallet-badge.connected{background:rgba(22,163,74,0.15);border:1.5px solid rgba(163,230,53,0.5);color:#86efac}
+.wallet-badge.disconnected{background:rgba(217,119,6,0.12);border:1.5px solid rgba(217,119,6,0.4);color:#fcd34d}
+.wallet-badge .dot{font-size:16px;flex-shrink:0}
+.wallet-badge .txt{font-size:12px;line-height:1.4}
 #touch-zone{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
 #joystick-base{position:fixed;border-radius:50%;background:rgba(168,85,247,0.12);border:2.5px solid rgba(168,85,247,0.5);display:none;transform:translate(-50%,-50%);pointer-events:none;width:150px;height:150px;box-shadow:0 0 30px rgba(168,85,247,0.2),inset 0 0 20px rgba(168,85,247,0.08)}
 #joystick-stick{position:fixed;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(230,180,255,0.95),rgba(160,80,240,0.85));border:2.5px solid rgba(240,200,255,0.9);display:none;transform:translate(-50%,-50%);pointer-events:none;width:66px;height:66px;box-shadow:0 0 18px rgba(168,85,247,0.8),0 4px 12px rgba(0,0,0,0.4)}
@@ -59,14 +59,12 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 </style>
 </head>
 <body>
-
 <canvas id="game"></canvas>
 <div id="gameTouch"></div>
 <div id="touch-zone"></div>
 <div id="joystick-base"></div>
 <div id="joystick-stick"></div>
 <button id="modeBtn" onclick="toggleMode()">🕹️ JOYSTICK</button>
-
 <div id="ui">
   <div class="label">SCORE</div><div class="val" id="scoreEl">0</div>
   <div class="label" style="margin-top:3px">LEVEL</div><div class="val" id="levelEl">1</div>
@@ -87,8 +85,14 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
   <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
 
-  <button class="btn btn-play" onclick="startGame()">▶ PLAY — 1 life</button>
-  <button class="btn btn-gold" onclick="goToWallet()">🌟 PLAY — 10 lives + bonuses</button>
+  <!-- Bouton PLAY -->
+  <button class="btn btn-play" onclick="startGame()">▶ PLAY</button>
+
+  <!-- Badge wallet status — cliquable vers connect-wallet -->
+  <button class="wallet-badge disconnected" id="walletBadge" onclick="goToWallet()">
+    <span class="dot" id="walletDot">🟠</span>
+    <span class="txt" id="walletTxt">Wallet not connected — tap to unlock 10 lives + bonuses</span>
+  </button>
 
   <hr class="divider">
   <button class="btn btn-blue" onclick="togglePanel('scorePanel','scoreList')">🏆 High Scores</button>
@@ -96,77 +100,46 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
     <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px">TOP 10</b>
     <ul class="slist" id="scoreList"></ul>
   </div>
-
   <div class="franc-box">
     <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
-    <div id="francStatus" style="font-size:12px;color:#c9aaee;line-height:2">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px">💔</span>
-        <span><span style="color:#ff8888">Without $FRANC:</span> <b style="color:#fff">1 life only</b></span>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px">
-        <span style="font-size:18px">❤️</span>
-        <span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br>
-        <b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br>
-        <b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫<br>
-        <span style="color:#888;font-size:10px">※ No bonus lives in 💀 Sudden Death</span></span>
-      </div>
+    <div style="font-size:12px;color:#c9aaee;line-height:2">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💔</span><span><span style="color:#ff8888">Without $FRANC:</span> <b style="color:#fff">1 life only</b></span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫</span></div>
     </div>
     <div id="francBadge" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"></div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-//  CANVAS SETUP
-// ══════════════════════════════════════════════
+// ══ CANVAS ══════════════════════════════════════════════════════
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
 function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
 addEventListener('resize',resize);resize();
 
-// ══════════════════════════════════════════════
-//  DOM REFS
-// ══════════════════════════════════════════════
-const scoreEl=document.getElementById('scoreEl');
-const levelEl=document.getElementById('levelEl');
-const livesBar=document.getElementById('livesBar');
-const panel=document.getElementById('panel');
-const msgEl=document.getElementById('msg');
-const levelupEl=document.getElementById('levelup');
-const weaponEl=document.getElementById('weaponInfo');
-const barFill=document.getElementById('barFill');
-const barLabel=document.getElementById('barLabel');
-const gameTouch=document.getElementById('gameTouch');
-const joystickBase=document.getElementById('joystick-base');
-const joystickStick=document.getElementById('joystick-stick');
+// ══ DOM ═════════════════════════════════════════════════════════
+const scoreEl=document.getElementById('scoreEl'),levelEl=document.getElementById('levelEl');
+const livesBar=document.getElementById('livesBar'),panel=document.getElementById('panel');
+const msgEl=document.getElementById('msg'),levelupEl=document.getElementById('levelup');
+const weaponEl=document.getElementById('weaponInfo'),barFill=document.getElementById('barFill'),barLabel=document.getElementById('barLabel');
+const gameTouch=document.getElementById('gameTouch'),joystickBase=document.getElementById('joystick-base'),joystickStick=document.getElementById('joystick-stick');
 
-// ══════════════════════════════════════════════
-//  IMAGES — chemins absolus GitHub
-// ══════════════════════════════════════════════
-const chickenImg=new Image();
-const coinImg=new Image();
+// ══ IMAGES ══════════════════════════════════════════════════════
+const chickenImg=new Image(),coinImg=new Image();
 chickenImg.src='https://franclecoq.github.io/FrancRun/coq_pilote.png';
 coinImg.src='https://franclecoq.github.io/FrancRun/piece_1f.png';
 
-// ══════════════════════════════════════════════
-//  MOBILE DETECTION
-// ══════════════════════════════════════════════
+// ══ MOBILE ══════════════════════════════════════════════════════
 const isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||window.innerWidth<700;
-const SCALE=isMobile?0.58:1.0;
-const MOBILE_SPD=isMobile?0.35:1.0;
+const SCALE=isMobile?0.58:1.0,MOBILE_SPD=isMobile?0.35:1.0;
 
-// ══════════════════════════════════════════════
-//  AUDIO
-// ══════════════════════════════════════════════
+// ══ AUDIO ═══════════════════════════════════════════════════════
 const AC=new(window.AudioContext||window.webkitAudioContext)();
-function unlockAudio(){AC.resume();}
-document.addEventListener('click',unlockAudio,{once:true});
-document.addEventListener('touchstart',unlockAudio,{once:true});
+document.addEventListener('click',()=>AC.resume(),{once:true});
+document.addEventListener('touchstart',()=>AC.resume(),{once:true});
 function playSound(type){
   if(AC.state==='suspended')AC.resume();
-  const o=AC.createOscillator(),g=AC.createGain();
-  o.connect(g);g.connect(AC.destination);const t=AC.currentTime;
+  const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);const t=AC.currentTime;
   if(type==='shoot'){o.type='square';o.frequency.setValueAtTime(600,t);o.frequency.exponentialRampToValueAtTime(200,t+0.08);g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.1);o.start(t);o.stop(t+0.1);}
   else if(type==='coin'){o.type='sine';o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(1320,t+0.15);g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.start(t);o.stop(t+0.2);}
   else if(type==='hit'){o.type='sawtooth';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(80,t+0.2);g.gain.setValueAtTime(0.25,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.25);o.start(t);o.stop(t+0.25);}
@@ -175,14 +148,12 @@ function playSound(type){
   else if(type==='kill'){o.type='triangle';o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(50,t+0.15);g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.start(t);o.stop(t+0.2);}
 }
 
-// ══════════════════════════════════════════════
-//  HIGH SCORES
-// ══════════════════════════════════════════════
+// ══ SCORES ══════════════════════════════════════════════════════
 function getScores(){try{return JSON.parse(localStorage.getItem('lcfScores')||'[]')}catch(e){return[]}}
 function saveScore(s,lvl){let sc=getScores();sc.push({score:s,level:lvl,date:new Date().toLocaleDateString('en')});sc.sort((a,b)=>b.score-a.score);sc=sc.slice(0,10);try{localStorage.setItem('lcfScores',JSON.stringify(sc))}catch(e){}}
 function renderScores(listEl){
   if(!listEl)return;
-  listEl.innerHTML='<li style="color:#c9aaee;font-size:11px;padding:8px">⏳ Loading leaderboard...</li>';
+  listEl.innerHTML='<li style="color:#c9aaee;font-size:11px;padding:8px">⏳ Loading...</li>';
   fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'leaderboard',game_id:'francrun',limit:10})})
   .then(r=>r.ok?r.json():null).then(data=>{
     const rows=data?.leaderboard||[];if(!rows.length){renderLocalScores(listEl);return;}
@@ -195,18 +166,14 @@ function renderLocalScores(listEl){
   if(!sc.length){listEl.innerHTML='<li style="color:#888;padding:8px">No scores yet</li>';return;}
   sc.forEach((s,i)=>{const li=document.createElement('li');li.innerHTML=`<span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} Lvl${s.level||'?'} ${s.date}</span><span style="color:#FFD700;font-weight:bold">${s.score}</span>`;if(i<3)li.style.color=['#FFD700','#C0C0C0','#CD7F32'][i];listEl.appendChild(li);});
 }
-function togglePanel(panelId,listId){const sp=document.getElementById(panelId);if(!sp)return;sp.style.display=sp.style.display==='none'?'block':'none';if(sp.style.display==='block')renderScores(document.getElementById(listId));}
+function togglePanel(pid,lid){const sp=document.getElementById(pid);if(!sp)return;sp.style.display=sp.style.display==='none'?'block':'none';if(sp.style.display==='block')renderScores(document.getElementById(lid));}
 
-// ══════════════════════════════════════════════
-//  SHAKE
-// ══════════════════════════════════════════════
+// ══ SHAKE ════════════════════════════════════════════════════════
 let shakeAmt=0,shakeDur=0;
 function triggerShake(a,d){shakeAmt=Math.max(shakeAmt,a);shakeDur=Math.max(shakeDur,d);}
 function applyShake(){if(shakeDur>0){ctx.translate((Math.random()-0.5)*shakeAmt*2,(Math.random()-0.5)*shakeAmt*2);shakeDur--;if(!shakeDur)shakeAmt=0;}}
 
-// ══════════════════════════════════════════════
-//  LEVEL SYSTEM
-// ══════════════════════════════════════════════
+// ══ LEVELS ══════════════════════════════════════════════════════
 const EGGS_PER_LEVEL=30,MAX_LEVEL=11,MORT_SUBITE=11;
 function getLevel(sc){return Math.min(MAX_LEVEL,Math.floor(sc/EGGS_PER_LEVEL)+1);}
 function isMortSubite(lvl){return lvl>=MORT_SUBITE;}
@@ -218,78 +185,47 @@ function getEnemySpeed(lvl){let s;if(lvl===1)s=0.6;else if(lvl<=6)s=1.0+(lvl-1)*
 function getHomingRatio(lvl){if(lvl<=3)return 0;if(lvl===4)return 0.10;if(lvl===5)return 0.20;if(lvl===6)return 0.30;if(lvl===7)return 0.40;if(lvl>=8)return 0.50;return 0.50;}
 function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30));}
 
-// ══════════════════════════════════════════════
-//  WALLET — navigation + liaison manuelle
-// ══════════════════════════════════════════════
+// ══ WALLET ══════════════════════════════════════════════════════
 function goToWallet(){
   const tg=window.Telegram?.WebApp;
   const url='https://franclecoq.github.io/FrancRun/connect-wallet.html';
   if(tg&&tg.openLink) tg.openLink(url);
   else window.location.href=url;
 }
-function openWalletBot(){
-  const tg=window.Telegram?.WebApp;
-  const url='https://t.me/FrancRunBot?start=connect';
-  if(tg&&tg.openTelegramLink) tg.openTelegramLink(url);
-  else window.open(url,'_blank');
-}
-function toggleWalletInput(){
-  const s=document.getElementById('walletInputSection');if(!s)return;
-  s.style.display=s.style.display==='none'?'block':'none';
-}
-function validateManualAddr(input){
-  const val=input.value.trim();const valid=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
-  const btn=document.getElementById('manualLinkBtn');const hint=document.getElementById('manualAddrHint');
-  if(valid){input.style.borderColor='rgba(163,230,53,0.7)';hint.textContent='✅ Valid address';hint.style.color='#86efac';btn.disabled=false;btn.style.opacity='1';}
-  else{input.style.borderColor=val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';hint.textContent=val.length>5?'❌ Invalid address':'Valid Solana address (32–44 chars)';hint.style.color=val.length>5?'#fca5a5':'#888';btn.disabled=true;btn.style.opacity='0.5';}
-}
-async function linkManualWallet(){
-  const address=(document.getElementById('manualWalletAddr')?.value||'').trim();
-  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)){alert('Please enter a valid Solana address.');return;}
-  const tg=window.Telegram?.WebApp;
-  if(!tg?.initData){alert('Please open this game inside Telegram to link your wallet.\n\nAlternatively, send /connect to @FrancRunBot in Telegram.');return;}
-  const btn=document.getElementById('manualLinkBtn');
-  btn.textContent='⏳ Linking...';btn.disabled=true;btn.style.opacity='0.6';
-  try{
-    const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/link-wallet',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({initData:tg.initData,wallet:address})
-    });
-    const data=await res.json();
-    if(data.ok){
-      await detectFranc();
-      document.getElementById('walletInputSection').style.display='none';
-      document.getElementById('manualWalletAddr').value='';
-      alert('✅ Wallet linked! Your bonuses are now active.');
-    } else {
-      alert('Error: '+(data.error||'Unknown error'));
-      btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';
-    }
-  }catch(e){
-    alert('Connection error. Please try again.');
-    btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';
+function updateWalletBadge(){
+  const badge=document.getElementById('walletBadge');
+  const dot=document.getElementById('walletDot');
+  const txt=document.getElementById('walletTxt');
+  if(!badge)return;
+  if(hasFranc){
+    badge.className='wallet-badge connected';
+    dot.textContent='✅';
+    txt.innerHTML=`$FRANC detected — <b style="color:#a3e635">${MAX_LIVES} lives unlocked!</b>`;
+  } else if(walletLinked){
+    badge.className='wallet-badge disconnected';
+    dot.textContent='⚠️';
+    txt.innerHTML=`Wallet connected — no $FRANC found.<br><span style="font-size:11px;color:#fbbf24">Buy $FRANC to unlock bonuses</span>`;
+  } else {
+    badge.className='wallet-badge disconnected';
+    dot.textContent='🟠';
+    txt.innerHTML=`Wallet not connected — tap to unlock 10 lives + bonuses`;
   }
 }
 
-// ══════════════════════════════════════════════
-//  $FRANC / TELEGRAM
-// ══════════════════════════════════════════════
-let MAX_LIVES=1,hasFranc=false,totalEggsEver=0;
+// ══ $FRANC ══════════════════════════════════════════════════════
+let MAX_LIVES=1,hasFranc=false,walletLinked=false,totalEggsEver=0;
 async function detectFranc(){
   const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
   try{totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0');}catch(e){}
-  if(!tg||!tg.initData){MAX_LIVES=1;hasFranc=false;showFrancStatus();return;}
+  if(!tg||!tg.initData){MAX_LIVES=1;hasFranc=false;updateWalletBadge();return;}
   try{
     const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun'})});
-    if(res.ok){const d=await res.json();hasFranc=d.hasFranc||false;MAX_LIVES=d.lives||1;}
+    if(res.ok){const d=await res.json();hasFranc=d.hasFranc||false;walletLinked=d.walletLinked||false;MAX_LIVES=d.lives||1;}
   }catch(e){hasFranc=false;}
   MAX_LIVES=hasFranc?10+Math.floor(totalEggsEver/100):1;
-  showFrancStatus();
-}
-function showFrancStatus(){
-  const badge=document.getElementById('francBadge');if(!badge)return;
-  if(hasFranc){const bonus=Math.floor(totalEggsEver/100);badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;badge.style.display='block';}
-  else{badge.style.display='none';}
+  updateWalletBadge();
+  const badge=document.getElementById('francBadge');
+  if(badge){if(hasFranc){const bonus=Math.floor(totalEggsEver/100);badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;badge.style.display='block';}else badge.style.display='none';}
 }
 function saveCumulativeEggs(n){
   const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
@@ -299,30 +235,23 @@ function saveCumulativeEggs(n){
 }
 detectFranc();
 
-// ══════════════════════════════════════════════
-//  LIVES BAR
-// ══════════════════════════════════════════════
+// ══ LIVES BAR ════════════════════════════════════════════════════
 function updateLivesBar(l){livesBar.innerHTML=`<span style="font-size:22px;filter:drop-shadow(0 0 6px #ff4444)">❤️</span><span style="font-size:20px;font-family:'Bangers',cursive;color:#ff4444;letter-spacing:1px;text-shadow:0 0 8px #ff4444;margin-left:4px">${Math.max(0,l)}</span>`;}
 let lifeGainTimeout=null;
 function showLifeGain(){
   const el=document.getElementById('lifeGainMsg');if(!el||gameState!=='play')return;
-  el.textContent='❤️ +1 LIFE!';el.style.display='block';el.style.opacity='0';el.style.animation='none';
-  void el.offsetHeight;el.style.animation='lifeGain 1.8s ease-out';
+  el.textContent='❤️ +1 LIFE!';el.style.display='block';el.style.opacity='0';el.style.animation='none';void el.offsetHeight;el.style.animation='lifeGain 1.8s ease-out';
   clearTimeout(lifeGainTimeout);lifeGainTimeout=setTimeout(()=>{el.style.animation='none';el.style.opacity='0';el.style.display='none';},1900);
   const heart=livesBar.querySelector('span');if(heart){heart.style.animation='none';void heart.offsetHeight;heart.style.animation='heartPop 0.5s ease-out';}
   playSound('coin');
 }
 
-// ══════════════════════════════════════════════
-//  PARTICLES & FLOATS
-// ══════════════════════════════════════════════
+// ══ PARTICLES ════════════════════════════════════════════════════
 let particles=[],floatingTexts=[];
 function addFloatText(x,y,text,color='#FFD700',size=22){floatingTexts.push({x,y,text,color,size,life:60,maxLife:60,vy:-1.5});}
 function spawnParticles(x,y,color,n=8,big=false){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(Math.random()*4+1)*(big?1.5:1);particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:Math.random()*(big?6:4)+2,color,life:big?35:25,maxLife:big?35:25});}}
 
-// ══════════════════════════════════════════════
-//  SPAWN
-// ══════════════════════════════════════════════
+// ══ SPAWN ════════════════════════════════════════════════════════
 let eliteCounter=0;
 function getBigEnemyChance(lvl){if(lvl>=11)return 4/5;if(lvl>=10)return 2/5;if(lvl>=7)return 1/5;if(lvl>=5)return 1/10;return 0;}
 function spawnEnemy(lvl){
@@ -331,8 +260,7 @@ function spawnEnemy(lvl){
   let hp;if(lvl<=3)hp=1;else if(lvl===4)hp=2;else if(lvl===5)hp=2;else if(lvl===6)hp=3;else if(lvl===7)hp=3;else if(lvl<=9)hp=4;else if(lvl===10)hp=5;else hp=6;
   const bigChance=getBigEnemyChance(lvl);const isBig=bigChance>0&&Math.random()<bigChance;if(isBig){hp+=2;vx*=0.7;vy*=0.7;}
   const eliteRate=isMortSubite(lvl)?10:20;const isElite=lvl>=9&&(++eliteCounter%eliteRate===0);if(isElite){hp+=3;vx*=1.4;vy*=1.4;}
-  const isHoming=Math.random()<getHomingRatio(lvl);
-  return{x,y,vx,vy,hp,maxHp:hp,t:0,wobble:Math.random()*Math.PI*2,elite:isElite,big:isBig,homing:isHoming};
+  return{x,y,vx,vy,hp,maxHp:hp,t:0,wobble:Math.random()*Math.PI*2,elite:isElite,big:isBig,homing:Math.random()<getHomingRatio(lvl)};
 }
 function spawnCoin(lvl){
   const sp=(1.2+lvl*0.1)*(isMobile?0.45:1.0);const s=Math.random()*4|0;let x,y,vx=0,vy=0;
@@ -340,23 +268,21 @@ function spawnCoin(lvl){
   return{x,y,vx,vy,t:0,bob:Math.random()*Math.PI*2};
 }
 
-// ══════════════════════════════════════════════
-//  GAME STATE
-// ══════════════════════════════════════════════
-let gameState='menu',score=0,lives=1,player=null;
-let lastLifeBonusScore=-1;let enemies=[],coins=[],bullets=[];
-let lastLevel=1,shootCooldown=0,frameCount=0;let msgTimeout=null,levelupTimeout=null;
+// ══ GAME STATE ═══════════════════════════════════════════════════
+let gameState='menu',score=0,lives=1,player=null,lastLifeBonusScore=-1;
+let enemies=[],coins=[],bullets=[],lastLevel=1,shootCooldown=0,frameCount=0;
+let msgTimeout=null,levelupTimeout=null;
 let playerAnim={bobPhase:0,tiltAngle:0,targetTilt:0,squish:1,lastX:0,lastY:0,speed:0,breathe:0};
 
 function showMsg(text,d=1000,cls=''){clearTimeout(msgTimeout);msgEl.textContent=text;msgEl.className=cls?'show '+cls:'show';msgTimeout=setTimeout(()=>{msgEl.className='';},d);}
 function clearEnemiesExplosion(c1,c2){enemies.forEach(e=>{spawnParticles(e.x,e.y,c1,14,true);spawnParticles(e.x,e.y,c2,8,true);triggerShake(6,15);});enemies=[];bullets=[];playSound('levelup');}
 function showLevelUp(lvl){
   clearTimeout(levelupTimeout);
-  if(isMortSubite(lvl)){levelupEl.textContent='💀 SUDDEN DEATH!';levelupEl.style.color='#ff2222';levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';clearEnemiesExplosion('#ff4400','#ffaa00');setTimeout(()=>{weaponEl.style.fontSize='13px';weaponEl.textContent='🏆 WELL DONE — FIGHT TO THE DEATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);},600);}
+  if(isMortSubite(lvl)){levelupEl.textContent='💀 SUDDEN DEATH!';levelupEl.style.color='#ff2222';levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';clearEnemiesExplosion('#ff4400','#ffaa00');setTimeout(()=>{weaponEl.style.fontSize='13px';weaponEl.textContent='🏆 FIGHT TO THE DEATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);},600);}
   else{levelupEl.textContent='⭐ LEVEL '+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
     if(lvl===7){clearEnemiesExplosion('#a855f7','#FFD700');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! CATCH YOUR BREATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
-    if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! LAST CHANCE TO BREATHE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
-    if(lvl===10){clearEnemiesExplosion('#ff0000','#cc0000');setTimeout(()=>{weaponEl.textContent='☠️ ALMOST THERE — SUDDEN DEATH AWAITS!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3500);},400);}
+    if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 LAST CHANCE TO BREATHE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
+    if(lvl===10){clearEnemiesExplosion('#ff0000','#cc0000');setTimeout(()=>{weaponEl.textContent='☠️ SUDDEN DEATH AWAITS!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3500);},400);}
   }
   levelupEl.className='show';levelupTimeout=setTimeout(()=>{levelupEl.className='';},2500);playSound('levelup');
   if(getWeapon(lvl)==='pistol'&&lvl===4){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
@@ -367,13 +293,11 @@ function updateProgressBar(){
   else{barFill.style.background='linear-gradient(90deg,#a855f7,#FFD700)';barFill.style.width=getLevelProgress(score)+'%';barLabel.textContent=getLevelEggs(score)+' / '+EGGS_PER_LEVEL+' eggs → Level '+(lvl+1);}
 }
 
-// ══════════════════════════════════════════════
-//  INPUT MODE
-// ══════════════════════════════════════════════
+// ══ INPUT ════════════════════════════════════════════════════════
 const JOY_RADIUS=72,JOY_SPEED_MAX=3.4,DRAG_LERP=0.18;
 let inputMode=localStorage.getItem('lcfInputMode')||'drag';
-const touchZone=document.getElementById('touch-zone');const modeBtnEl=document.getElementById('modeBtn');
-let joyActive=false,joyDX=0,joyDY=0;let dragActive=false,dragTouchX=0,dragTouchY=0;
+const touchZone=document.getElementById('touch-zone'),modeBtnEl=document.getElementById('modeBtn');
+let joyActive=false,joyDX=0,joyDY=0,dragActive=false,dragTouchX=0,dragTouchY=0;
 let fingerRing={active:false,x:0,y:0,alpha:0};
 function getJoyAnchor(){return{x:window.innerWidth/2,y:window.innerHeight-95};}
 function showJoyBase(){const a=getJoyAnchor();joystickBase.style.cssText=`display:block;left:${a.x}px;top:${a.y}px`;joystickStick.style.cssText=`display:block;left:${a.x}px;top:${a.y}px`;}
@@ -402,15 +326,13 @@ function updatePlayerMovement(){
 function drawMobileHints(){
   if(!isMobile)return;ctx.save();
   if(inputMode==='drag'){
-    if(player&&(fingerRing.active||fingerRing.alpha>0)){const a=fingerRing.active?Math.min(1,fingerRing.alpha):fingerRing.alpha;const pulse=1+0.08*Math.sin(frameCount*0.22);ctx.globalAlpha=a*0.35;ctx.strokeStyle='#a855f7';ctx.lineWidth=3;ctx.beginPath();ctx.arc(player.x,player.y+18,46*pulse*SCALE,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=a*0.18;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(player.x,player.y+18,36*SCALE,0,Math.PI*2);ctx.fill();if(fingerRing.active&&(Math.abs(fingerRing.x-player.x)>15||Math.abs(fingerRing.y-player.y)>15)){ctx.globalAlpha=a*0.4;ctx.strokeStyle='#FFD700';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(fingerRing.x,fingerRing.y,22,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=a*0.2;ctx.strokeStyle='#FFD700';ctx.lineWidth=1;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(player.x,player.y+18);ctx.lineTo(fingerRing.x,fingerRing.y);ctx.stroke();ctx.setLineDash([]);}}
+    if(player&&(fingerRing.active||fingerRing.alpha>0)){const a=fingerRing.active?Math.min(1,fingerRing.alpha):fingerRing.alpha;const pulse=1+0.08*Math.sin(frameCount*0.22);ctx.globalAlpha=a*0.35;ctx.strokeStyle='#a855f7';ctx.lineWidth=3;ctx.beginPath();ctx.arc(player.x,player.y+18,46*pulse*SCALE,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=a*0.18;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(player.x,player.y+18,36*SCALE,0,Math.PI*2);ctx.fill();}
     if(!dragActive){ctx.globalAlpha=0.15;ctx.strokeStyle='#c084fc';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(canvas.width/2,canvas.height-60,32,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#c084fc';ctx.font='10px Fredoka One,cursive';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('DRAG',canvas.width/2,canvas.height-60);}
   }else{const jcx=canvas.width/2,jcy=canvas.height-95;const aa=joyActive?0.55:0.22;ctx.globalAlpha=aa;ctx.strokeStyle=joyActive?'#c084fc':'#a855f7';ctx.lineWidth=joyActive?3:2.5;ctx.beginPath();ctx.arc(jcx,jcy,72,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=joyActive?'rgba(220,160,255,0.6)':'rgba(168,85,247,0.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(jcx,jcy,28,0,Math.PI*2);ctx.stroke();ctx.fillStyle=joyActive?'rgba(220,170,255,0.8)':'rgba(192,132,252,0.4)';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('▲',jcx,jcy-52);ctx.fillText('▼',jcx,jcy+52);ctx.fillText('◀',jcx-52,jcy);ctx.fillText('▶',jcx+52,jcy);ctx.globalAlpha=joyActive?0.6:0.28;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(jcx,jcy,14,0,Math.PI*2);ctx.fill();}
   ctx.restore();
 }
 
-// ══════════════════════════════════════════════
-//  START GAME
-// ══════════════════════════════════════════════
+// ══ START ════════════════════════════════════════════════════════
 function startGame(){
   panel.style.borderColor='';panel.style.boxShadow='';panel.classList.add('hidden');
   setTouchOverlay(true);if(isMobile)applyInputMode();
@@ -424,62 +346,37 @@ function startGame(){
   updateLivesBar(lives);updateProgressBar();showMsg('GO!',800);
 }
 
-// ══════════════════════════════════════════════
-//  DRAW SPRITES
-// ══════════════════════════════════════════════
+// ══ SPRITES ══════════════════════════════════════════════════════
 function drawChickenSprite(x,y,inv,anim){
-  ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);
-  ctx.translate(0,Math.sin(anim.bobPhase)*3);
-  ctx.rotate(anim.tiltAngle*0.15);
-  const bs=1+Math.sin(anim.breathe)*0.015;
-  ctx.scale(bs*anim.squish,bs*(2-anim.squish));
+  ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);ctx.translate(0,Math.sin(anim.bobPhase)*3);ctx.rotate(anim.tiltAngle*0.15);
+  const bs=1+Math.sin(anim.breathe)*0.015;ctx.scale(bs*anim.squish,bs*(2-anim.squish));
   if(inv>0&&Math.floor(inv/4)%2===0)ctx.globalAlpha=0.35;
-  // Ombre sol
   ctx.save();ctx.scale(1,0.25);ctx.translate(0,160);ctx.globalAlpha*=0.25;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,28,10,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  if(chickenImg.complete&&chickenImg.naturalWidth>0){
-    if(anim.tiltAngle<-0.1)ctx.scale(-1,1);
-    ctx.drawImage(chickenImg,-38,-49,76,76);
-  } else {
-    // ── Fallback : coq pilote dessiné en canvas ──────────────────────────
-    const flip=anim.tiltAngle<-0.1?-1:1;
-    ctx.scale(flip,1);
-    // Corps
+  if(chickenImg.complete&&chickenImg.naturalWidth>0){if(anim.tiltAngle<-0.1)ctx.scale(-1,1);ctx.drawImage(chickenImg,-38,-49,76,76);}
+  else{
+    const flip=anim.tiltAngle<-0.1?-1:1;ctx.scale(flip,1);
     ctx.fillStyle='#c87941';ctx.beginPath();ctx.ellipse(0,4,20,16,0,0,Math.PI*2);ctx.fill();
-    // Aile
     ctx.fillStyle='#8b4513';ctx.beginPath();ctx.ellipse(-2,6,13,8,-0.3,0,Math.PI*2);ctx.fill();
-    // Plumes de queue
     ctx.fillStyle='#a0522d';ctx.beginPath();ctx.ellipse(-20,2,10,4,-0.8,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#8b1a1a';ctx.beginPath();ctx.ellipse(-21,-2,9,3,-1.0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#6b0f0f';ctx.beginPath();ctx.ellipse(-20,6,8,3,-0.5,0,Math.PI*2);ctx.fill();
-    // Tête
     ctx.fillStyle='#c87941';ctx.beginPath();ctx.arc(12,-10,11,0,Math.PI*2);ctx.fill();
-    // Casque pilote
     ctx.fillStyle='#5c3317';ctx.beginPath();ctx.arc(12,-12,11,Math.PI,0);ctx.lineTo(23,-8);ctx.lineTo(1,-8);ctx.closePath();ctx.fill();
-    // Lunettes — montures
     ctx.fillStyle='#2a1a08';ctx.beginPath();ctx.ellipse(8,-10,5,4,0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(17,-10,5,4,-0.2,0,Math.PI*2);ctx.fill();
-    // Lunettes — verres
     ctx.fillStyle='rgba(100,180,255,0.5)';ctx.beginPath();ctx.ellipse(8,-10,4,3,0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(17,-10,4,3,-0.2,0,Math.PI*2);ctx.fill();
-    // Reflets
     ctx.fillStyle='rgba(255,255,255,0.6)';ctx.beginPath();ctx.ellipse(7,-11,1.5,1,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(16,-11,1.5,1,0,0,Math.PI*2);ctx.fill();
-    // Pont lunettes
     ctx.strokeStyle='#2a1a08';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(12,-10);ctx.lineTo(13,-10);ctx.stroke();
-    // Crête
     ctx.fillStyle='#cc2200';ctx.beginPath();ctx.ellipse(10,-22,4,6,0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(14,-21,3,5,-0.1,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(18,-20,3,4,-0.3,0,Math.PI*2);ctx.fill();
-    // Bec
     ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.moveTo(23,-9);ctx.lineTo(30,-10);ctx.lineTo(23,-7);ctx.closePath();ctx.fill();
-    // Barbillon
     ctx.fillStyle='#dc2626';ctx.beginPath();ctx.ellipse(22,-6,4,5,0.3,0,Math.PI*2);ctx.fill();
-    // Pattes
     ctx.strokeStyle='#f59e0b';ctx.lineWidth=2.5;ctx.lineCap='round';
     ctx.beginPath();ctx.moveTo(-4,18);ctx.lineTo(-6,28);ctx.stroke();ctx.beginPath();ctx.moveTo(-6,28);ctx.lineTo(-10,32);ctx.stroke();ctx.beginPath();ctx.moveTo(-6,28);ctx.lineTo(-4,33);ctx.stroke();
     ctx.beginPath();ctx.moveTo(4,18);ctx.lineTo(6,28);ctx.stroke();ctx.beginPath();ctx.moveTo(6,28);ctx.lineTo(10,32);ctx.stroke();ctx.beginPath();ctx.moveTo(6,28);ctx.lineTo(7,33);ctx.stroke();
   }
   ctx.restore();
 }
-
 function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){
-  ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);
-  const dx=player?player.x-x:0,dy=player?player.y-y:0;ctx.rotate(Math.atan2(dy,dx));ctx.translate(0,Math.sin(t*0.18+wobble)*3);
+  ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);const dx=player?player.x-x:0,dy=player?player.y-y:0;ctx.rotate(Math.atan2(dy,dx));ctx.translate(0,Math.sin(t*0.18+wobble)*3);
   const sc=elite?1.35:big?1.7:1.0;ctx.scale(sc,sc);
   if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}else if(homing){ctx.shadowColor='#ddaa00';ctx.shadowBlur=10+Math.sin(t*0.1)*3;}else if(big){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}
   ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
@@ -498,27 +395,11 @@ function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){
   if(maxHp>1&&homing){const bw=36,bh=5,bx=-18,by=20;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx,by,bw,bh);ctx.fillStyle=hp/maxHp>0.5?'#22cc44':hp/maxHp>0.25?'#ffaa00':'#ff2222';ctx.fillRect(bx,by,bw*(hp/maxHp),bh);ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=0.5;ctx.strokeRect(bx,by,bw,bh);}
   ctx.restore();
 }
-
-function drawCoinSprite(x,y,t,bob){
-  ctx.save();ctx.translate(x,y+Math.sin(t*0.06+bob)*5);ctx.scale(SCALE,SCALE);ctx.scale(Math.abs(Math.cos(t*0.07))*0.6+0.4,1);
-  ctx.shadowColor='#FFD700';ctx.shadowBlur=14+Math.sin(t*0.1)*5;
-  if(coinImg.complete&&coinImg.naturalWidth>0){ctx.drawImage(coinImg,-22,-22,44,44);}
-  else{ctx.fillStyle='#FFD700';ctx.beginPath();ctx.ellipse(0,0,16,20,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#FFA500';ctx.beginPath();ctx.ellipse(0,0,12,15,0,0,Math.PI*2);ctx.fill();}
-  ctx.restore();
-}
-
-function drawBullet(b){
-  ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);
-  const col=b.type==='pistol3'?'#00ff88':b.type==='pistol2'?'#00eeff':'#FFD700';
-  ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(0,0,8,3,0,0,Math.PI*2);ctx.fill();
-  ctx.globalAlpha=0.4;ctx.beginPath();ctx.ellipse(-10,0,6,2,0,0,Math.PI*2);ctx.fill();ctx.restore();
-}
-
+function drawCoinSprite(x,y,t,bob){ctx.save();ctx.translate(x,y+Math.sin(t*0.06+bob)*5);ctx.scale(SCALE,SCALE);ctx.scale(Math.abs(Math.cos(t*0.07))*0.6+0.4,1);ctx.shadowColor='#FFD700';ctx.shadowBlur=14+Math.sin(t*0.1)*5;if(coinImg.complete&&coinImg.naturalWidth>0){ctx.drawImage(coinImg,-22,-22,44,44);}else{ctx.fillStyle='#FFD700';ctx.beginPath();ctx.ellipse(0,0,16,20,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#FFA500';ctx.beginPath();ctx.ellipse(0,0,12,15,0,0,Math.PI*2);ctx.fill();}ctx.restore();}
+function drawBullet(b){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);const col=b.type==='pistol3'?'#00ff88':b.type==='pistol2'?'#00eeff':'#FFD700';ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(0,0,8,3,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=0.4;ctx.beginPath();ctx.ellipse(-10,0,6,2,0,0,Math.PI*2);ctx.fill();ctx.restore();}
 function drawParticle(p){ctx.save();ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=4;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(p.life/p.maxLife),0,Math.PI*2);ctx.fill();ctx.restore();}
 
-// ══════════════════════════════════════════════
-//  UPDATE
-// ══════════════════════════════════════════════
+// ══ UPDATE ═══════════════════════════════════════════════════════
 function update(){
   if(gameState!=='play')return;frameCount++;updatePlayerMovement();
   const lvl=getLevel(score);
@@ -556,9 +437,7 @@ function update(){
   if(player.inv>0)player.inv--;
 }
 
-// ══════════════════════════════════════════════
-//  BACKGROUND
-// ══════════════════════════════════════════════
+// ══ BG + DRAW ════════════════════════════════════════════════════
 function drawBg(){
   const lvl=getLevel(score);const grd=ctx.createLinearGradient(0,0,0,canvas.height);
   if(isMortSubite(lvl)){grd.addColorStop(0,'#150005');grd.addColorStop(1,'#3a0010');}else if(lvl>=9){grd.addColorStop(0,'#0a0018');grd.addColorStop(1,'#200040');}else if(lvl>=6){grd.addColorStop(0,'#0d0520');grd.addColorStop(1,'#1a0840');}else{grd.addColorStop(0,'#0d0520');grd.addColorStop(1,'#150830');}
@@ -568,17 +447,11 @@ function drawBg(){
   if(lvl>=7){const glow=ctx.createRadialGradient(canvas.width/2,canvas.height,50,canvas.width/2,canvas.height,500);glow.addColorStop(0,`rgba(${lvl>=9?255:180},${lvl>=9?0:20},${lvl>=9?0:80},0.18)`);glow.addColorStop(1,'transparent');ctx.fillStyle=glow;ctx.fillRect(0,canvas.height-500,canvas.width,500);}
 }
 function drawWeaponHUD(lvl){const w=getWeapon(lvl);if(w==='none')return;ctx.save();const cx=canvas.width/2,cy=canvas.height-50;ctx.fillStyle='rgba(13,5,32,0.75)';ctx.beginPath();ctx.roundRect(cx-80,cy-16,160,32,8);ctx.fill();ctx.strokeStyle='rgba(168,85,247,0.7)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#c084fc';ctx.font='bold 14px Fredoka One,cursive';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🔫 PISTOL',cx,cy);ctx.restore();}
-
-// ══════════════════════════════════════════════
-//  DRAW
-// ══════════════════════════════════════════════
 function draw(){
   ctx.save();if(shakeDur>0)applyShake();drawBg();
   if(gameState==='menu'){ctx.fillStyle='rgba(13,5,32,0.75)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();return;}
   if(gameState==='play'||gameState==='dying'){
-    coins.forEach(c=>drawCoinSprite(c.x,c.y,c.t,c.bob));
-    enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite,e.big,e.homing));
-    bullets.forEach(b=>drawBullet(b));particles.forEach(p=>drawParticle(p));
+    coins.forEach(c=>drawCoinSprite(c.x,c.y,c.t,c.bob));enemies.forEach(e=>drawEnemySprite(e.x,e.y,e.hp,e.maxHp,e.t,e.wobble,e.elite,e.big,e.homing));bullets.forEach(b=>drawBullet(b));particles.forEach(p=>drawParticle(p));
     if(player)drawChickenSprite(player.x,player.y,player.inv,playerAnim);
     if(player&&player.inv>0){const secsLeft=Math.ceil(player.inv/60);const alpha=Math.min(1,player.inv/60);ctx.save();ctx.globalAlpha=alpha*0.85;ctx.strokeStyle='#00eeff';ctx.lineWidth=2;ctx.shadowColor='#00eeff';ctx.shadowBlur=12+Math.sin(frameCount*0.3)*4;ctx.beginPath();ctx.arc(player.x,player.y,36*SCALE,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=alpha;ctx.fillStyle='#00eeff';ctx.font=`bold ${14*SCALE}px Bangers,cursive`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowBlur=8;ctx.fillText('🛡️ '+secsLeft+'s',player.x,player.y-48*SCALE);ctx.restore();}
     floatingTexts.forEach(ft=>{ctx.save();ctx.globalAlpha=ft.life/ft.maxLife;ctx.fillStyle=ft.color||'#FFD700';ctx.font=`bold ${ft.size}px Bangers,cursive`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor=ft.color||'#FFD700';ctx.shadowBlur=8;ctx.fillText(ft.text,ft.x,ft.y);ctx.restore();});
@@ -588,60 +461,39 @@ function draw(){
   ctx.restore();
 }
 
-// ══════════════════════════════════════════════
-//  GAME OVER & MENU
-// ══════════════════════════════════════════════
-function walletSection(){
-  // Affiché uniquement si pas encore connecté
-  if(hasFranc) return '';
-  return `
-    <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
-    <button class="btn btn-cyan" onclick="toggleWalletInput()">✍️ Enter wallet address</button>
-    <div id="walletInputSection" style="display:none;margin-top:8px">
-      <input class="input-field" id="manualWalletAddr" type="text"
-        placeholder="Paste your Solana address..."
-        oninput="validateManualAddr(this)"/>
-      <div class="addr-hint" id="manualAddrHint">Valid Solana address (32–44 chars)</div>
-      <button id="manualLinkBtn" class="btn btn-play" onclick="linkManualWallet()" disabled style="opacity:0.5;margin-top:6px">✅ Link my wallet</button>
-    </div>
-    <button class="btn btn-bot" onclick="openWalletBot()" style="margin-top:8px">🤖 Connect via @FrancRunBot</button>`;
-}
-
+// ══ GAME OVER (simple et propre) ════════════════════════════════
 function showGameOver(){
   panel.style.borderColor='rgba(200,0,0,0.6)';panel.style.boxShadow='0 0 80px rgba(180,0,0,0.7)';
+  const scores=getScores();const rankIdx=scores.findIndex(s=>s.score===score);const rank=rankIdx+1;
+  let rankHtml='';
+  if(rank===1)rankHtml='<div style="color:#FFD700;font-size:15px;margin:6px 0">🥇 NEW RECORD!</div>';
+  else if(rank>=2&&rank<=3)rankHtml=`<div style="color:#C0C0C0;font-size:13px;margin:6px 0">🏅 Podium #${rank}!</div>`;
   panel.innerHTML=`
-    <h2 style="color:#ff0000;font-size:38px;text-shadow:0 0 20px #ff0000,0 0 40px #880000;letter-spacing:3px">💀 GAME OVER</h2>
-    <p style="font-size:19px;color:#FFD700;margin:10px 0;font-family:'Bangers',cursive;letter-spacing:2px">Score: <b>${score}</b> eggs</p>
-    <p style="font-size:13px;color:#c9aaee">Level reached: <b style="color:#fff">${getLevel(score)}</b></p>
-    <div style="margin:8px 0;font-size:13px;color:#aaa" id="rankInfo"></div>
-    <button class="btn btn-red" onclick="startGame()">🔄 Play Again — 1 life</button>
-    <button class="btn btn-gold" onclick="goToWallet()">🌟 Play with 10 lives + bonuses</button>
-    ${walletSection()}
-    <button class="btn btn-gray" onclick="goMenu()" style="margin-top:8px;font-size:13px">🏠 Menu</button>
-    <div style="margin-top:12px">
-      <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">TOP 10</b>
-      <ul class="slist" id="scoreList2" style="margin-top:6px"></ul>
-    </div>`;
+    <h2 style="color:#ff0000;font-size:36px;text-shadow:0 0 20px #ff0000;letter-spacing:3px">💀 GAME OVER</h2>
+    <p style="font-size:22px;color:#FFD700;margin:8px 0;font-family:'Bangers',cursive;letter-spacing:2px"><b>${score}</b> eggs — Level <b>${getLevel(score)}</b></p>
+    ${rankHtml}
+    <button class="btn btn-play" onclick="startGame()" style="margin-top:10px">🔄 Play Again</button>
+    <button class="btn btn-gray" onclick="goMenu()" style="margin-top:6px;font-size:13px">🏠 Menu</button>
+    <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:14px 0">
+    <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">TOP 10</b>
+    <ul class="slist" id="scoreList2" style="margin-top:6px"></ul>`;
   panel.classList.remove('hidden');
-  const scores=getScores();const currentScore=score;const rankIdx=scores.findIndex(s=>s.score===currentScore);const rank=rankIdx+1;
-  const rankEl=panel.querySelector('#rankInfo');
-  if(rank===1)rankEl.innerHTML='<span style="color:#FFD700;font-size:15px">🥇 NEW RECORD!</span>';
-  else if(rank>=2&&rank<=3)rankEl.textContent='🏅 Podium #'+rank+'!';
-  else if(rank>3)rankEl.textContent='Rank: #'+rank+' / '+scores.length;
-  else rankEl.textContent='';
   renderScores(panel.querySelector('#scoreList2'));
 }
 
 function goMenu(){
   gameState='menu';msgEl.className='';setTouchOverlay(false);
+  panel.style.borderColor='';panel.style.boxShadow='';
   panel.innerHTML=`
     <h2>🐓 FRANC RUN</h2>
     <p>Collect golden eggs &amp; dodge enemies!<br>
     <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
     <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
-    <button class="btn btn-play" onclick="startGame()">▶ PLAY — 1 life</button>
-    <button class="btn btn-gold" onclick="goToWallet()">🌟 PLAY — 10 lives + bonuses</button>
-    ${walletSection()}
+    <button class="btn btn-play" onclick="startGame()">▶ PLAY</button>
+    <button class="wallet-badge ${hasFranc?'connected':'disconnected'}" onclick="goToWallet()" style="width:100%;padding:10px 14px;border-radius:10px;font-size:13px;margin-top:8px;display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;border:${hasFranc?'1.5px solid rgba(163,230,53,0.5)':'1.5px solid rgba(217,119,6,0.4)'};background:${hasFranc?'rgba(22,163,74,0.15)':'rgba(217,119,6,0.12)'};color:${hasFranc?'#86efac':'#fcd34d'};font-family:Fredoka One,cursive">
+      <span style="font-size:16px">${hasFranc?'✅':walletLinked?'⚠️':'🟠'}</span>
+      <span style="font-size:12px;line-height:1.4">${hasFranc?`$FRANC detected — <b style="color:#a3e635">${MAX_LIVES} lives unlocked!</b>`:walletLinked?'Wallet connected — no $FRANC found':'Wallet not connected — tap to connect'}</span>
+    </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
     <button class="btn btn-blue" onclick="togglePanel('scorePanel2','scoreList3')">🏆 High Scores</button>
     <div id="scorePanel2" style="display:none;margin-top:10px">
@@ -652,16 +504,14 @@ function goMenu(){
       <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:6px">💎 $FRANC RULES</div>
       <div style="font-size:11px;color:#c9aaee;line-height:1.7">
         <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
-        <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1</b> every 100 eggs + <b style="color:#00eeff">triple shot</b>
+        <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1</b>/100 eggs + <b style="color:#00eeff">triple shot</b>
       </div>
-      <div id="francBadge" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"></div>
+      ${hasFranc?`<div style="margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"><span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b></div>`:''}
     </div>`;
-  panel.classList.remove('hidden');showFrancStatus();
+  panel.classList.remove('hidden');
 }
 
-// ══════════════════════════════════════════════
-//  MAIN LOOP
-// ══════════════════════════════════════════════
+// ══ LOOP ═════════════════════════════════════════════════════════
 function loop(){update();draw();scoreEl.textContent=score;levelEl.textContent=getLevel(score);requestAnimationFrame(loop);}
 loop();
 </script>
