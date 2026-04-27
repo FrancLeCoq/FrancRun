@@ -33,7 +33,6 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:16px;cursor:pointer;color:#fff;margin-top:8px;font-family:'Bangers',cursive;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;display:block;transition:all 0.15s}
 .btn:active{opacity:0.8;transform:scale(0.97)}
 .btn-play{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 15px rgba(22,163,74,0.4)}
-.btn-gold{background:linear-gradient(135deg,#b45309,#d97706);box-shadow:0 4px 15px rgba(217,119,6,0.5)}
 .btn-blue{background:linear-gradient(135deg,#6d28d9,#4c1d95);box-shadow:0 4px 15px rgba(109,40,217,0.5)}
 .btn-red{background:linear-gradient(135deg,#8b0000,#cc0000);box-shadow:0 4px 15px rgba(180,0,0,0.4)}
 .btn-gray{background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
@@ -41,13 +40,12 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .slist{text-align:left;margin:8px 0;max-height:180px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between}
 .franc-box{margin-top:12px;padding:11px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left}
-/* Wallet status badge */
-.wallet-badge{width:100%;padding:10px 14px;border-radius:10px;font-size:13px;margin-top:8px;display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;border:none;font-family:'Fredoka One',cursive;transition:all 0.15s}
+/* Wallet badge cliquable */
+.wallet-badge{width:100%;padding:10px 14px;border-radius:10px;font-size:12px;margin-top:8px;display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;border:none;font-family:'Fredoka One',cursive;transition:all 0.15s;line-height:1.5}
 .wallet-badge:active{opacity:0.8;transform:scale(0.97)}
 .wallet-badge.connected{background:rgba(22,163,74,0.15);border:1.5px solid rgba(163,230,53,0.5);color:#86efac}
 .wallet-badge.disconnected{background:rgba(217,119,6,0.12);border:1.5px solid rgba(217,119,6,0.4);color:#fcd34d}
-.wallet-badge .dot{font-size:16px;flex-shrink:0}
-.wallet-badge .txt{font-size:12px;line-height:1.4}
+.wallet-badge .wdot{font-size:16px;flex-shrink:0}
 #touch-zone{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
 #joystick-base{position:fixed;border-radius:50%;background:rgba(168,85,247,0.12);border:2.5px solid rgba(168,85,247,0.5);display:none;transform:translate(-50%,-50%);pointer-events:none;width:150px;height:150px;box-shadow:0 0 30px rgba(168,85,247,0.2),inset 0 0 20px rgba(168,85,247,0.08)}
 #joystick-stick{position:fixed;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(230,180,255,0.95),rgba(160,80,240,0.85));border:2.5px solid rgba(240,200,255,0.9);display:none;transform:translate(-50%,-50%);pointer-events:none;width:66px;height:66px;box-shadow:0 0 18px rgba(168,85,247,0.8),0 4px 12px rgba(0,0,0,0.4)}
@@ -85,13 +83,11 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
   <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
 
-  <!-- Bouton PLAY -->
   <button class="btn btn-play" onclick="startGame()">▶ PLAY</button>
 
-  <!-- Badge wallet status — cliquable vers connect-wallet -->
   <button class="wallet-badge disconnected" id="walletBadge" onclick="goToWallet()">
-    <span class="dot" id="walletDot">🟠</span>
-    <span class="txt" id="walletTxt">Wallet not connected — tap to unlock 10 lives + bonuses</span>
+    <span class="wdot" id="walletDot">🟠</span>
+    <span id="walletTxt">Wallet not connected — tap to unlock 10 lives + bonuses</span>
   </button>
 
   <hr class="divider">
@@ -104,36 +100,40 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
     <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
     <div style="font-size:12px;color:#c9aaee;line-height:2">
       <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💔</span><span><span style="color:#ff8888">Without $FRANC:</span> <b style="color:#fff">1 life only</b></span></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫<br><span style="color:#888;font-size:10px">※ No bonus lives in 💀 Sudden Death</span></span></div>
     </div>
     <div id="francBadge" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"></div>
   </div>
 </div>
 
 <script>
-// ══ CANVAS ══════════════════════════════════════════════════════
+// ══ CONSTANTES ═══════════════════════════════════════════════════
+const WALLET_PAGE = 'https://franclecoq.github.io/Wallet/connect-wallet.html';
+const SUPABASE    = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
+
+// ══ CANVAS ═══════════════════════════════════════════════════════
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
 function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
 addEventListener('resize',resize);resize();
 
-// ══ DOM ═════════════════════════════════════════════════════════
+// ══ DOM ══════════════════════════════════════════════════════════
 const scoreEl=document.getElementById('scoreEl'),levelEl=document.getElementById('levelEl');
 const livesBar=document.getElementById('livesBar'),panel=document.getElementById('panel');
 const msgEl=document.getElementById('msg'),levelupEl=document.getElementById('levelup');
 const weaponEl=document.getElementById('weaponInfo'),barFill=document.getElementById('barFill'),barLabel=document.getElementById('barLabel');
 const gameTouch=document.getElementById('gameTouch'),joystickBase=document.getElementById('joystick-base'),joystickStick=document.getElementById('joystick-stick');
 
-// ══ IMAGES ══════════════════════════════════════════════════════
+// ══ IMAGES ═══════════════════════════════════════════════════════
 const chickenImg=new Image(),coinImg=new Image();
 chickenImg.src='https://franclecoq.github.io/FrancRun/coq_pilote.png';
 coinImg.src='https://franclecoq.github.io/FrancRun/piece_1f.png';
 
-// ══ MOBILE ══════════════════════════════════════════════════════
+// ══ MOBILE ═══════════════════════════════════════════════════════
 const isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||window.innerWidth<700;
 const SCALE=isMobile?0.58:1.0,MOBILE_SPD=isMobile?0.35:1.0;
 
-// ══ AUDIO ═══════════════════════════════════════════════════════
+// ══ AUDIO ════════════════════════════════════════════════════════
 const AC=new(window.AudioContext||window.webkitAudioContext)();
 document.addEventListener('click',()=>AC.resume(),{once:true});
 document.addEventListener('touchstart',()=>AC.resume(),{once:true});
@@ -148,13 +148,13 @@ function playSound(type){
   else if(type==='kill'){o.type='triangle';o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(50,t+0.15);g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.start(t);o.stop(t+0.2);}
 }
 
-// ══ SCORES ══════════════════════════════════════════════════════
+// ══ SCORES ═══════════════════════════════════════════════════════
 function getScores(){try{return JSON.parse(localStorage.getItem('lcfScores')||'[]')}catch(e){return[]}}
 function saveScore(s,lvl){let sc=getScores();sc.push({score:s,level:lvl,date:new Date().toLocaleDateString('en')});sc.sort((a,b)=>b.score-a.score);sc=sc.slice(0,10);try{localStorage.setItem('lcfScores',JSON.stringify(sc))}catch(e){}}
 function renderScores(listEl){
   if(!listEl)return;
   listEl.innerHTML='<li style="color:#c9aaee;font-size:11px;padding:8px">⏳ Loading...</li>';
-  fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'leaderboard',game_id:'francrun',limit:10})})
+  fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'leaderboard',game_id:'francrun',limit:10})})
   .then(r=>r.ok?r.json():null).then(data=>{
     const rows=data?.leaderboard||[];if(!rows.length){renderLocalScores(listEl);return;}
     const medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];listEl.innerHTML='';
@@ -173,7 +173,7 @@ let shakeAmt=0,shakeDur=0;
 function triggerShake(a,d){shakeAmt=Math.max(shakeAmt,a);shakeDur=Math.max(shakeDur,d);}
 function applyShake(){if(shakeDur>0){ctx.translate((Math.random()-0.5)*shakeAmt*2,(Math.random()-0.5)*shakeAmt*2);shakeDur--;if(!shakeDur)shakeAmt=0;}}
 
-// ══ LEVELS ══════════════════════════════════════════════════════
+// ══ LEVELS ═══════════════════════════════════════════════════════
 const EGGS_PER_LEVEL=30,MAX_LEVEL=11,MORT_SUBITE=11;
 function getLevel(sc){return Math.min(MAX_LEVEL,Math.floor(sc/EGGS_PER_LEVEL)+1);}
 function isMortSubite(lvl){return lvl>=MORT_SUBITE;}
@@ -185,12 +185,11 @@ function getEnemySpeed(lvl){let s;if(lvl===1)s=0.6;else if(lvl<=6)s=1.0+(lvl-1)*
 function getHomingRatio(lvl){if(lvl<=3)return 0;if(lvl===4)return 0.10;if(lvl===5)return 0.20;if(lvl===6)return 0.30;if(lvl===7)return 0.40;if(lvl>=8)return 0.50;return 0.50;}
 function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30));}
 
-// ══ WALLET ══════════════════════════════════════════════════════
+// ══ WALLET ═══════════════════════════════════════════════════════
 function goToWallet(){
   const tg=window.Telegram?.WebApp;
-  const url='https://franclecoq.github.io/FrancRun/connect-wallet.html';
-  if(tg&&tg.openLink) tg.openLink(url);
-  else window.location.href=url;
+  if(tg&&tg.openLink) tg.openLink(WALLET_PAGE);
+  else window.location.href=WALLET_PAGE;
 }
 function updateWalletBadge(){
   const badge=document.getElementById('walletBadge');
@@ -204,34 +203,37 @@ function updateWalletBadge(){
   } else if(walletLinked){
     badge.className='wallet-badge disconnected';
     dot.textContent='⚠️';
-    txt.innerHTML=`Wallet connected — no $FRANC found.<br><span style="font-size:11px;color:#fbbf24">Buy $FRANC to unlock bonuses</span>`;
+    txt.innerHTML=`Wallet connected — no $FRANC found`;
   } else {
     badge.className='wallet-badge disconnected';
     dot.textContent='🟠';
-    txt.innerHTML=`Wallet not connected — tap to unlock 10 lives + bonuses`;
+    txt.innerHTML=`Wallet not connected — tap to unlock 10 lives`;
   }
 }
 
-// ══ $FRANC ══════════════════════════════════════════════════════
+// ══ $FRANC ═══════════════════════════════════════════════════════
 let MAX_LIVES=1,hasFranc=false,walletLinked=false,totalEggsEver=0;
 async function detectFranc(){
   const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
   try{totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0');}catch(e){}
   if(!tg||!tg.initData){MAX_LIVES=1;hasFranc=false;updateWalletBadge();return;}
   try{
-    const res=await fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun'})});
+    const res=await fetch(SUPABASE+'/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun'})});
     if(res.ok){const d=await res.json();hasFranc=d.hasFranc||false;walletLinked=d.walletLinked||false;MAX_LIVES=d.lives||1;}
   }catch(e){hasFranc=false;}
   MAX_LIVES=hasFranc?10+Math.floor(totalEggsEver/100):1;
   updateWalletBadge();
   const badge=document.getElementById('francBadge');
-  if(badge){if(hasFranc){const bonus=Math.floor(totalEggsEver/100);badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;badge.style.display='block';}else badge.style.display='none';}
+  if(badge){
+    if(hasFranc){const bonus=Math.floor(totalEggsEver/100);badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;badge.style.display='block';}
+    else badge.style.display='none';
+  }
 }
 function saveCumulativeEggs(n){
   const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
   if(hasFranc){const prevLives=10+Math.floor(prevEggs/100);const newLives=10+Math.floor(totalEggsEver/100);MAX_LIVES=newLives;if(newLives>prevLives&&gameState==='play'&&lives>0){lives=Math.min(lives+1,MAX_LIVES);updateLivesBar(lives);showLifeGain();}}
   const tg=window.Telegram?.WebApp;
-  if(tg?.initData){fetch('https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
+  if(tg?.initData){fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
 }
 detectFranc();
 
@@ -352,8 +354,9 @@ function drawChickenSprite(x,y,inv,anim){
   const bs=1+Math.sin(anim.breathe)*0.015;ctx.scale(bs*anim.squish,bs*(2-anim.squish));
   if(inv>0&&Math.floor(inv/4)%2===0)ctx.globalAlpha=0.35;
   ctx.save();ctx.scale(1,0.25);ctx.translate(0,160);ctx.globalAlpha*=0.25;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,28,10,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  if(chickenImg.complete&&chickenImg.naturalWidth>0){if(anim.tiltAngle<-0.1)ctx.scale(-1,1);ctx.drawImage(chickenImg,-38,-49,76,76);}
-  else{
+  if(chickenImg.complete&&chickenImg.naturalWidth>0){
+    if(anim.tiltAngle<-0.1)ctx.scale(-1,1);ctx.drawImage(chickenImg,-38,-49,76,76);
+  } else {
     const flip=anim.tiltAngle<-0.1?-1:1;ctx.scale(flip,1);
     ctx.fillStyle='#c87941';ctx.beginPath();ctx.ellipse(0,4,20,16,0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#8b4513';ctx.beginPath();ctx.ellipse(-2,6,13,8,-0.3,0,Math.PI*2);ctx.fill();
@@ -375,26 +378,7 @@ function drawChickenSprite(x,y,inv,anim){
   }
   ctx.restore();
 }
-function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){
-  ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);const dx=player?player.x-x:0,dy=player?player.y-y:0;ctx.rotate(Math.atan2(dy,dx));ctx.translate(0,Math.sin(t*0.18+wobble)*3);
-  const sc=elite?1.35:big?1.7:1.0;ctx.scale(sc,sc);
-  if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}else if(homing){ctx.shadowColor='#ddaa00';ctx.shadowBlur=10+Math.sin(t*0.1)*3;}else if(big){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}
-  ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  const bodyCol=hp<maxHp?(elite?'#cc2200':homing?'#b08800':'#9b1a1a'):(elite?'#aa1800':homing?'#9a7700':'#8b1a1a');
-  ctx.fillStyle=bodyCol;ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=elite?'#5a0000':big?'#3a0505':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.ellipse(8,-18,10,4,0,0,Math.PI*2);ctx.fill();ctx.fillRect(2,-18,12,5);
-  ctx.fillStyle=elite?'#ff6600':big?'#cc0000':'#ff0000';ctx.beginPath();ctx.arc(8,-14,2,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=elite?'#ff4400':big?'#ff2200':'#ffdd00';ctx.beginPath();ctx.arc(10,-13,4,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#111';ctx.beginPath();ctx.arc(11,-13,2,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#cc4400';ctx.beginPath();ctx.moveTo(17,-11);ctx.lineTo(23,-11);ctx.lineTo(17,-8);ctx.fill();
-  ctx.fillStyle='#cc0000';ctx.beginPath();ctx.ellipse(12,-7,4,3,0.3,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle=elite?'#ff4400':big?'#cc2200':'#8b4513';ctx.lineWidth=elite?4:big?3.5:3;ctx.beginPath();ctx.moveTo(16,-4);ctx.lineTo(32,-4);ctx.stroke();
-  if(elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💀',-10,-18);}
-  if(big&&!elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💢',-10,-18);}
-  if(maxHp>1&&homing){const bw=36,bh=5,bx=-18,by=20;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx,by,bw,bh);ctx.fillStyle=hp/maxHp>0.5?'#22cc44':hp/maxHp>0.25?'#ffaa00':'#ff2222';ctx.fillRect(bx,by,bw*(hp/maxHp),bh);ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=0.5;ctx.strokeRect(bx,by,bw,bh);}
-  ctx.restore();
-}
+function drawEnemySprite(x,y,hp,maxHp,t,wobble,elite,big,homing){ctx.save();ctx.translate(x,y);ctx.scale(SCALE,SCALE);const dx=player?player.x-x:0,dy=player?player.y-y:0;ctx.rotate(Math.atan2(dy,dx));ctx.translate(0,Math.sin(t*0.18+wobble)*3);const sc=elite?1.35:big?1.7:1.0;ctx.scale(sc,sc);if(elite){ctx.shadowColor='#ff4400';ctx.shadowBlur=16+Math.sin(t*0.12)*5;}else if(homing){ctx.shadowColor='#ddaa00';ctx.shadowBlur=10+Math.sin(t*0.1)*3;}else if(big){ctx.shadowColor='#aa0000';ctx.shadowBlur=12;}ctx.save();ctx.scale(1,0.25);ctx.translate(0,85);ctx.globalAlpha=0.2;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,0,20,8,0,0,Math.PI*2);ctx.fill();ctx.restore();const bodyCol=hp<maxHp?(elite?'#cc2200':homing?'#b08800':'#9b1a1a'):(elite?'#aa1800':homing?'#9a7700':'#8b1a1a');ctx.fillStyle=bodyCol;ctx.beginPath();ctx.ellipse(0,0,20,16,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=elite?'#5a0000':big?'#3a0505':'#6b0f0f';ctx.beginPath();ctx.arc(8,-11,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.ellipse(8,-18,10,4,0,0,Math.PI*2);ctx.fill();ctx.fillRect(2,-18,12,5);ctx.fillStyle=elite?'#ff6600':big?'#cc0000':'#ff0000';ctx.beginPath();ctx.arc(8,-14,2,0,Math.PI*2);ctx.fill();ctx.fillStyle=elite?'#ff4400':big?'#ff2200':'#ffdd00';ctx.beginPath();ctx.arc(10,-13,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(11,-13,2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#cc4400';ctx.beginPath();ctx.moveTo(17,-11);ctx.lineTo(23,-11);ctx.lineTo(17,-8);ctx.fill();ctx.fillStyle='#cc0000';ctx.beginPath();ctx.ellipse(12,-7,4,3,0.3,0,Math.PI*2);ctx.fill();ctx.strokeStyle=elite?'#ff4400':big?'#cc2200':'#8b4513';ctx.lineWidth=elite?4:big?3.5:3;ctx.beginPath();ctx.moveTo(16,-4);ctx.lineTo(32,-4);ctx.stroke();if(elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💀',-10,-18);}if(big&&!elite){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💢',-10,-18);}if(maxHp>1&&homing){const bw=36,bh=5,bx=-18,by=20;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx,by,bw,bh);ctx.fillStyle=hp/maxHp>0.5?'#22cc44':hp/maxHp>0.25?'#ffaa00':'#ff2222';ctx.fillRect(bx,by,bw*(hp/maxHp),bh);ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=0.5;ctx.strokeRect(bx,by,bw,bh);}ctx.restore();}
 function drawCoinSprite(x,y,t,bob){ctx.save();ctx.translate(x,y+Math.sin(t*0.06+bob)*5);ctx.scale(SCALE,SCALE);ctx.scale(Math.abs(Math.cos(t*0.07))*0.6+0.4,1);ctx.shadowColor='#FFD700';ctx.shadowBlur=14+Math.sin(t*0.1)*5;if(coinImg.complete&&coinImg.naturalWidth>0){ctx.drawImage(coinImg,-22,-22,44,44);}else{ctx.fillStyle='#FFD700';ctx.beginPath();ctx.ellipse(0,0,16,20,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#FFA500';ctx.beginPath();ctx.ellipse(0,0,12,15,0,0,Math.PI*2);ctx.fill();}ctx.restore();}
 function drawBullet(b){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);const col=b.type==='pistol3'?'#00ff88':b.type==='pistol2'?'#00eeff':'#FFD700';ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(0,0,8,3,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=0.4;ctx.beginPath();ctx.ellipse(-10,0,6,2,0,0,Math.PI*2);ctx.fill();ctx.restore();}
 function drawParticle(p){ctx.save();ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=4;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(p.life/p.maxLife),0,Math.PI*2);ctx.fill();ctx.restore();}
@@ -407,11 +391,7 @@ function update(){
   updateProgressBar();
   const effectiveLvl=isMortSubite(lvl)?getMortSubiteTier():lvl;const mBonus=isMobile?20:0;
   let base;if(effectiveLvl===1)base=70+mBonus;else if(effectiveLvl===2)base=55+mBonus;else if(effectiveLvl===3)base=42+mBonus;else if(effectiveLvl===4)base=32+mBonus;else if(effectiveLvl===5)base=26+mBonus;else if(effectiveLvl===6)base=22+mBonus;else if(effectiveLvl===7)base=20+mBonus;else if(effectiveLvl===8)base=16+mBonus;else if(effectiveLvl===9)base=13+mBonus;else if(effectiveLvl===10)base=10+mBonus;else base=Math.max(6,10-(effectiveLvl-11)*0.8)+mBonus;
-  if(frameCount%Math.floor(base)===0)enemies.push(spawnEnemy(lvl));
-  if(effectiveLvl>=5&&frameCount%Math.floor(base*1.8)===0)enemies.push(spawnEnemy(lvl));
-  if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0)enemies.push(spawnEnemy(lvl));
-  if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0)enemies.push(spawnEnemy(lvl));
-  if(effectiveLvl>=6&&frameCount%Math.floor(base*0.95)===0){const e=spawnEnemy(lvl);e.homing=false;enemies.push(e);}
+  if(frameCount%Math.floor(base)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=5&&frameCount%Math.floor(base*1.8)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0)enemies.push(spawnEnemy(lvl));if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=6&&frameCount%Math.floor(base*0.95)===0){const e=spawnEnemy(lvl);e.homing=false;enemies.push(e);}
   if(Math.random()<0.012+Math.min(lvl,15)*0.003)coins.push(spawnCoin(lvl));
   const dxa=player.x-playerAnim.lastX,dya=player.y-playerAnim.lastY;playerAnim.speed=Math.hypot(dxa,dya);playerAnim.lastX=player.x;playerAnim.lastY=player.y;playerAnim.targetTilt=dxa*0.5;playerAnim.tiltAngle+=(playerAnim.targetTilt-playerAnim.tiltAngle)*0.15;playerAnim.bobPhase+=playerAnim.speed>1?0.18:0.04;playerAnim.breathe+=0.04;playerAnim.squish+=(1-playerAnim.squish)*0.2;
   const weapon=getWeapon(lvl);
@@ -461,7 +441,7 @@ function draw(){
   ctx.restore();
 }
 
-// ══ GAME OVER (simple et propre) ════════════════════════════════
+// ══ GAME OVER ════════════════════════════════════════════════════
 function showGameOver(){
   panel.style.borderColor='rgba(200,0,0,0.6)';panel.style.boxShadow='0 0 80px rgba(180,0,0,0.7)';
   const scores=getScores();const rankIdx=scores.findIndex(s=>s.score===score);const rank=rankIdx+1;
@@ -481,6 +461,7 @@ function showGameOver(){
   renderScores(panel.querySelector('#scoreList2'));
 }
 
+// ══ MENU ═════════════════════════════════════════════════════════
 function goMenu(){
   gameState='menu';msgEl.className='';setTouchOverlay(false);
   panel.style.borderColor='';panel.style.boxShadow='';
@@ -490,9 +471,10 @@ function goMenu(){
     <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
     <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
     <button class="btn btn-play" onclick="startGame()">▶ PLAY</button>
-    <button class="wallet-badge ${hasFranc?'connected':'disconnected'}" onclick="goToWallet()" style="width:100%;padding:10px 14px;border-radius:10px;font-size:13px;margin-top:8px;display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;border:${hasFranc?'1.5px solid rgba(163,230,53,0.5)':'1.5px solid rgba(217,119,6,0.4)'};background:${hasFranc?'rgba(22,163,74,0.15)':'rgba(217,119,6,0.12)'};color:${hasFranc?'#86efac':'#fcd34d'};font-family:Fredoka One,cursive">
-      <span style="font-size:16px">${hasFranc?'✅':walletLinked?'⚠️':'🟠'}</span>
-      <span style="font-size:12px;line-height:1.4">${hasFranc?`$FRANC detected — <b style="color:#a3e635">${MAX_LIVES} lives unlocked!</b>`:walletLinked?'Wallet connected — no $FRANC found':'Wallet not connected — tap to connect'}</span>
+    <button class="wallet-badge ${hasFranc?'connected':'disconnected'}" onclick="goToWallet()"
+      style="width:100%;padding:10px 14px;border-radius:10px;margin-top:8px;display:flex;align-items:center;gap:8px;cursor:pointer;border:${hasFranc?'1.5px solid rgba(163,230,53,0.5)':'1.5px solid rgba(217,119,6,0.4)'};background:${hasFranc?'rgba(22,163,74,0.15)':'rgba(217,119,6,0.12)'};color:${hasFranc?'#86efac':'#fcd34d'};font-family:Fredoka One,cursive;font-size:12px;line-height:1.5">
+      <span style="font-size:16px;flex-shrink:0">${hasFranc?'✅':walletLinked?'⚠️':'🟠'}</span>
+      <span>${hasFranc?`$FRANC detected — <b style="color:#a3e635">${MAX_LIVES} lives unlocked!</b>`:walletLinked?'Wallet connected — no $FRANC found':'Wallet not connected — tap to connect'}</span>
     </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
     <button class="btn btn-blue" onclick="togglePanel('scorePanel2','scoreList3')">🏆 High Scores</button>
