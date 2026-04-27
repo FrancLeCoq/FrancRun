@@ -40,33 +40,17 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .slist{text-align:left;margin:8px 0;max-height:180px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between}
 .franc-box{margin-top:12px;padding:11px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left}
-
-/* ── Wallet badge grand format ────────────────────────────── */
-.wallet-btn{
-  width:100%;padding:14px 16px;border-radius:14px;margin-top:10px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  cursor:pointer;border:none;touch-action:manipulation;
-  transition:all 0.15s;text-align:center;
-}
+/* Wallet badge grand format */
+.wallet-btn{width:100%;padding:14px 16px;border-radius:14px;margin-top:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:none;touch-action:manipulation;transition:all 0.15s;text-align:center}
 .wallet-btn:active{transform:scale(0.97);opacity:0.85}
-.wallet-btn.disconnected{
-  background:linear-gradient(135deg,rgba(217,119,6,0.25),rgba(180,90,0,0.2));
-  border:2px solid rgba(217,119,6,0.6);
-}
-.wallet-btn.connected{
-  background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(15,100,50,0.2));
-  border:2px solid rgba(163,230,53,0.6);
-}
-.wallet-btn .wt-main{
-  font-family:'Bangers',cursive;font-size:22px;letter-spacing:3px;
-  text-shadow:0 0 12px currentColor;
-}
-.wallet-btn.disconnected .wt-main{color:#fcd34d;}
-.wallet-btn.connected .wt-main{color:#a3e635;}
-.wallet-btn .wt-sub{font-size:11px;margin-top:3px;opacity:0.8;font-family:'Fredoka One',cursive;}
-.wallet-btn.disconnected .wt-sub{color:#fbbf24;}
-.wallet-btn.connected .wt-sub{color:#86efac;}
-
+.wallet-btn.disconnected{background:linear-gradient(135deg,rgba(217,119,6,0.25),rgba(180,90,0,0.2));border:2px solid rgba(217,119,6,0.6)}
+.wallet-btn.connected{background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(15,100,50,0.2));border:2px solid rgba(163,230,53,0.6)}
+.wallet-btn .wt-main{font-family:'Bangers',cursive;font-size:22px;letter-spacing:3px;text-shadow:0 0 12px currentColor}
+.wallet-btn.disconnected .wt-main{color:#fcd34d}
+.wallet-btn.connected .wt-main{color:#a3e635}
+.wallet-btn .wt-sub{font-size:11px;margin-top:3px;opacity:0.8;font-family:'Fredoka One',cursive}
+.wallet-btn.disconnected .wt-sub{color:#fbbf24}
+.wallet-btn.connected .wt-sub{color:#86efac}
 #touch-zone{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
 #joystick-base{position:fixed;border-radius:50%;background:rgba(168,85,247,0.12);border:2.5px solid rgba(168,85,247,0.5);display:none;transform:translate(-50%,-50%);pointer-events:none;width:150px;height:150px;box-shadow:0 0 30px rgba(168,85,247,0.2),inset 0 0 20px rgba(168,85,247,0.08)}
 #joystick-stick{position:fixed;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(230,180,255,0.95),rgba(160,80,240,0.85));border:2.5px solid rgba(240,200,255,0.9);display:none;transform:translate(-50%,-50%);pointer-events:none;width:66px;height:66px;box-shadow:0 0 18px rgba(168,85,247,0.8),0 4px 12px rgba(0,0,0,0.4)}
@@ -103,15 +87,11 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   <p>Collect golden eggs &amp; dodge enemies!<br>
   <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
   <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
-
   <button class="btn btn-play" onclick="startGame()">▶ PLAY</button>
-
-  <!-- Wallet badge grand format -->
   <button class="wallet-btn disconnected" id="walletBtn" onclick="goToWallet()">
     <div class="wt-main" id="walletMain">TAP TO UNLOCK 10 LIVES 🔓</div>
     <div class="wt-sub" id="walletSub">Wallet not connected</div>
   </button>
-
   <hr class="divider">
   <button class="btn btn-blue" onclick="togglePanel('scorePanel','scoreList')">🏆 High Scores</button>
   <div id="scorePanel" style="display:none;margin-top:10px">
@@ -122,16 +102,44 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
     <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
     <div style="font-size:12px;color:#c9aaee;line-height:2">
       <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💔</span><span><span style="color:#ff8888">Without $FRANC:</span> <b style="color:#fff">1 life only</b></span></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫<br><span style="color:#888;font-size:10px">※ No bonus lives in 💀 Sudden Death</span></span></div>
     </div>
     <div id="francBadge" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"></div>
   </div>
 </div>
 
 <script>
-const WALLET_PAGE  = 'https://franclecoq.github.io/Wallet/connect-wallet.html';
-const SUPABASE     = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
+const SUPABASE = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
 
+// ══ WALLET ════════════════════════════════════════════════════
+function goToWallet(){
+  const tg=window.Telegram?.WebApp;
+  const url='https://t.me/FrancisLeCoqBot/wallet';
+  if(tg&&tg.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url,'_blank');
+}
+
+function updateWalletBadge(){
+  const btn=document.getElementById('walletBtn');
+  const main=document.getElementById('walletMain');
+  const sub=document.getElementById('walletSub');
+  if(!btn)return;
+  if(hasFranc){
+    btn.className='wallet-btn connected';
+    main.textContent='✅ WALLET CONNECTED';
+    sub.textContent=`$FRANC detected — ${MAX_LIVES} lives unlocked!`;
+  } else if(walletLinked){
+    btn.className='wallet-btn disconnected';
+    main.textContent='⚠️ NO $FRANC FOUND';
+    sub.textContent='Wallet connected — buy $FRANC to unlock bonuses';
+  } else {
+    btn.className='wallet-btn disconnected';
+    main.textContent='TAP TO UNLOCK 10 LIVES 🔓';
+    sub.textContent='Wallet not connected';
+  }
+}
+
+// ══ CANVAS ════════════════════════════════════════════════════
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
 function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
@@ -198,79 +206,27 @@ function getEnemySpeed(lvl){let s;if(lvl===1)s=0.6;else if(lvl<=6)s=1.0+(lvl-1)*
 function getHomingRatio(lvl){if(lvl<=3)return 0;if(lvl===4)return 0.10;if(lvl===5)return 0.20;if(lvl===6)return 0.30;if(lvl===7)return 0.40;if(lvl>=8)return 0.50;return 0.50;}
 function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30));}
 
-// ══ WALLET ═══════════════════════════════════════════════════════
-function goToWallet(){
-  const tg=window.Telegram?.WebApp;
-  if(tg&&tg.openLink) tg.openLink(WALLET_PAGE);
-  else window.location.href=WALLET_PAGE;
-}
-
-function updateWalletBadge(){
-  const btn=document.getElementById('walletBtn');
-  const main=document.getElementById('walletMain');
-  const sub=document.getElementById('walletSub');
-  if(!btn)return;
-  if(hasFranc){
-    btn.className='wallet-btn connected';
-    main.textContent='✅ WALLET CONNECTED';
-    sub.textContent=`$FRANC detected — ${MAX_LIVES} lives unlocked!`;
-  } else if(walletLinked){
-    btn.className='wallet-btn disconnected';
-    main.textContent='⚠️ NO $FRANC FOUND';
-    sub.textContent='Wallet connected — buy $FRANC to unlock bonuses';
-  } else {
-    btn.className='wallet-btn disconnected';
-    main.textContent='TAP TO UNLOCK 10 LIVES 🔓';
-    sub.textContent='Wallet not connected';
-  }
-}
-
-// ══ $FRANC ═══════════════════════════════════════════════════════
+// ══ $FRANC ════════════════════════════════════════════════════
 let MAX_LIVES=1,hasFranc=false,walletLinked=false,totalEggsEver=0;
 async function detectFranc(){
-  const tg=window.Telegram?.WebApp;
-  if(tg){tg.ready();tg.expand();}
+  const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
   try{totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0');}catch(e){}
-
-  if(!tg||!tg.initData){
-    MAX_LIVES=1;hasFranc=false;
-    updateWalletBadge();
-    return;
-  }
-
+  if(!tg||!tg.initData){MAX_LIVES=1;hasFranc=false;updateWalletBadge();return;}
   try{
-    const res=await fetch(SUPABASE+'/check-franc',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({initData:tg.initData,game_id:'francrun'})
-    });
+    const res=await fetch(SUPABASE+'/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun'})});
     if(res.ok){
       const d=await res.json();
-      console.log('check-franc response:', JSON.stringify(d));
+      console.log('check-franc:',JSON.stringify(d));
       hasFranc=d.hasFranc||false;
       walletLinked=d.walletLinked||false;
       MAX_LIVES=d.lives||1;
     }
-  }catch(e){
-    console.error('check-franc error:', e);
-    hasFranc=false;
-  }
-
-  MAX_LIVES=hasFranc?10+Math.floor(totalEggsEver/100):1;
+  }catch(e){console.error('check-franc error:',e);hasFranc=false;}
+  MAX_LIVES=hasFranc?Math.max(MAX_LIVES,10):1;
   updateWalletBadge();
-
   const badge=document.getElementById('francBadge');
-  if(badge){
-    if(hasFranc){
-      const bonus=Math.floor(totalEggsEver/100);
-      badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;
-      badge.style.display='block';
-    } else {
-      badge.style.display='none';
-    }
-  }
+  if(badge){if(hasFranc){const bonus=Math.floor(totalEggsEver/100);badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;badge.style.display='block';}else badge.style.display='none';}
 }
-
 function saveCumulativeEggs(n){
   const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
   if(hasFranc){const prevLives=10+Math.floor(prevEggs/100);const newLives=10+Math.floor(totalEggsEver/100);MAX_LIVES=newLives;if(newLives>prevLives&&gameState==='play'&&lives>0){lives=Math.min(lives+1,MAX_LIVES);updateLivesBar(lives);showLifeGain();}}
@@ -374,7 +330,7 @@ function drawMobileHints(){
 function startGame(){
   panel.style.borderColor='';panel.style.boxShadow='';panel.classList.add('hidden');
   setTouchOverlay(true);if(isMobile)applyInputMode();
-  MAX_LIVES=hasFranc?10:1;lives=MAX_LIVES;
+  MAX_LIVES=hasFranc?Math.max(MAX_LIVES,10):1;lives=MAX_LIVES;
   clearTimeout(lifeGainTimeout);const lgEl=document.getElementById('lifeGainMsg');if(lgEl){lgEl.style.animation='none';lgEl.style.opacity='0';lgEl.style.display='none';}
   gameState='play';score=0;lastLifeBonusScore=-1;enemies=[];coins=[];bullets=[];particles=[];floatingTexts=[];
   lastLevel=1;shootCooldown=0;frameCount=0;eliteCounter=0;
