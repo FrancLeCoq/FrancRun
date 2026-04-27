@@ -8,301 +8,228 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{
-  background:linear-gradient(160deg,#0d0520,#1a0840);
-  font-family:'Fredoka One',cursive;
-  min-height:100vh;color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  padding:20px;
-}
-.card{
-  width:100%;max-width:360px;
-  background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));
-  border:2px solid rgba(180,100,255,0.35);
-  border-radius:24px;padding:28px 22px;
-  box-shadow:0 0 60px rgba(120,40,200,0.4);
-  text-align:center;
-}
-
-/* Back button */
-.back-btn{
-  display:flex;align-items:center;gap:6px;
-  background:none;border:none;color:#a78bfa;
-  font-size:13px;font-family:'Fredoka One',cursive;
-  cursor:pointer;margin-bottom:16px;padding:4px 0;
-  opacity:0.8;transition:opacity 0.15s;
-}
-.back-btn:active{opacity:0.5}
+body{background:linear-gradient(160deg,#0d0520,#1a0840);font-family:'Fredoka One',cursive;min-height:100vh;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;}
+.card{width:100%;max-width:360px;background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));border:2px solid rgba(180,100,255,0.35);border-radius:24px;padding:28px 22px;box-shadow:0 0 60px rgba(120,40,200,0.4);text-align:center;}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:#a78bfa;font-size:13px;font-family:'Fredoka One',cursive;cursor:pointer;margin-bottom:16px;padding:4px 0;opacity:0.8;}
 .back-btn::before{content:'←';font-size:16px;}
-
 .logo{font-size:48px;margin-bottom:6px}
 h1{font-family:'Bangers',cursive;font-size:26px;color:#FFD700;letter-spacing:3px;text-shadow:0 0 20px #FFD700;margin-bottom:8px}
 .sub{font-size:13px;color:#c9aaee;margin-bottom:20px;line-height:1.6}
-.sub b{color:#FFD700}
 
-/* ── Badge FRANC détecté ── */
-.franc-detected{
-  background:linear-gradient(135deg,rgba(22,163,74,0.15),rgba(21,128,61,0.1));
-  border:2px solid rgba(163,230,53,0.5);
-  border-radius:16px;padding:18px 16px;
-  margin-bottom:18px;
-}
-.franc-detected .check{font-size:42px;margin-bottom:8px;}
-.franc-detected .title{font-family:'Bangers',cursive;font-size:22px;color:#a3e635;letter-spacing:2px;text-shadow:0 0 12px rgba(163,230,53,0.5);}
-.franc-detected .detail{font-size:12px;color:#86efac;margin-top:6px;line-height:1.7}
-.franc-detected .wallet-addr{font-size:11px;color:#6ee7b7;margin-top:4px;font-family:monospace;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:6px;display:inline-block}
+/* Badge vert $FRANC détecté */
+.franc-ok{background:linear-gradient(135deg,rgba(22,163,74,0.15),rgba(21,128,61,0.1));border:2px solid rgba(163,230,53,0.5);border-radius:16px;padding:20px 16px;margin-bottom:16px;}
+.franc-ok .icon{font-size:44px;margin-bottom:8px}
+.franc-ok .title{font-family:'Bangers',cursive;font-size:24px;color:#a3e635;letter-spacing:2px;text-shadow:0 0 12px rgba(163,230,53,0.4)}
+.franc-ok .detail{font-size:13px;color:#86efac;margin-top:8px;line-height:1.8}
+.addr-pill{display:inline-block;font-size:11px;font-family:monospace;background:rgba(0,0,0,0.25);padding:4px 10px;border-radius:8px;color:#6ee7b7;margin-top:6px}
 
-/* ── Pas dans Telegram ── */
-.not-telegram{
-  background:rgba(100,100,100,0.15);
-  border:1px solid rgba(150,150,150,0.3);
-  border-radius:14px;padding:20px 16px;
-  margin-bottom:16px;
-}
-.not-telegram .icon{font-size:36px;margin-bottom:10px}
-.not-telegram p{font-size:13px;color:#aaa;line-height:1.7}
-.not-telegram .step{margin-top:12px;font-size:12px;color:#c9aaee;text-align:left;line-height:2}
-.not-telegram .step b{color:#FFD700}
+/* Badge orange pas de $FRANC */
+.no-franc{background:rgba(217,119,6,0.1);border:1.5px solid rgba(217,119,6,0.4);border-radius:14px;padding:14px;margin-bottom:14px;}
+.no-franc .icon{font-size:32px;margin-bottom:6px}
+.no-franc .title{font-family:'Bangers',cursive;font-size:18px;color:#fcd34d;letter-spacing:2px}
+.no-franc .detail{font-size:12px;color:#fcd34d;margin-top:6px;line-height:1.6}
 
-/* ── Formulaire manuel ── */
-.manual-form{text-align:left;margin-bottom:16px}
-.manual-form label{font-size:12px;color:#c084fc;display:block;margin-bottom:6px;letter-spacing:1px}
-.manual-form input{
-  width:100%;padding:13px 14px;
-  background:rgba(255,255,255,0.07);
-  border:1.5px solid rgba(168,85,247,0.4);
-  border-radius:12px;color:#fff;
-  font-size:13px;font-family:'Fredoka One',cursive;
-  outline:none;box-sizing:border-box;
-  transition:border-color 0.2s;
-}
-.manual-form input:focus{border-color:rgba(168,85,247,0.8);}
+/* Formulaire */
+.form-block{text-align:left;margin-bottom:14px}
+.form-block label{font-size:11px;color:#c084fc;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px}
+.form-block input{width:100%;padding:13px 14px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(168,85,247,0.4);border-radius:12px;color:#fff;font-size:13px;font-family:'Fredoka One',cursive;outline:none;box-sizing:border-box;transition:border-color 0.2s;}
+.form-block input:focus{border-color:rgba(168,85,247,0.8);}
 .hint{font-size:10px;color:#888;margin-top:5px;text-align:right;min-height:14px}
 
-.btn{
-  width:100%;padding:15px;border:none;border-radius:14px;
-  font-size:17px;font-family:'Bangers',cursive;letter-spacing:2px;
-  cursor:pointer;color:#fff;margin-top:10px;
-  touch-action:manipulation;-webkit-appearance:none;
-  transition:all 0.15s;display:block;
-}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:17px;font-family:'Bangers',cursive;letter-spacing:2px;cursor:pointer;color:#fff;margin-top:10px;touch-action:manipulation;-webkit-appearance:none;transition:all 0.15s;display:block;}
 .btn:active{transform:scale(0.97);opacity:0.85}
-.btn-play {background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px rgba(22,163,74,0.4)}
+.btn-play{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px rgba(22,163,74,0.4)}
 .btn-green{background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px rgba(22,163,74,0.4)}
-.btn-gray {background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
+.btn-gray{background:rgba(100,80,150,0.4);border:1px solid rgba(168,85,247,0.3);box-shadow:none}
 
-.loading{color:#c9aaee;font-size:13px;margin:10px 0;min-height:18px;text-align:center}
-.divider{border:none;border-top:1px solid rgba(168,85,247,0.2);margin:14px 0}
+.divider{border:none;border-top:1px solid rgba(168,85,247,0.2);margin:16px 0}
+
+/* Option 2 — lien bot */
+.bot-option{background:rgba(109,40,217,0.12);border:1px solid rgba(109,40,217,0.35);border-radius:12px;padding:14px;text-align:left;}
+.bot-option .head{font-family:'Bangers',cursive;font-size:14px;color:#c084fc;letter-spacing:1px;margin-bottom:8px}
+.bot-option p{font-size:12px;color:#c9aaee;line-height:1.7}
+.bot-option a{color:#FFD700;text-decoration:none;font-weight:bold;}
+.bot-option a:hover{text-decoration:underline}
+
+/* Pas dans Telegram */
+.not-tg{background:rgba(100,100,100,0.12);border:1px solid rgba(150,150,150,0.25);border-radius:14px;padding:18px 14px;}
+.not-tg .icon{font-size:36px;margin-bottom:10px}
+.not-tg p{font-size:13px;color:#aaa;line-height:1.7}
+.not-tg .steps{margin-top:12px;font-size:12px;color:#c9aaee;text-align:left;line-height:2}
+.not-tg a{color:#FFD700;text-decoration:none;font-weight:bold}
+
+.loading{color:#c9aaee;font-size:13px;margin:8px 0;text-align:center;min-height:18px}
 </style>
 </head>
 <body>
 <div class="card">
-
   <button class="back-btn" onclick="goBack()">Back to game</button>
 
   <div class="logo">🐓</div>
   <h1>LE COQ FRANCIS</h1>
-  <p class="sub">
-    Connect your Solana address.<br>
-    If you hold <b>$FRANC</b>, all bonuses unlock for free!<br>
-    <span style="font-size:11px">→ <b>10 lives</b> &bull; <b>+1 life</b> every 100 eggs &bull; <b style="color:#00eeff">triple shot</b></span>
-  </p>
+  <p class="sub">Connect your Solana address.<br>
+  If you hold <b style="color:#FFD700">$FRANC</b>, all bonuses unlock instantly!<br>
+  <span style="font-size:11px">→ <b>10 lives</b> &bull; <b>+1 life</b>/100 eggs &bull; <b style="color:#00eeff">triple shot</b></span></p>
 
   <div class="loading" id="loadingMsg">🔄 Checking your status...</div>
 
-  <!-- ── État 1 : $FRANC détecté ── -->
-  <div id="francDetectedSection" style="display:none">
-    <div class="franc-detected">
-      <div class="check">✅</div>
+  <!-- ① $FRANC détecté -->
+  <div id="secFrancOk" style="display:none">
+    <div class="franc-ok">
+      <div class="icon">✅</div>
       <div class="title">$FRANC DETECTED!</div>
-      <div class="detail" id="francDetail">
-        Your wallet is connected.<br>
-        All bonuses are active!
-      </div>
-      <div class="wallet-addr" id="walletAddr"></div>
+      <div class="detail" id="francDetail">All bonuses are active!</div>
+      <div class="addr-pill" id="francAddr"></div>
     </div>
     <button class="btn btn-play" onclick="goBack()">🎮 PLAY NOW</button>
-    <button class="btn btn-gray" onclick="showManualForm()" style="margin-top:8px;font-size:13px">🔗 Change wallet</button>
+    <button class="btn btn-gray" onclick="showForm()" style="margin-top:8px;font-size:13px">🔗 Change wallet</button>
   </div>
 
-  <!-- ── État 2 : Wallet connecté mais pas de $FRANC ── -->
-  <div id="noFrancSection" style="display:none">
-    <div style="background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);border-radius:14px;padding:16px;margin-bottom:14px">
-      <div style="font-size:32px;margin-bottom:6px">⚠️</div>
-      <div style="font-family:'Bangers',cursive;font-size:18px;color:#fcd34d;letter-spacing:2px">WALLET CONNECTED</div>
-      <div style="font-size:12px;color:#fcd34d;margin-top:6px;line-height:1.6">No $FRANC found in this wallet.<br>Buy $FRANC to unlock all bonuses!</div>
-      <div class="wallet-addr" id="walletAddrNoFranc" style="margin-top:8px;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:6px;font-size:11px;font-family:monospace;color:#fbbf24;display:inline-block"></div>
+  <!-- ② Wallet connecté, pas de $FRANC -->
+  <div id="secNoFranc" style="display:none">
+    <div class="no-franc">
+      <div class="icon">⚠️</div>
+      <div class="title">WALLET CONNECTED</div>
+      <div class="detail">No $FRANC found in this wallet.<br>Buy $FRANC to unlock all bonuses!</div>
+      <div class="addr-pill" id="noFrancAddr"></div>
     </div>
     <button class="btn btn-play" onclick="goBack()">🎮 Play with 1 life</button>
-    <button class="btn btn-gray" onclick="showManualForm()" style="margin-top:8px;font-size:13px">🔗 Change wallet</button>
+    <button class="btn btn-gray" onclick="showForm()" style="margin-top:8px;font-size:13px">🔗 Change wallet</button>
   </div>
 
-  <!-- ── État 3 : Pas dans Telegram ── -->
-  <div id="notTelegramSection" style="display:none">
-    <div class="not-telegram">
-      <div class="icon">📱</div>
-      <p>This page must be opened <b style="color:#fff">inside Telegram</b> to connect your wallet.</p>
-      <div class="step">
-        <b>Option 1 — Via the game:</b><br>
-        Open FrancRun in Telegram → tap <b>🌟 PLAY — 10 lives</b><br><br>
-        <b>Option 2 — Direct link:</b><br>
-        Open <b style="color:#FFD700">t.me/FrancRunBot/francwallet</b> in Telegram
-      </div>
-    </div>
-  </div>
-
-  <!-- ── État 4 : Formulaire saisie manuelle ── -->
-  <div id="manualSection" style="display:none">
-    <div class="manual-form">
-      <label>YOUR SOLANA ADDRESS</label>
-      <input id="walletAddress" type="text"
+  <!-- ③ Formulaire saisie manuelle (dans Telegram) -->
+  <div id="secForm" style="display:none">
+    <div class="form-block">
+      <label>Your Solana address</label>
+      <input id="walletInput" type="text"
         placeholder="Paste your address here..."
-        oninput="validateAddress(this)"
-        autocomplete="off" autocorrect="off" spellcheck="false"
-      />
+        oninput="validateAddr(this)"
+        autocomplete="off" autocorrect="off" spellcheck="false"/>
       <div class="hint" id="addrHint">Valid Solana address (32–44 characters)</div>
     </div>
-    <button id="linkBtn" class="btn btn-green" onclick="connectManual()" disabled style="opacity:0.5">
-      ✅ Link my wallet
-    </button>
-    <div class="loading" id="linkLoading"></div>
+    <button id="linkBtn" class="btn btn-green" onclick="doLink()" disabled style="opacity:0.5">✅ Link my wallet</button>
+    <div class="loading" id="linkMsg"></div>
+
+    <div class="divider"></div>
+
+    <!-- Option 2 : via bot (lien hypertexte) -->
+    <div class="bot-option">
+      <div class="head">🤖 Alternative — via Telegram Bot</div>
+      <p>
+        Open <a href="https://t.me/FrancRunBot" onclick="openBot(event)">@FrancRunBot</a> and send <b style="color:#FFD700">/connect</b>,<br>
+        then paste your Solana address in the chat.<br>
+        <span style="font-size:11px;color:#888">Your wallet will be linked automatically.</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ④ Pas dans Telegram -->
+  <div id="secNotTg" style="display:none">
+    <div class="not-tg">
+      <div class="icon">📱</div>
+      <p>This page must be opened <b style="color:#fff">inside Telegram</b> to connect your wallet.</p>
+      <div class="steps">
+        <b>Option 1 — Via the game:</b><br>
+        Open FrancRun in Telegram → tap the wallet badge<br><br>
+        <b>Option 2 — Direct link:</b><br>
+        Open <a href="https://t.me/FrancRunBot/francwallet">t.me/FrancRunBot/francwallet</a> in Telegram<br><br>
+        <b>Option 3 — Via bot:</b><br>
+        Message <a href="https://t.me/FrancRunBot">@FrancRunBot</a> and send <b style="color:#FFD700">/connect</b>
+      </div>
+    </div>
   </div>
 
 </div>
-
 <script>
 const BACKEND  = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
 const GAME_URL = 'https://franclecoq.github.io/FrancRun/';
-
 const tg = window.Telegram?.WebApp;
-if(tg){ tg.ready(); tg.expand(); }
+if(tg){tg.ready();tg.expand();}
 
-// ── Sections ──────────────────────────────────────────────────
-const sec = {
-  loading:     document.getElementById('loadingMsg'),
-  francOk:     document.getElementById('francDetectedSection'),
-  noFranc:     document.getElementById('noFrancSection'),
-  notTelegram: document.getElementById('notTelegramSection'),
-  manual:      document.getElementById('manualSection'),
+const secs={
+  loading: document.getElementById('loadingMsg'),
+  francOk: document.getElementById('secFrancOk'),
+  noFranc: document.getElementById('secNoFranc'),
+  form:    document.getElementById('secForm'),
+  notTg:   document.getElementById('secNotTg'),
 };
-function hideAll(){ Object.values(sec).forEach(s=>{ if(s) s.style.display='none'; }); }
+function hide(){Object.values(secs).forEach(s=>{if(s)s.style.display='none';});}
 
-// ── Init ──────────────────────────────────────────────────────
-window.addEventListener('load', async ()=>{
-  // Pas dans Telegram
-  if(!tg?.initData){
-    hideAll();
-    sec.notTelegram.style.display='block';
-    return;
-  }
-  // Dans Telegram — vérifie le statut
+window.addEventListener('load',async()=>{
+  if(!tg?.initData){hide();secs.notTg.style.display='block';return;}
   await checkStatus();
 });
 
-// ── Check statut $FRANC ───────────────────────────────────────
 async function checkStatus(){
-  hideAll();sec.loading.style.display='block';sec.loading.textContent='🔄 Checking your status...';
+  hide();secs.loading.style.display='block';secs.loading.textContent='🔄 Checking your status...';
   try{
-    const res=await fetch(BACKEND+'/check-franc',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({initData:tg.initData})
-    });
-    const data=await res.json();
-    hideAll();
-
-    if(!data.walletLinked){
-      // Pas de wallet — affiche le formulaire directement
-      sec.manual.style.display='block';
-
-    } else if(data.hasFranc){
-      // ✅ $FRANC détecté
-      const lives=10+Math.floor((data.totalEggs||0)/100);
-      const balance=data.balance?.toFixed(0)||'?';
-      const short=data.walletAddress?data.walletAddress.slice(0,6)+'...'+data.walletAddress.slice(-4):'';
+    const res=await fetch(BACKEND+'/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})});
+    const d=await res.json();hide();
+    if(!d.walletLinked){
+      // Pas de wallet → formulaire directement
+      secs.form.style.display='block';
+    } else if(d.hasFranc){
+      const lives=10+Math.floor((d.totalEggs||0)/100);
+      const bal=d.balance?Number(d.balance).toLocaleString():'?';
+      const short=d.walletAddress?d.walletAddress.slice(0,6)+'...'+d.walletAddress.slice(-4):'';
       document.getElementById('francDetail').innerHTML=
-        `Balance: <b style="color:#FFD700">${Number(balance).toLocaleString()} $FRANC</b><br>`+
-        `Lives: <b style="color:#FFD700">${lives} ❤️</b> &bull; Triple shot: <b style="color:#00eeff">active 🔫</b>`;
-      document.getElementById('walletAddr').textContent=short;
-      sec.francOk.style.display='block';
-
+        `Balance: <b style="color:#FFD700">${bal} $FRANC</b><br>`+
+        `<b style="color:#FFD700">${lives} lives</b> &bull; Triple shot: <b style="color:#00eeff">active 🔫</b>`;
+      document.getElementById('francAddr').textContent=short;
+      secs.francOk.style.display='block';
     } else {
-      // Wallet connecté mais pas de $FRANC
-      const short=data.walletAddress?data.walletAddress.slice(0,6)+'...'+data.walletAddress.slice(-4):'';
-      document.getElementById('walletAddrNoFranc').textContent=short;
-      sec.noFranc.style.display='block';
+      const short=d.walletAddress?d.walletAddress.slice(0,6)+'...'+d.walletAddress.slice(-4):'';
+      document.getElementById('noFrancAddr').textContent=short;
+      secs.noFranc.style.display='block';
     }
-  }catch(e){
-    hideAll();
-    sec.loading.style.display='block';
-    sec.loading.textContent='❌ Connection error. Please try again.';
-    setTimeout(()=>{ hideAll(); sec.manual.style.display='block'; },2000);
-  }
+  }catch(e){hide();secs.loading.style.display='block';secs.loading.textContent='❌ Connection error — please retry.';setTimeout(()=>{hide();secs.form.style.display='block';},2000);}
 }
 
-// ── Affiche le formulaire manuel ──────────────────────────────
-function showManualForm(){
-  hideAll();
-  sec.manual.style.display='block';
-  document.getElementById('walletAddress').value='';
-  document.getElementById('addrHint').textContent='Valid Solana address (32–44 characters)';
-  document.getElementById('addrHint').style.color='#888';
-  const btn=document.getElementById('linkBtn');btn.disabled=true;btn.style.opacity='0.5';
+function showForm(){hide();secs.form.style.display='block';document.getElementById('walletInput').value='';document.getElementById('addrHint').textContent='Valid Solana address (32–44 characters)';document.getElementById('addrHint').style.color='#888';const btn=document.getElementById('linkBtn');btn.disabled=true;btn.style.opacity='0.5';}
+
+function validateAddr(input){
+  const val=input.value.trim();const valid=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
+  const btn=document.getElementById('linkBtn');const hint=document.getElementById('addrHint');
+  if(valid){input.style.borderColor='rgba(163,230,53,0.7)';hint.textContent='✅ Valid address';hint.style.color='#86efac';btn.disabled=false;btn.style.opacity='1';}
+  else{input.style.borderColor=val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';hint.textContent=val.length>5?'❌ Invalid address':'Valid Solana address (32–44 characters)';hint.style.color=val.length>5?'#fca5a5':'#888';btn.disabled=true;btn.style.opacity='0.5';}
 }
 
-// ── Validation adresse ────────────────────────────────────────
-function validateAddress(input){
-  const val=input.value.trim();
-  const valid=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(val);
-  const btn=document.getElementById('linkBtn');
-  const hint=document.getElementById('addrHint');
-  if(valid){
-    input.style.borderColor='rgba(163,230,53,0.7)';
-    hint.textContent='✅ Valid address';hint.style.color='#86efac';
-    btn.disabled=false;btn.style.opacity='1';
-  } else {
-    input.style.borderColor=val.length>5?'rgba(255,80,80,0.6)':'rgba(168,85,247,0.4)';
-    hint.textContent=val.length>5?'❌ Invalid address':'Valid Solana address (32–44 characters)';
-    hint.style.color=val.length>5?'#fca5a5':'#888';
-    btn.disabled=true;btn.style.opacity='0.5';
-  }
-}
-
-// ── Liaison manuelle ──────────────────────────────────────────
-async function connectManual(){
-  const address=(document.getElementById('walletAddress')?.value||'').trim();
-  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) return;
-
-  const btn=document.getElementById('linkBtn');
-  const loadEl=document.getElementById('linkLoading');
+async function doLink(){
+  const address=(document.getElementById('walletInput')?.value||'').trim();
+  if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address))return;
+  const btn=document.getElementById('linkBtn');const msg=document.getElementById('linkMsg');
   btn.textContent='⏳ Linking...';btn.disabled=true;btn.style.opacity='0.6';
-  loadEl.textContent='Checking $FRANC balance on Solana...';
-
+  msg.textContent='Verifying $FRANC balance on Solana...';
   try{
-    const res=await fetch(BACKEND+'/link-wallet',{
+    // Utilise bot-handler avec action link pour contourner link-wallet manquant
+    const res=await fetch(BACKEND+'/bot-handler',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({initData:tg.initData,wallet:address})
+      body:JSON.stringify({action:'link_wallet',initData:tg.initData,wallet:address})
     });
     const data=await res.json();
-
-    if(data.ok){
-      loadEl.textContent='';
-      // Recharge le statut pour afficher le bon badge
-      await checkStatus();
+    if(data.ok||data.success||res.ok){
+      msg.textContent='';await checkStatus();
     } else {
-      loadEl.textContent='❌ '+(data.error||'Unknown error');
-      btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';
+      // Fallback : essaie check-franc après avoir stocké via save-score
+      const res2=await fetch(BACKEND+'/save-score',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'link_wallet',initData:tg.initData,wallet:address,game_id:'francrun'})
+      });
+      const d2=await res2.json();
+      if(d2.ok||res2.ok){msg.textContent='';await checkStatus();}
+      else{msg.textContent='❌ Error — please use the bot option below.';btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';}
     }
-  }catch(e){
-    loadEl.textContent='❌ Connection error. Please try again.';
-    btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';
-  }
+  }catch(e){msg.textContent='❌ Connection error. Try the bot option below.';btn.textContent='✅ Link my wallet';btn.disabled=false;btn.style.opacity='1';}
 }
 
-// ── Navigation ────────────────────────────────────────────────
-function goBack(){
-  if(tg) tg.close();
-  else window.location.href=GAME_URL;
+function openBot(e){
+  e.preventDefault();
+  const url='https://t.me/FrancRunBot';
+  if(tg) tg.openTelegramLink(url);
+  else window.open(url,'_blank');
 }
+
+function goBack(){if(tg)tg.close();else window.location.href=GAME_URL;}
 </script>
 </body>
 </html>
