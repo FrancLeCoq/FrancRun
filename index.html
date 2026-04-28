@@ -39,25 +39,29 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .slist{text-align:left;margin:8px 0;max-height:200px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between;align-items:center}
 .franc-box{margin-top:12px;padding:11px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left}
-.wallet-btn{width:100%;padding:14px 16px;border-radius:14px;margin-top:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:none;touch-action:manipulation;transition:all 0.15s;text-align:center}
+/* Wallet badge */
+.wallet-btn{width:100%;padding:14px 16px;border-radius:14px;margin-top:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:none;touch-action:manipulation;transition:all 0.15s;text-align:left}
 .wallet-btn:active{transform:scale(0.97);opacity:0.85}
 .wallet-btn.disconnected{background:linear-gradient(135deg,rgba(217,119,6,0.25),rgba(180,90,0,0.2));border:2px solid rgba(217,119,6,0.6)}
 .wallet-btn.connected{background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(15,100,50,0.2));border:2px solid rgba(163,230,53,0.6)}
-.wallet-btn .wt-main{font-family:'Bangers',cursive;font-size:22px;letter-spacing:3px;text-shadow:0 0 12px currentColor}
+.wallet-btn .wlock{font-size:28px;flex-shrink:0;line-height:1}
+.wallet-btn .wtxt{flex:1}
+.wallet-btn .wt-main{font-family:'Bangers',cursive;font-size:20px;letter-spacing:2px;display:block}
 .wallet-btn.disconnected .wt-main{color:#fcd34d}
-.wallet-btn.connected .wt-main{color:#a3e635}
-.wallet-btn .wt-sub{font-size:11px;margin-top:3px;opacity:0.8;font-family:'Fredoka One',cursive}
-.wallet-btn.disconnected .wt-sub{color:#fbbf24}
+.wallet-btn.connected .wt-main{color:#a3e635;text-shadow:0 0 10px rgba(163,230,53,0.5)}
+.wallet-btn .wt-sub{font-size:11px;display:block;margin-top:2px}
+.wallet-btn.disconnected .wt-sub{color:#fbbf24;opacity:0.8}
 .wallet-btn.connected .wt-sub{color:#86efac}
-/* Score panel */
-.score-section{margin-top:8px}
-.score-section .my-score{background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:10px;padding:8px 12px;margin-bottom:10px;text-align:left;font-size:12px;color:#FFD700}
-.score-section .my-score .ms-title{font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#FFD700;margin-bottom:4px}
-.score-section .top3{display:flex;gap:6px;margin-bottom:10px}
-.score-section .top3 .podium{flex:1;background:rgba(100,80,150,0.2);border-radius:10px;padding:8px 6px;text-align:center;font-size:11px}
-.score-section .top3 .podium .medal{font-size:20px;display:block;margin-bottom:3px}
-.score-section .top3 .podium .pname{font-size:10px;color:#c9aaee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px}
-.score-section .top3 .podium .pscore{font-family:'Bangers',cursive;font-size:14px;color:#FFD700}
+/* Score */
+.score-section{margin-top:4px}
+.my-score{background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:10px;padding:8px 12px;margin-bottom:8px;text-align:left;font-size:12px}
+.my-score .ms-title{font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#FFD700;margin-bottom:4px}
+.top3{display:flex;gap:6px;margin-bottom:8px}
+.podium{flex:1;background:rgba(100,80,150,0.2);border-radius:10px;padding:8px 6px;text-align:center;font-size:11px}
+.podium .medal{font-size:20px;display:block;margin-bottom:3px}
+.podium .pname{font-size:10px;color:#c9aaee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;margin:0 auto}
+.podium .pscore{font-family:'Bangers',cursive;font-size:14px;color:#FFD700}
+/* Touch */
 #touch-zone{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
 #joystick-base{position:fixed;border-radius:50%;background:rgba(168,85,247,0.12);border:2.5px solid rgba(168,85,247,0.5);display:none;transform:translate(-50%,-50%);pointer-events:none;width:150px;height:150px}
 #joystick-stick{position:fixed;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(230,180,255,0.95),rgba(160,80,240,0.85));border:2.5px solid rgba(240,200,255,0.9);display:none;transform:translate(-50%,-50%);pointer-events:none;width:66px;height:66px;box-shadow:0 0 18px rgba(168,85,247,0.8)}
@@ -65,8 +69,6 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.8)}70%{transform:scale(0.9)}100%{transform:scale(1)}}
 @keyframes lifeGain{0%{opacity:0;transform:translate(-50%,-20px) scale(0.5)}30%{opacity:1;transform:translate(-50%,-40px) scale(1.2)}80%{opacity:1;transform:translate(-50%,-60px) scale(1)}100%{opacity:0;transform:translate(-50%,-80px) scale(0.8)}}
 #lifeGainMsg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-family:'Bangers',cursive;letter-spacing:3px;color:#ff4444;text-shadow:0 0 20px #ff0000;z-index:25;pointer-events:none;opacity:0;display:none;white-space:nowrap}
-/* Spinner loading */
-.play-loading{display:none;text-align:center;padding:12px;color:#c9aaee;font-size:13px}
 </style>
 </head>
 <body>
@@ -96,13 +98,14 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
   <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
   <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
 
-  <!-- PLAY — attend que detectFranc soit terminé -->
-  <button class="btn btn-play" id="playBtn" onclick="handlePlay()">▶ PLAY</button>
-  <div class="play-loading" id="playLoading">🔄 Checking wallet...</div>
+  <button class="btn btn-play" id="playBtn" onclick="startGame()" style="opacity:0.5" disabled>⏳ Loading...</button>
 
   <button class="wallet-btn disconnected" id="walletBtn" onclick="goToWallet()">
-    <div class="wt-main" id="walletMain">TAP TO UNLOCK 10 LIVES 🔓</div>
-    <div class="wt-sub" id="walletSub">Wallet not connected</div>
+    <span class="wlock" id="walletLock">🔒</span>
+    <span class="wtxt">
+      <span class="wt-main" id="walletMain">TAP TO UNLOCK 10 LIVES</span>
+      <span class="wt-sub" id="walletSub">Wallet not connected</span>
+    </span>
   </button>
 
   <hr class="divider">
@@ -114,39 +117,58 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
     <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
     <div style="font-size:12px;color:#c9aaee;line-height:2">
       <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💔</span><span><span style="color:#ff8888">Without $FRANC:</span> <b style="color:#fff">1 life only</b></span></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span> Connect wallet for<br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b> every 100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span><br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b>/100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫</span></div>
     </div>
   </div>
 </div>
 
 <script>
-const SUPABASE   = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
-const WALLET_URL = 'https://franclecoq.github.io/Wallet/connect-wallet.html';
+const SUPABASE       = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
+const WALLET_MINIAPP = 'https://t.me/FrancisLeCoqBot/wallet'; // Mini App Telegram
 
 // ══ WALLET ════════════════════════════════════════════════════
 function goToWallet(){
   const tg=window.Telegram?.WebApp;
-  if(tg&&tg.openLink) tg.openLink(WALLET_URL);
-  else window.location.href=WALLET_URL;
+  // openTelegramLink ouvre dans le WebView Telegram natif
+  if(tg&&tg.openTelegramLink){
+    tg.openTelegramLink(WALLET_MINIAPP);
+  } else if(tg&&tg.openLink){
+    tg.openLink(WALLET_MINIAPP);
+  } else {
+    window.open(WALLET_MINIAPP,'_blank');
+  }
 }
+
 function updateWalletBadge(){
   const btn=document.getElementById('walletBtn');
+  const lock=document.getElementById('walletLock');
   const main=document.getElementById('walletMain');
   const sub=document.getElementById('walletSub');
   if(!btn)return;
   if(hasFranc){
     btn.className='wallet-btn connected';
-    main.textContent='✅ WALLET CONNECTED';
+    lock.textContent='🔓';
+    main.textContent='WALLET CONNECTED ✅';
     sub.textContent=`$FRANC detected — ${MAX_LIVES} lives unlocked!`;
   } else if(walletLinked){
     btn.className='wallet-btn disconnected';
-    main.textContent='⚠️ NO $FRANC FOUND';
-    sub.textContent='Wallet connected — buy $FRANC to unlock bonuses';
+    lock.textContent='🔒';
+    main.textContent='NO $FRANC FOUND';
+    sub.textContent='Buy $FRANC to unlock bonuses';
   } else {
     btn.className='wallet-btn disconnected';
-    main.textContent='TAP TO UNLOCK 10 LIVES 🔓';
+    lock.textContent='🔒';
+    main.textContent='TAP TO UNLOCK 10 LIVES';
     sub.textContent='Wallet not connected';
   }
+}
+
+function enablePlayBtn(){
+  const btn=document.getElementById('playBtn');
+  if(!btn)return;
+  btn.disabled=false;
+  btn.style.opacity='1';
+  btn.textContent='▶ PLAY';
 }
 
 // ══ CANVAS ════════════════════════════════════════════════════
@@ -188,101 +210,45 @@ function saveLocalScore(s,lvl){let sc=getLocalScores();sc.push({score:s,level:lv
 
 let scorePanelOpen=false;
 function toggleScorePanel(){
-  const sp=document.getElementById('scorePanel');
-  if(!sp)return;
+  const sp=document.getElementById('scorePanel');if(!sp)return;
   scorePanelOpen=!scorePanelOpen;
   sp.style.display=scorePanelOpen?'block':'none';
-  if(scorePanelOpen)renderScorePanel();
+  if(scorePanelOpen)renderScorePanel(document.getElementById('scoreSection'));
 }
-
-async function renderScorePanel(){
-  const sec=document.getElementById('scoreSection');
+async function renderScorePanel(sec){
   if(!sec)return;
   sec.innerHTML='<div style="color:#c9aaee;font-size:11px;padding:8px;text-align:center">⏳ Loading...</div>';
-
+  const tg=window.Telegram?.WebApp;
+  const myId=tg?.initDataUnsafe?.user?.id?.toString();
+  const myName=tg?.initDataUnsafe?.user?.first_name||'You';
   try{
     const res=await fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'leaderboard',game_id:'francrun',limit:10})});
     const data=res.ok?await res.json():null;
     const rows=data?.leaderboard||[];
-
-    // Mon score perso
-    const tg=window.Telegram?.WebApp;
-    const myId=tg?.initDataUnsafe?.user?.id?.toString();
-    const myRows=rows.filter(r=>r.telegram_id===myId||r.telegram_id===parseInt(myId));
-    const myBest=myRows.length?Math.max(...myRows.map(r=>r.best_score||r.score||0)):getLocalScores()[0]?.score||0;
-    const myRank=rows.findIndex(r=>r.telegram_id===myId||r.telegram_id===parseInt(myId))+1;
-    const myName=tg?.initDataUnsafe?.user?.first_name||'You';
-
-    let html='';
-
-    // Ma stat
-    html+=`<div class="my-score">
-      <div class="ms-title">👤 YOUR BEST</div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span>${myName}${myRank>0?` <span style="color:#c9aaee;font-size:10px">#${myRank}</span>`:''}</span>
-        <span style="font-family:'Bangers',cursive;font-size:18px;color:#FFD700">${myBest} 🥚</span>
-      </div>
-    </div>`;
-
-    // Top 3 podium
-    if(rows.length>=1){
-      const top3=rows.slice(0,3);
-      const order=[1,0,2]; // affiche 2e, 1er, 3e (podium)
+    const myRec=rows.find(r=>String(r.telegram_id)===String(myId));
+    const myBest=myRec?myRec.best_score||myRec.score||0:getLocalScores()[0]?.score||0;
+    const myRank=rows.findIndex(r=>String(r.telegram_id)===String(myId))+1;
+    let html=`<div class="my-score"><div class="ms-title">👤 YOUR BEST</div><div style="display:flex;justify-content:space-between;align-items:center"><span>${myName}${myRank>0?` <span style="color:#c9aaee;font-size:10px">#${myRank}</span>`:''}</span><span style="font-family:'Bangers',cursive;font-size:18px;color:#FFD700">${myBest} 🥚</span></div></div>`;
+    if(rows.length>=2){
       const medals=['🥇','🥈','🥉'];
-      const heights=['50px','70px','40px'];
+      const order=rows.length>=3?[1,0,2]:[0,1];
       html+='<div class="top3">';
-      order.forEach(i=>{
-        if(!top3[i])return;
-        const r=top3[i];
-        const name=r.telegram_name||r.telegram_username||'Player';
-        const short=name.length>8?name.slice(0,8)+'…':name;
-        html+=`<div class="podium" style="padding-top:${heights[i]}">
-          <span class="medal">${medals[i]}</span>
-          <div class="pname">${short}</div>
-          <div class="pscore">${r.best_score||r.score||0}</div>
-        </div>`;
-      });
+      order.forEach(i=>{if(!rows[i])return;const r=rows[i];const n=(r.telegram_name||r.telegram_username||'Player').slice(0,8);html+=`<div class="podium"><span class="medal">${medals[i]}</span><div class="pname">${n}</div><div class="pscore">${r.best_score||r.score||0}</div></div>`;});
       html+='</div>';
     }
-
-    // Liste complète top 10
     if(rows.length){
-      html+='<div style="font-family:Bangers,cursive;letter-spacing:2px;font-size:12px;color:#c084fc;margin-bottom:4px">TOP 10</div>';
-      html+='<ul class="slist">';
-      const medals2=['🥇','🥈','🥉'];
-      rows.forEach((r,i)=>{
-        const name=r.telegram_name||r.telegram_username||'Player';
-        const franc=r.has_franc?'<span style="color:#FFD700"> 💎</span>':'';
-        const isMe=(r.telegram_id===myId||r.telegram_id===parseInt(myId));
-        const bg=isMe?'background:rgba(255,215,0,0.06);border-radius:6px':'';
-        html+=`<li style="${bg}"><span>${medals2[i]||'#'+(i+1)} <b>${name}</b>${franc}${isMe?' 👈':''}</span><span style="color:#FFD700;font-family:Bangers,cursive">${r.best_score||r.score||0} 🥚</span></li>`;
-      });
+      html+='<div style="font-family:Bangers,cursive;letter-spacing:2px;font-size:12px;color:#c084fc;margin-bottom:4px">TOP 10</div><ul class="slist">';
+      rows.forEach((r,i)=>{const n=r.telegram_name||r.telegram_username||'Player';const franc=r.has_franc?'💎':'';const isMe=String(r.telegram_id)===String(myId);const bg=isMe?'background:rgba(255,215,0,0.07);border-radius:6px':'';html+=`<li style="${bg}"><span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} <b>${n}</b>${franc?` <span style="color:#FFD700">${franc}</span>`:''}${isMe?' 👈':''}</span><span style="color:#FFD700;font-family:Bangers,cursive">${r.best_score||r.score||0} 🥚</span></li>`;});
       html+='</ul>';
-    } else {
-      // Fallback local
-      const sc=getLocalScores();
-      if(sc.length){
-        html+='<div style="font-size:11px;color:#888;margin-bottom:4px;text-align:center">Local scores</div><ul class="slist">';
-        sc.forEach((s,i)=>{html+=`<li><span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} Lvl${s.level||'?'} ${s.date}</span><span style="color:#FFD700;font-family:Bangers,cursive">${s.score}</span></li>`;});
-        html+='</ul>';
-      } else {
-        html+='<div style="color:#888;font-size:12px;text-align:center;padding:12px">No scores yet — be the first! 🎮</div>';
-      }
-    }
-
+    } else {renderLocalHtml(sec);return;}
     sec.innerHTML=html;
-  }catch(e){
-    const sc=getLocalScores();
-    let html='';
-    if(sc.length){
-      html='<ul class="slist">';
-      sc.forEach((s,i)=>{html+=`<li><span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} Lvl${s.level||'?'} ${s.date}</span><span style="color:#FFD700;font-family:Bangers,cursive">${s.score}</span></li>`;});
-      html+='</ul>';
-    } else {
-      html='<div style="color:#888;font-size:12px;text-align:center;padding:12px">No scores yet</div>';
-    }
-    sec.innerHTML=html;
-  }
+  }catch(e){renderLocalHtml(sec);}
+}
+function renderLocalHtml(sec){
+  const sc=getLocalScores();
+  if(!sc.length){sec.innerHTML='<div style="color:#888;font-size:12px;text-align:center;padding:12px">No scores yet!</div>';return;}
+  let h='<ul class="slist">';sc.forEach((s,i)=>{h+=`<li><span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} Lvl${s.level||'?'} ${s.date}</span><span style="color:#FFD700;font-family:Bangers,cursive">${s.score}</span></li>`;});h+='</ul>';
+  sec.innerHTML=h;
 }
 
 let shakeAmt=0,shakeDur=0;
@@ -300,69 +266,47 @@ function getEnemySpeed(lvl){let s;if(lvl===1)s=0.6;else if(lvl<=6)s=1.0+(lvl-1)*
 function getHomingRatio(lvl){if(lvl<=3)return 0;if(lvl===4)return 0.10;if(lvl===5)return 0.20;if(lvl===6)return 0.30;if(lvl===7)return 0.40;if(lvl>=8)return 0.50;return 0.50;}
 function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(0,score-(MAX_LEVEL-1)*EGGS_PER_LEVEL)/30));}
 
-// ══ $FRANC ════════════════════════════════════════════════════
+// ══ $FRANC — BLOQUE PLAY JUSQU'À LA FIN ══════════════════════
 let MAX_LIVES=1,hasFranc=false,walletLinked=false,totalEggsEver=0;
-let francReady=false; // indique si detectFranc est terminé
 
 async function detectFranc(){
-  francReady=false;
-  // Affiche spinner sur le bouton play
-  const playBtn=document.getElementById('playBtn');
-  const playLoading=document.getElementById('playLoading');
-  if(playBtn)playBtn.style.display='none';
-  if(playLoading)playLoading.style.display='block';
+  // Désactive PLAY pendant le chargement
+  const btn=document.getElementById('playBtn');
+  if(btn){btn.disabled=true;btn.style.opacity='0.5';btn.textContent='⏳ Loading...';}
 
   const tg=window.Telegram?.WebApp;
   if(tg){tg.ready();tg.expand();}
   try{totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0');}catch(e){}
 
-  if(!tg||!tg.initData){
-    MAX_LIVES=1;hasFranc=false;
-    francReady=true;
-    if(playBtn)playBtn.style.display='block';
-    if(playLoading)playLoading.style.display='none';
-    updateWalletBadge();
-    return;
-  }
-
-  try{
-    const res=await fetch(SUPABASE+'/check-franc',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({initData:tg.initData,game_id:'francrun'})
-    });
-    if(res.ok){
-      const d=await res.json();
-      console.log('check-franc:',JSON.stringify(d));
-      hasFranc=d.hasFranc||false;
-      walletLinked=d.walletLinked||false;
-      MAX_LIVES=hasFranc?Math.max(d.lives||10,10):1;
+  if(tg&&tg.initData){
+    try{
+      const res=await fetch(SUPABASE+'/check-franc',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({initData:tg.initData,game_id:'francrun'})
+      });
+      if(res.ok){
+        const d=await res.json();
+        console.log('check-franc:',JSON.stringify(d));
+        hasFranc   = d.hasFranc   || false;
+        walletLinked = d.walletLinked || false;
+        MAX_LIVES  = hasFranc ? Math.max(d.lives||10, 10) : 1;
+      }
+    }catch(e){
+      console.error('check-franc error:',e);
     }
-  }catch(e){
-    console.error('check-franc error:',e);
-    hasFranc=false;
-    MAX_LIVES=1;
   }
 
-  francReady=true;
-  if(playBtn)playBtn.style.display='block';
-  if(playLoading)playLoading.style.display='none';
+  // Active PLAY seulement après
+  enablePlayBtn();
   updateWalletBadge();
 }
 
-// Refresh au retour de la page wallet
+// Refresh au retour
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'&&gameState==='menu') detectFranc();
 });
 
-// ══ PLAY — attend detectFranc ═════════════════════════════════
-function handlePlay(){
-  if(!francReady){
-    // Sécurité : si jamais pas encore prêt, lance quand même
-    startGame();
-    return;
-  }
-  startGame();
-}
+detectFranc(); // Lance au démarrage
 
 function saveCumulativeEggs(n){
   const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
@@ -370,7 +314,6 @@ function saveCumulativeEggs(n){
   const tg=window.Telegram?.WebApp;
   if(tg?.initData){fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
 }
-detectFranc();
 
 function updateLivesBar(l){livesBar.innerHTML=`<span style="font-size:22px;filter:drop-shadow(0 0 6px #ff4444)">❤️</span><span style="font-size:20px;font-family:'Bangers',cursive;color:#ff4444;letter-spacing:1px;text-shadow:0 0 8px #ff4444;margin-left:4px">${Math.max(0,l)}</span>`;}
 let lifeGainTimeout=null;
@@ -459,15 +402,15 @@ function drawMobileHints(){
   if(inputMode==='drag'){
     if(player&&(fingerRing.active||fingerRing.alpha>0)){const a=fingerRing.active?Math.min(1,fingerRing.alpha):fingerRing.alpha;const pulse=1+0.08*Math.sin(frameCount*0.22);ctx.globalAlpha=a*0.35;ctx.strokeStyle='#a855f7';ctx.lineWidth=3;ctx.beginPath();ctx.arc(player.x,player.y+18,46*pulse*SCALE,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=a*0.18;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(player.x,player.y+18,36*SCALE,0,Math.PI*2);ctx.fill();}
     if(!dragActive){ctx.globalAlpha=0.15;ctx.strokeStyle='#c084fc';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(canvas.width/2,canvas.height-60,32,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#c084fc';ctx.font='10px Fredoka One,cursive';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('DRAG',canvas.width/2,canvas.height-60);}
-  }else{const jcx=canvas.width/2,jcy=canvas.height-95;const aa=joyActive?0.55:0.22;ctx.globalAlpha=aa;ctx.strokeStyle=joyActive?'#c084fc':'#a855f7';ctx.lineWidth=joyActive?3:2.5;ctx.beginPath();ctx.arc(jcx,jcy,72,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=joyActive?'rgba(220,160,255,0.6)':'rgba(168,85,247,0.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(jcx,jcy,28,0,Math.PI*2);ctx.stroke();ctx.fillStyle=joyActive?'rgba(220,170,255,0.8)':'rgba(192,132,252,0.4)';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('▲',jcx,jcy-52);ctx.fillText('▼',jcx,jcy+52);ctx.fillText('◀',jcx-52,jcy);ctx.fillText('▶',jcx+52,jcy);ctx.globalAlpha=joyActive?0.6:0.28;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(jcx,jcy,14,0,Math.PI*2);ctx.fill();}
+  }else{const jcx=canvas.width/2,jcy=canvas.height-95;const aa=joyActive?0.55:0.22;ctx.globalAlpha=aa;ctx.strokeStyle=joyActive?'#c084fc':'#a855f7';ctx.lineWidth=joyActive?3:2.5;ctx.beginPath();ctx.arc(jcx,jcy,72,0,Math.PI*2);ctx.stroke();ctx.fillStyle=joyActive?'rgba(220,170,255,0.8)':'rgba(192,132,252,0.4)';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('▲',jcx,jcy-52);ctx.fillText('▼',jcx,jcy+52);ctx.fillText('◀',jcx-52,jcy);ctx.fillText('▶',jcx+52,jcy);ctx.globalAlpha=joyActive?0.6:0.28;ctx.fillStyle='#c084fc';ctx.beginPath();ctx.arc(jcx,jcy,14,0,Math.PI*2);ctx.fill();}
   ctx.restore();
 }
 
 function startGame(){
   panel.style.borderColor='';panel.style.boxShadow='';panel.classList.add('hidden');
   setTouchOverlay(true);if(isMobile)applyInputMode();
-  // Utilise MAX_LIVES tel que défini par detectFranc
-  lives=MAX_LIVES;
+  lives=MAX_LIVES; // MAX_LIVES est déjà défini par detectFranc()
+  console.log('startGame: MAX_LIVES='+MAX_LIVES+' hasFranc='+hasFranc);
   clearTimeout(lifeGainTimeout);const lgEl=document.getElementById('lifeGainMsg');if(lgEl){lgEl.style.animation='none';lgEl.style.opacity='0';lgEl.style.display='none';}
   gameState='play';score=0;lastLifeBonusScore=-1;enemies=[];coins=[];bullets=[];particles=[];floatingTexts=[];
   lastLevel=1;shootCooldown=0;frameCount=0;eliteCounter=0;
@@ -563,9 +506,7 @@ function draw(){
 function showGameOver(){
   panel.style.borderColor='rgba(200,0,0,0.6)';panel.style.boxShadow='0 0 80px rgba(180,0,0,0.7)';
   const sc=getLocalScores();const rankIdx=sc.findIndex(s=>s.score===score);const rank=rankIdx+1;
-  let rankHtml='';
-  if(rank===1)rankHtml='<div style="color:#FFD700;font-size:15px;margin:6px 0">🥇 NEW RECORD!</div>';
-  else if(rank>=2&&rank<=3)rankHtml=`<div style="color:#C0C0C0;font-size:13px;margin:6px 0">🏅 Podium #${rank}!</div>`;
+  let rankHtml='';if(rank===1)rankHtml='<div style="color:#FFD700;font-size:15px;margin:6px 0">🥇 NEW RECORD!</div>';else if(rank>=2&&rank<=3)rankHtml=`<div style="color:#C0C0C0;font-size:13px;margin:6px 0">🏅 Podium #${rank}!</div>`;
   panel.innerHTML=`
     <h2 style="color:#ff0000;font-size:36px;text-shadow:0 0 20px #ff0000;letter-spacing:3px">💀 GAME OVER</h2>
     <p style="font-size:22px;color:#FFD700;margin:8px 0;font-family:'Bangers',cursive;letter-spacing:2px"><b>${score}</b> eggs — Level <b>${getLevel(score)}</b></p>
@@ -576,49 +517,24 @@ function showGameOver(){
     <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">TOP 10</b>
     <div class="score-section" id="goScoreSection" style="margin-top:6px"></div>`;
   panel.classList.remove('hidden');
-  // Charge le score panel
-  const goSec=document.getElementById('goScoreSection');
-  if(goSec){
-    goSec.innerHTML='<div style="color:#c9aaee;font-size:11px;padding:8px;text-align:center">⏳ Loading...</div>';
-    fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'leaderboard',game_id:'francrun',limit:10})})
-    .then(r=>r.ok?r.json():null).then(data=>{
-      const rows=data?.leaderboard||[];
-      if(!rows.length){renderGoLocalScores(goSec);return;}
-      const tg=window.Telegram?.WebApp;
-      const myId=tg?.initDataUnsafe?.user?.id?.toString();
-      const medals=['🥇','🥈','🥉'];
-      let html='<ul class="slist">';
-      rows.forEach((r,i)=>{
-        const name=r.telegram_name||r.telegram_username||'Player';
-        const franc=r.has_franc?'<span style="color:#FFD700"> 💎</span>':'';
-        const isMe=(r.telegram_id===myId||r.telegram_id===parseInt(myId));
-        const bg=isMe?'background:rgba(255,215,0,0.06);border-radius:6px':'';
-        html+=`<li style="${bg}"><span>${medals[i]||'#'+(i+1)} <b>${name}</b>${franc}${isMe?' 👈':''}</span><span style="color:#FFD700;font-family:Bangers,cursive">${r.best_score||r.score||0} 🥚</span></li>`;
-      });
-      html+='</ul>';
-      goSec.innerHTML=html;
-    }).catch(()=>renderGoLocalScores(goSec));
-  }
-}
-function renderGoLocalScores(el){
-  const sc=getLocalScores();if(!sc.length){el.innerHTML='<div style="color:#888;font-size:12px;text-align:center;padding:8px">No scores yet</div>';return;}
-  let h='<ul class="slist">';sc.forEach((s,i)=>{h+=`<li><span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} Lvl${s.level||'?'} ${s.date}</span><span style="color:#FFD700;font-family:Bangers,cursive">${s.score}</span></li>`;});h+='</ul>';el.innerHTML=h;
+  renderScorePanel(document.getElementById('goScoreSection'));
 }
 
 function goMenu(){
   gameState='menu';msgEl.className='';setTouchOverlay(false);
-  panel.style.borderColor='';panel.style.boxShadow='';
-  scorePanelOpen=false;
+  panel.style.borderColor='';panel.style.boxShadow='';scorePanelOpen=false;
   panel.innerHTML=`
     <h2>🐓 FRANC RUN</h2>
     <p>Collect golden eggs &amp; dodge enemies!<br>
     <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
     <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
-    <button class="btn btn-play" id="playBtn" onclick="handlePlay()">▶ PLAY</button>
-    <div class="play-loading" id="playLoading">🔄 Checking wallet...</div>
+    <button class="btn btn-play" id="playBtn" onclick="startGame()" style="opacity:0.5" disabled>⏳ Loading...</button>
     <button class="wallet-btn ${hasFranc?'connected':'disconnected'}" onclick="goToWallet()">
-      <div class="wt-main">${hasFranc?'✅ WALLET CONNECTED':'TAP TO UNLOCK 10 LIVES 🔓'}</div>
-      <div class="wt-sub">${hasFranc?`$FRANC detected — ${MAX_LIVES} lives unlocked!`:walletLinked?'Wallet connected — buy $FRANC to unlock':'Wallet not connected'}</div>
+      <span class="wlock">${hasFranc?'🔓':'🔒'}</span>
+      <span class="wtxt">
+        <span class="wt-main">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
+        <span class="wt-sub">${hasFranc?`$FRANC detected — ${MAX_LIVES} lives unlocked!`:walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
+      </span>
     </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
     <button class="btn btn-blue" onclick="toggleScorePanel()">🏆 High Scores</button>
@@ -629,12 +545,11 @@ function goMenu(){
         <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
         <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1</b>/100 eggs + <b style="color:#00eeff">triple shot</b>
       </div>
-      ${hasFranc?`<div style="margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center"><span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b></div>`:''}
+      ${hasFranc?`<div style="margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center">✅ $FRANC detected! <b style="color:#FFD700">${MAX_LIVES} lives</b></div>`:''}
     </div>`;
   panel.classList.remove('hidden');
-  // francReady est déjà true depuis la dernière détection
-  const pb=document.getElementById('playBtn');const pl=document.getElementById('playLoading');
-  if(pb)pb.style.display='block';if(pl)pl.style.display='none';
+  // Relance la détection
+  detectFranc();
 }
 
 function loop(){update();draw();scoreEl.textContent=score;levelEl.textContent=getLevel(score);requestAnimationFrame(loop);}
