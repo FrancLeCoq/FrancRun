@@ -40,7 +40,6 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .slist{text-align:left;margin:8px 0;max-height:180px;overflow-y:auto}
 .slist li{padding:5px 8px;border-bottom:1px solid rgba(180,100,255,0.1);font-size:12px;list-style:none;display:flex;justify-content:space-between}
 .franc-box{margin-top:12px;padding:11px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:12px;text-align:left}
-/* Wallet badge grand format */
 .wallet-btn{width:100%;padding:14px 16px;border-radius:14px;margin-top:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:none;touch-action:manipulation;transition:all 0.15s;text-align:center}
 .wallet-btn:active{transform:scale(0.97);opacity:0.85}
 .wallet-btn.disconnected{background:linear-gradient(135deg,rgba(217,119,6,0.25),rgba(180,90,0,0.2));border:2px solid rgba(217,119,6,0.6)}
@@ -109,14 +108,19 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 </div>
 
 <script>
-const SUPABASE = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
+const SUPABASE     = 'https://mubqtnqulpyehkgubhnh.supabase.co/functions/v1';
+const WALLET_URL   = 'https://franclecoq.github.io/Wallet/connect-wallet.html';
 
 // ══ WALLET ════════════════════════════════════════════════════
+// Ouvre connect-wallet.html directement dans le WebView Telegram
+// Le joueur reste dans le même contexte → initData transmis
 function goToWallet(){
   const tg=window.Telegram?.WebApp;
-  const url='https://t.me/FrancisLeCoqBot/wallet';
-  if(tg&&tg.openTelegramLink) tg.openTelegramLink(url);
-  else window.open(url,'_blank');
+  if(tg&&tg.openLink){
+    tg.openLink(WALLET_URL);
+  } else {
+    window.location.href=WALLET_URL;
+  }
 }
 
 function updateWalletBadge(){
@@ -208,25 +212,49 @@ function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(
 
 // ══ $FRANC ════════════════════════════════════════════════════
 let MAX_LIVES=1,hasFranc=false,walletLinked=false,totalEggsEver=0;
+
 async function detectFranc(){
-  const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
+  const tg=window.Telegram?.WebApp;
+  if(tg){tg.ready();tg.expand();}
   try{totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0');}catch(e){}
   if(!tg||!tg.initData){MAX_LIVES=1;hasFranc=false;updateWalletBadge();return;}
   try{
-    const res=await fetch(SUPABASE+'/check-franc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun'})});
+    const res=await fetch(SUPABASE+'/check-franc',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({initData:tg.initData,game_id:'francrun'})
+    });
     if(res.ok){
       const d=await res.json();
-      console.log('check-franc:',JSON.stringify(d));
+      console.log('check-franc response:',JSON.stringify(d));
       hasFranc=d.hasFranc||false;
       walletLinked=d.walletLinked||false;
       MAX_LIVES=d.lives||1;
     }
-  }catch(e){console.error('check-franc error:',e);hasFranc=false;}
-  MAX_LIVES=hasFranc?Math.max(MAX_LIVES,10):1;
+  }catch(e){
+    console.error('check-franc error:',e);
+    hasFranc=false;
+  }
+  if(hasFranc) MAX_LIVES=Math.max(MAX_LIVES,10);
   updateWalletBadge();
   const badge=document.getElementById('francBadge');
-  if(badge){if(hasFranc){const bonus=Math.floor(totalEggsEver/100);badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;badge.style.display='block';}else badge.style.display='none';}
+  if(badge){
+    if(hasFranc){
+      const bonus=Math.floor(totalEggsEver/100);
+      badge.innerHTML=`<span style="color:#a3e635">✅ $FRANC detected!</span> <b style="color:#FFD700">${MAX_LIVES} lives</b>${bonus>0?' (+'+bonus+' bonus)':''}`;
+      badge.style.display='block';
+    } else {
+      badge.style.display='none';
+    }
+  }
 }
+
+// Refresh au retour de la page wallet (visibilitychange)
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && gameState==='menu'){
+    detectFranc();
+  }
+});
+
 function saveCumulativeEggs(n){
   const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
   if(hasFranc){const prevLives=10+Math.floor(prevEggs/100);const newLives=10+Math.floor(totalEggsEver/100);MAX_LIVES=newLives;if(newLives>prevLives&&gameState==='play'&&lives>0){lives=Math.min(lives+1,MAX_LIVES);updateLivesBar(lives);showLifeGain();}}
