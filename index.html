@@ -414,7 +414,9 @@ function drawMobileHints(){
 function startGame(){
   panel.style.borderColor='';panel.style.boxShadow='';panel.classList.add('hidden');
   setTouchOverlay(true);if(isMobile)applyInputMode();
-  lives=MAX_LIVES; // MAX_LIVES est déjà défini par detectFranc()
+  // Recalcule MAX_LIVES proprement à chaque nouvelle partie
+  MAX_LIVES = hasFranc ? 10 + Math.floor(totalEggsEver / 100) : 1;
+  lives=MAX_LIVES;
   console.log('startGame: MAX_LIVES='+MAX_LIVES+' hasFranc='+hasFranc);
   clearTimeout(lifeGainTimeout);const lgEl=document.getElementById('lifeGainMsg');if(lgEl){lgEl.style.animation='none';lgEl.style.opacity='0';lgEl.style.display='none';}
   gameState='play';score=0;lastLifeBonusScore=-1;enemies=[];coins=[];bullets=[];particles=[];floatingTexts=[];
