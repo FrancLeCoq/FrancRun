@@ -301,10 +301,15 @@ async function detectFranc(){
   updateWalletBadge();
 }
 
-// Refresh au retour
+// Refresh au retour de la page wallet (visibilitychange)
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'&&gameState==='menu') detectFranc();
 });
+
+// Refresh automatique toutes les 10s sur le menu (détecte connexion wallet)
+setInterval(()=>{
+  if(gameState==='menu'&&document.visibilityState==='visible') detectFranc();
+}, 10000);
 
 detectFranc(); // Lance au démarrage
 
