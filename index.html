@@ -289,7 +289,7 @@ async function detectFranc(){
         console.log('check-franc:',JSON.stringify(d));
         hasFranc   = d.hasFranc   || false;
         walletLinked = d.walletLinked || false;
-        MAX_LIVES  = hasFranc ? Math.max(d.lives||10, 10) : 1;
+        MAX_LIVES = hasFranc ? (d.lives || 10) : 1; // valeur serveur uniquement
       }
     }catch(e){
       console.error('check-franc error:',e);
@@ -415,7 +415,7 @@ function startGame(){
   panel.style.borderColor='';panel.style.boxShadow='';panel.classList.add('hidden');
   setTouchOverlay(true);if(isMobile)applyInputMode();
   // Recalcule MAX_LIVES proprement à chaque nouvelle partie
-  MAX_LIVES = hasFranc ? 10 + Math.floor(totalEggsEver / 100) : 1;
+  MAX_LIVES = hasFranc ? MAX_LIVES : 1; // garde la valeur serveur
   lives=MAX_LIVES;
   console.log('startGame: MAX_LIVES='+MAX_LIVES+' hasFranc='+hasFranc);
   clearTimeout(lifeGainTimeout);const lgEl=document.getElementById('lifeGainMsg');if(lgEl){lgEl.style.animation='none';lgEl.style.opacity='0';lgEl.style.display='none';}
