@@ -315,7 +315,7 @@ detectFranc(); // Lance au démarrage
 
 function saveCumulativeEggs(n){
   const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
-  if(hasFranc){const prevLives=10+Math.floor(prevEggs/100);const newLives=10+Math.floor(totalEggsEver/100);MAX_LIVES=newLives;if(newLives>prevLives&&gameState==='play'&&lives>0){lives=Math.min(lives+1,MAX_LIVES);updateLivesBar(lives);showLifeGain();}}
+  if(hasFranc){const prevLives=10+Math.floor(prevEggs/100);const newLives=10+Math.floor(totalEggsEver/100);if(newLives>prevLives&&gameState==='play'&&lives>0){lives++;updateLivesBar(lives);showLifeGain();}}
   const tg=window.Telegram?.WebApp;
   if(tg?.initData){fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
 }
@@ -415,7 +415,7 @@ function startGame(){
   panel.style.borderColor='';panel.style.boxShadow='';panel.classList.add('hidden');
   setTouchOverlay(true);if(isMobile)applyInputMode();
   // Recalcule MAX_LIVES proprement à chaque nouvelle partie
-  MAX_LIVES = hasFranc ? MAX_LIVES : 1; // garde la valeur serveur
+  MAX_LIVES = hasFranc ? 10 : 1; // toujours 10 au départ
   lives=MAX_LIVES;
   console.log('startGame: MAX_LIVES='+MAX_LIVES+' hasFranc='+hasFranc);
   clearTimeout(lifeGainTimeout);const lgEl=document.getElementById('lifeGainMsg');if(lgEl){lgEl.style.animation='none';lgEl.style.opacity='0';lgEl.style.display='none';}
@@ -482,7 +482,7 @@ function update(){
   enemies.forEach(e=>{e.t++;const edx=player.x-e.x,edy=player.y-e.y,ed=Math.hypot(edx,edy)||1;const spd=(e.elite?1.5:1)*getEnemySpeed(lvl);if(e.homing){e.x+=edx/ed*spd;e.y+=edy/ed*spd;}else{e.x+=e.vx;e.y+=e.vy;}if(Math.hypot(player.x-e.x,player.y-e.y)<(e.big?42:32)*SCALE&&player.inv<=0){lives--;player.inv=300;playSound('hit');triggerShake(10,22);spawnParticles(player.x,player.y,'#ffcc00',12);playerAnim.squish=0.7;updateLivesBar(lives);if(lives<=0){lives=0;updateLivesBar(0);playSound('die');triggerShake(22,70);floatingTexts=[];particles=[];clearTimeout(lifeGainTimeout);const lgEl=document.getElementById('lifeGainMsg');if(lgEl){lgEl.style.animation='none';lgEl.style.opacity='0';lgEl.style.display='none';}saveCumulativeEggs(score);saveLocalScore(score,getLevel(score));gameState='dying';setTouchOverlay(false);showMsg('GAME OVER',99999,'gameover');setTimeout(()=>{gameState='gameover';showGameOver();},1800);}}});
   enemies=enemies.filter(e=>e.x>-80&&e.x<canvas.width+80&&e.y>-80&&e.y<canvas.height+80);
   coins.forEach(c=>{c.x+=c.vx;c.y+=c.vy;c.t++;});
-  coins=coins.filter(c=>{if(Math.hypot(player.x-c.x,player.y-c.y)<30*SCALE){score++;playSound('coin');spawnParticles(c.x,c.y,'#FFD700',10);spawnParticles(c.x,c.y,'#fff',4);addFloatText(c.x,c.y-20,'+1',null,20);playerAnim.squish=1.25;const curLvl=getLevel(score);if(hasFranc&&score>0&&score%100===0&&score!==lastLifeBonusScore&&lives>1&&gameState==='play'&&!isMortSubite(curLvl)){lastLifeBonusScore=score;lives=Math.min(lives+1,MAX_LIVES+1);MAX_LIVES=Math.max(MAX_LIVES,lives);updateLivesBar(lives);showLifeGain();}return false;}return c.x>-50&&c.x<canvas.width+50&&c.y>-50&&c.y<canvas.height+50;});
+  coins=coins.filter(c=>{if(Math.hypot(player.x-c.x,player.y-c.y)<30*SCALE){score++;playSound('coin');spawnParticles(c.x,c.y,'#FFD700',10);spawnParticles(c.x,c.y,'#fff',4);addFloatText(c.x,c.y-20,'+1',null,20);playerAnim.squish=1.25;const curLvl=getLevel(score);if(hasFranc&&score>0&&score%100===0&&score!==lastLifeBonusScore&&lives>1&&gameState==='play'&&!isMortSubite(curLvl)){lastLifeBonusScore=score;lives=lives+1;updateLivesBar(lives);showLifeGain();}return false;}return c.x>-50&&c.x<canvas.width+50&&c.y>-50&&c.y<canvas.height+50;});
   particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=0.91;p.vy*=0.91;p.life--;return p.life>0;});
   floatingTexts=floatingTexts.filter(ft=>{ft.y+=ft.vy;ft.life--;return ft.life>0;});
   if(player.inv>0)player.inv--;
