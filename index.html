@@ -24,7 +24,7 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 #msg.show{opacity:1}
 #msg.gameover{color:#cc0000;text-shadow:0 0 30px #ff0000,0 0 60px #880000,0 0 100px #440000;font-size:72px;animation:bloodPulse 0.5s ease-in-out infinite alternate}
 @keyframes bloodPulse{0%{text-shadow:0 0 50px #ff0000,0 0 100px #cc0000,0 0 150px #880000,0 0 200px #440000;color:#880000;transform:translate(-50%,-50%) scale(0.92) skewX(-1deg)}100%{text-shadow:0 0 80px #ff2200,0 0 150px #ff0000,0 0 220px #cc0000,0 0 300px #880000;color:#ff0000;transform:translate(-50%,-50%) scale(1.08) skewX(1deg)}}
-#levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:4px}
+#levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:4px;text-align:center;white-space:normal;line-height:1.1}
 #levelup.show{opacity:1}
 #panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;max-height:92vh;overflow-y:auto;background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));color:#fff;padding:26px 22px;border-radius:22px;z-index:20;border:2px solid rgba(180,100,255,0.35);box-shadow:0 0 60px rgba(120,40,200,0.4);text-align:center}
 #panel.hidden{display:none!important}
@@ -276,7 +276,7 @@ async function detectFranc(){
 
   const tg=window.Telegram?.WebApp;
   if(tg){tg.ready();tg.expand();}
-  try{totalEggsEver=parseInt(localStorage.getItem('lcfTotalEggs')||'0');}catch(e){}
+  totalEggsEver=0; // bonus vies désactivé
 
   if(tg&&tg.initData){
     try{
@@ -314,8 +314,6 @@ setInterval(()=>{
 detectFranc(); // Lance au démarrage
 
 function saveCumulativeEggs(n){
-  const prevEggs=totalEggsEver;totalEggsEver+=n;try{localStorage.setItem('lcfTotalEggs',totalEggsEver);}catch(e){}
-  if(hasFranc){const prevLives=10+Math.floor(prevEggs/100);const newLives=10+Math.floor(totalEggsEver/100);if(newLives>prevLives&&gameState==='play'&&lives>0){lives++;updateLivesBar(lives);showLifeGain();}}
   const tg=window.Telegram?.WebApp;
   if(tg?.initData){fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
 }
@@ -359,9 +357,9 @@ function clearEnemiesExplosion(c1,c2){enemies.forEach(e=>{spawnParticles(e.x,e.y
 function showLevelUp(lvl){
   clearTimeout(levelupTimeout);
   if(isMortSubite(lvl)){levelupEl.textContent='💀 SUDDEN DEATH!';levelupEl.style.color='#ff2222';levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';clearEnemiesExplosion('#ff4400','#ffaa00');setTimeout(()=>{weaponEl.style.fontSize='13px';weaponEl.textContent='🏆 FIGHT TO THE DEATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);},600);}
-  else{levelupEl.textContent='⭐ LEVEL '+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
+  else{levelupEl.innerHTML='⭐ LEVEL<br>'+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
     if(lvl===7){clearEnemiesExplosion('#a855f7','#FFD700');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! CATCH YOUR BREATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
-    if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 LAST CHANCE TO BREATHE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
+    if(lvl===8){clearEnemiesExplosion('#ff6600','#ff4400');setTimeout(()=>{weaponEl.textContent='🔥 THINGS ARE HEATING UP!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 LAST CHANCE TO BREATHE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
     if(lvl===10){clearEnemiesExplosion('#ff0000','#cc0000');setTimeout(()=>{weaponEl.textContent='☠️ SUDDEN DEATH AWAITS!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3500);},400);}
   }
   levelupEl.className='show';levelupTimeout=setTimeout(()=>{levelupEl.className='';},2500);playSound('levelup');
@@ -482,7 +480,7 @@ function update(){
   enemies.forEach(e=>{e.t++;const edx=player.x-e.x,edy=player.y-e.y,ed=Math.hypot(edx,edy)||1;const spd=(e.elite?1.5:1)*getEnemySpeed(lvl);if(e.homing){e.x+=edx/ed*spd;e.y+=edy/ed*spd;}else{e.x+=e.vx;e.y+=e.vy;}if(Math.hypot(player.x-e.x,player.y-e.y)<(e.big?42:32)*SCALE&&player.inv<=0){lives--;player.inv=300;playSound('hit');triggerShake(10,22);spawnParticles(player.x,player.y,'#ffcc00',12);playerAnim.squish=0.7;updateLivesBar(lives);if(lives<=0){lives=0;updateLivesBar(0);playSound('die');triggerShake(22,70);floatingTexts=[];particles=[];clearTimeout(lifeGainTimeout);const lgEl=document.getElementById('lifeGainMsg');if(lgEl){lgEl.style.animation='none';lgEl.style.opacity='0';lgEl.style.display='none';}saveCumulativeEggs(score);saveLocalScore(score,getLevel(score));gameState='dying';setTouchOverlay(false);showMsg('GAME OVER',99999,'gameover');setTimeout(()=>{gameState='gameover';showGameOver();},1800);}}});
   enemies=enemies.filter(e=>e.x>-80&&e.x<canvas.width+80&&e.y>-80&&e.y<canvas.height+80);
   coins.forEach(c=>{c.x+=c.vx;c.y+=c.vy;c.t++;});
-  coins=coins.filter(c=>{if(Math.hypot(player.x-c.x,player.y-c.y)<30*SCALE){score++;playSound('coin');spawnParticles(c.x,c.y,'#FFD700',10);spawnParticles(c.x,c.y,'#fff',4);addFloatText(c.x,c.y-20,'+1',null,20);playerAnim.squish=1.25;const curLvl=getLevel(score);if(hasFranc&&score>0&&score%100===0&&score!==lastLifeBonusScore&&lives>1&&gameState==='play'&&!isMortSubite(curLvl)){lastLifeBonusScore=score;lives=lives+1;updateLivesBar(lives);showLifeGain();}return false;}return c.x>-50&&c.x<canvas.width+50&&c.y>-50&&c.y<canvas.height+50;});
+  coins=coins.filter(c=>{if(Math.hypot(player.x-c.x,player.y-c.y)<30*SCALE){score++;playSound('coin');spawnParticles(c.x,c.y,'#FFD700',10);spawnParticles(c.x,c.y,'#fff',4);addFloatText(c.x,c.y-20,'+1',null,20);playerAnim.squish=1.25;const curLvl=getLevel(score);return false;}return c.x>-50&&c.x<canvas.width+50&&c.y>-50&&c.y<canvas.height+50;});
   particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=0.91;p.vy*=0.91;p.life--;return p.life>0;});
   floatingTexts=floatingTexts.filter(ft=>{ft.y+=ft.vy;ft.life--;return ft.life>0;});
   if(player.inv>0)player.inv--;
