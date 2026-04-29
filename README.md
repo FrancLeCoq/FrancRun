@@ -38,7 +38,6 @@ Hold [$FRANC](https://solana.com) in your Solana wallet to unlock exclusive in-g
 |---|---|---|
 | ❤️ Lives | 1 | **10** |
 | 🔫 Weapon | Basic | **Triple shot** |
-| 💀 Sudden Death lives | ❌ | ❌ |
 
 > Connect your wallet via [@FrancisLeCoqBot](https://t.me/FrancisLeCoqBot) or the in-game wallet button.
 
