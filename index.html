@@ -24,7 +24,7 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 #msg.show{opacity:1}
 #msg.gameover{color:#cc0000;text-shadow:0 0 30px #ff0000,0 0 60px #880000,0 0 100px #440000;font-size:72px;animation:bloodPulse 0.5s ease-in-out infinite alternate}
 @keyframes bloodPulse{0%{text-shadow:0 0 50px #ff0000,0 0 100px #cc0000,0 0 150px #880000,0 0 200px #440000;color:#880000;transform:translate(-50%,-50%) scale(0.92) skewX(-1deg)}100%{text-shadow:0 0 80px #ff2200,0 0 150px #ff0000,0 0 220px #cc0000,0 0 300px #880000;color:#ff0000;transform:translate(-50%,-50%) scale(1.08) skewX(1deg)}}
-#levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:4px;text-align:center;white-space:normal;line-height:1.1}
+#levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:46px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:3px;white-space:nowrap;text-align:center}
 #levelup.show{opacity:1}
 #panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;max-height:92vh;overflow-y:auto;background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));color:#fff;padding:26px 22px;border-radius:22px;z-index:20;border:2px solid rgba(180,100,255,0.35);box-shadow:0 0 60px rgba(120,40,200,0.4);text-align:center}
 #panel.hidden{display:none!important}
@@ -117,7 +117,7 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
     <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:8px">💎 $FRANC RULES</div>
     <div style="font-size:12px;color:#c9aaee;line-height:2">
       <div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💔</span><span><span style="color:#ff8888">Without $FRANC:</span> <b style="color:#fff">1 life only</b></span></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span><br><b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1 life</b>/100 eggs<br><b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-top:4px"><span style="font-size:18px">❤️</span><span><span style="color:#a3e635">Hold $FRANC:</span><br><b style="color:#FFD700">10 lives</b> + <b style="color:#00eeff">+ triple shot</b> 🔫🔫🔫</span></div>
     </div>
   </div>
 </div>
@@ -357,7 +357,7 @@ function clearEnemiesExplosion(c1,c2){enemies.forEach(e=>{spawnParticles(e.x,e.y
 function showLevelUp(lvl){
   clearTimeout(levelupTimeout);
   if(isMortSubite(lvl)){levelupEl.textContent='💀 SUDDEN DEATH!';levelupEl.style.color='#ff2222';levelupEl.style.textShadow='0 0 20px #ff0000,0 0 40px #ff0000';clearEnemiesExplosion('#ff4400','#ffaa00');setTimeout(()=>{weaponEl.style.fontSize='13px';weaponEl.textContent='🏆 FIGHT TO THE DEATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},5000);},600);}
-  else{levelupEl.innerHTML='⭐ LEVEL<br>'+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
+  else{levelupEl.textContent='⭐ LEVEL '+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
     if(lvl===7){clearEnemiesExplosion('#a855f7','#FFD700');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! CATCH YOUR BREATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
     if(lvl===8){clearEnemiesExplosion('#ff6600','#ff4400');setTimeout(()=>{weaponEl.textContent='🔥 THINGS ARE HEATING UP!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 LAST CHANCE TO BREATHE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
     if(lvl===10){clearEnemiesExplosion('#ff0000','#cc0000');setTimeout(()=>{weaponEl.textContent='☠️ SUDDEN DEATH AWAITS!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3500);},400);}
@@ -456,7 +456,7 @@ function drawParticle(p){ctx.save();ctx.globalAlpha=p.life/p.maxLife;ctx.fillSty
 function update(){
   if(gameState!=='play')return;frameCount++;updatePlayerMovement();
   const lvl=getLevel(score);
-  if(lvl!==lastLevel&&lvl<=MAX_LEVEL){showLevelUp(lvl);lastLevel=lvl;spawnParticles(player.x,player.y,'#FFD700',20,true);spawnParticles(player.x,player.y,'#a855f7',15,true);if(lvl===7||lvl===9||lvl===10||isMortSubite(lvl))player.inv=Math.max(player.inv,180);}
+  if(lvl!==lastLevel&&lvl<=MAX_LEVEL){showLevelUp(lvl);lastLevel=lvl;spawnParticles(player.x,player.y,'#FFD700',20,true);spawnParticles(player.x,player.y,'#a855f7',15,true);if(lvl===7||lvl===8||lvl===9||lvl===10||isMortSubite(lvl))player.inv=Math.max(player.inv,180);}
   updateProgressBar();
   const effectiveLvl=isMortSubite(lvl)?getMortSubiteTier():lvl;const mBonus=isMobile?20:0;
   let base;if(effectiveLvl===1)base=70+mBonus;else if(effectiveLvl===2)base=55+mBonus;else if(effectiveLvl===3)base=42+mBonus;else if(effectiveLvl===4)base=32+mBonus;else if(effectiveLvl===5)base=26+mBonus;else if(effectiveLvl===6)base=22+mBonus;else if(effectiveLvl===7)base=20+mBonus;else if(effectiveLvl===8)base=16+mBonus;else if(effectiveLvl===9)base=13+mBonus;else if(effectiveLvl===10)base=10+mBonus;else base=Math.max(6,10-(effectiveLvl-11)*0.8)+mBonus;
@@ -548,7 +548,7 @@ function goMenu(){
       <div style="font-family:'Bangers',cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:6px">💎 $FRANC RULES</div>
       <div style="font-size:11px;color:#c9aaee;line-height:1.7">
         <span style="color:#ff8888">🖤 Without $FRANC:</span> <b style="color:#fff">1 life</b> only<br>
-        <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">10 lives</b> + <b style="color:#FFD700">+1</b>/100 eggs + <b style="color:#00eeff">triple shot</b>
+        <span style="color:#a3e635">💚 Holding $FRANC:</span> <b style="color:#FFD700">10 lives</b> + <b style="color:#00eeff">triple shot</b>
       </div>
       ${hasFranc?`<div style="margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center">✅ $FRANC detected! <b style="color:#FFD700">${MAX_LIVES} lives</b></div>`:''}
     </div>`;
