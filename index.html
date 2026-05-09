@@ -187,7 +187,13 @@ const chickenImg=new Image(),coinImg=new Image();
 chickenImg.src='https://franclecoq.github.io/FrancRun/coq_pilote.png';
 coinImg.src='https://franclecoq.github.io/FrancRun/piece_1f.png';
 
-const isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||window.innerWidth<700;
+// Détection mobile améliorée — robuste sur web.telegram.com
+const isMobile=(()=>{
+  const ua=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const narrow=window.innerWidth<700;
+  const touch=navigator.maxTouchPoints>0&&!window.matchMedia('(pointer:fine)').matches;
+  return ua||( narrow&&touch);
+})();
 const SCALE=isMobile?0.58:1.0,MOBILE_SPD=isMobile?0.35:1.0;
 
 const AC=new(window.AudioContext||window.webkitAudioContext)();
@@ -390,7 +396,38 @@ if(isMobile){
   touchZone.addEventListener('touchcancel',e=>{if(inputMode==='joystick'){joyActive=false;joyDX=0;joyDY=0;resetStickCenter();}else{dragActive=false;fingerRing.active=false;}},{passive:false});
 }
 let targetX=canvas.width/2,targetY=canvas.height/2;
-window.addEventListener('mousemove',e=>{if(gameState==='play'){targetX=e.clientX;targetY=e.clientY;}});
+// Souris — écoute sur document ET canvas pour compatibilité iframe Telegram
+function handleMouseMove(e){
+  if(gameState!=='play')return;
+  // Calcule la position relative au canvas (fonctionne dans iframe)
+  const rect=canvas.getBoundingClientRect();
+  targetX=e.clientX-rect.left;
+  targetY=e.clientY-rect.top;
+}
+window.addEventListener('mousemove',handleMouseMove);
+document.addEventListener('mousemove',handleMouseMove);
+canvas.style.pointerEvents='auto'; // Active les events sur le canvas
+
+// ── Clavier — flèches + WASD + ZQSD (AZERTY) ──────────────────
+const keys={};
+window.addEventListener('keydown',e=>{keys[e.key]=true;e.preventDefault&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)&&e.preventDefault();});
+window.addEventListener('keyup',e=>{keys[e.key]=false;});
+
+const KB_SPEED=4.5;
+function applyKeyboard(){
+  if(!player||gameState!=='play')return;
+  let dx=0,dy=0;
+  if(keys['ArrowLeft']||keys['a']||keys['A']||keys['q']||keys['Q'])dx-=KB_SPEED;
+  if(keys['ArrowRight']||keys['d']||keys['D'])dx+=KB_SPEED;
+  if(keys['ArrowUp']||keys['w']||keys['W']||keys['z']||keys['Z'])dy-=KB_SPEED;
+  if(keys['ArrowDown']||keys['s']||keys['S'])dy+=KB_SPEED;
+  if(dx!==0&&dy!==0){dx*=0.707;dy*=0.707;} // Normalise diagonales
+  if(dx!==0||dy!==0){
+    player.x=Math.max(20,Math.min(canvas.width-20,player.x+dx));
+    player.y=Math.max(20,Math.min(canvas.height-40,player.y+dy));
+    targetX=player.x;targetY=player.y; // Sync pour éviter le retour à la souris
+  }
+}
 function setTouchOverlay(on){gameTouch.style.display='none';touchZone.style.display=(on&&isMobile)?'block':'none';modeBtnEl.style.display=(on&&isMobile)?'block':'none';if(!on){hideJoy();dragActive=false;fingerRing.active=false;}if(on&&isMobile){applyInputMode();if(inputMode==='joystick')showJoyBase();}}
 function updatePlayerMovement(){
   if(!player||gameState!=='play')return;
@@ -398,7 +435,13 @@ function updatePlayerMovement(){
     if(inputMode==='joystick'){if(joyActive&&(Math.abs(joyDX)>0.04||Math.abs(joyDY)>0.04)){const norm=Math.hypot(joyDX,joyDY);const curve=norm*norm*0.4+norm*0.6;const ang=Math.atan2(joyDY,joyDX);const speed=curve*JOY_SPEED_MAX;player.x=Math.max(20,Math.min(canvas.width-20,player.x+Math.cos(ang)*speed));player.y=Math.max(20,Math.min(canvas.height-40,player.y+Math.sin(ang)*speed));}}
     else{const FINGER_OFFSET_Y=85;if(dragActive){player.x+=(dragTouchX-player.x)*DRAG_LERP;player.y+=((dragTouchY-FINGER_OFFSET_Y)-player.y)*DRAG_LERP;player.x=Math.max(20,Math.min(canvas.width-20,player.x));player.y=Math.max(20,Math.min(canvas.height-40,player.y));}}
     if(!fingerRing.active&&fingerRing.alpha>0)fingerRing.alpha=Math.max(0,fingerRing.alpha-0.06);
-  }else{player.x+=(targetX-player.x)*0.22;player.y+=(targetY-player.y)*0.22;player.x=Math.max(20,Math.min(canvas.width-20,player.x));player.y=Math.max(20,Math.min(canvas.height-40,player.y));}
+  }else{
+    applyKeyboard(); // Clavier en priorité
+    player.x+=(targetX-player.x)*0.22;
+    player.y+=(targetY-player.y)*0.22;
+    player.x=Math.max(20,Math.min(canvas.width-20,player.x));
+    player.y=Math.max(20,Math.min(canvas.height-40,player.y));
+  }
 }
 function drawMobileHints(){
   if(!isMobile)return;ctx.save();
