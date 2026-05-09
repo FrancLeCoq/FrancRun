@@ -9,8 +9,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#111;font-family:'Fredoka One',cursive;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
-#gameWrapper{position:relative;width:min(100vw,420px);height:min(100vh,900px);overflow:hidden;background:#0d0520;}
-canvas{position:absolute;inset:0;z-index:1;}
+#gameWrapper{position:relative;width:min(100vw,420px);height:min(100vh,900px);overflow:hidden;background:#0d0520;will-change:transform;transform:translateZ(0);}
+canvas{position:absolute;inset:0;z-index:1;will-change:transform;transform:translateZ(0);image-rendering:pixelated;}
 #gameTouch{position:absolute;inset:0;z-index:2;display:none;touch-action:none}
 #ui{position:absolute;top:12px;left:14px;color:#fff;z-index:5;pointer-events:none;line-height:1.6}
 #ui .label{font-size:13px;color:#b89fd4;letter-spacing:1px}
@@ -515,7 +515,7 @@ function update(){
   updateProgressBar();
   const effectiveLvl=isMortSubite(lvl)?getMortSubiteTier():lvl;const mBonus=isMobile?20:0;
   let base;if(effectiveLvl===1)base=70+mBonus;else if(effectiveLvl===2)base=55+mBonus;else if(effectiveLvl===3)base=42+mBonus;else if(effectiveLvl===4)base=32+mBonus;else if(effectiveLvl===5)base=26+mBonus;else if(effectiveLvl===6)base=22+mBonus;else if(effectiveLvl===7)base=20+mBonus;else if(effectiveLvl===8)base=16+mBonus;else if(effectiveLvl===9)base=13+mBonus;else if(effectiveLvl===10)base=10+mBonus;else base=Math.max(6,10-(effectiveLvl-11)*0.8)+mBonus;
-  if(frameCount%Math.floor(base)===0&&enemies.length<40)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=5&&frameCount%Math.floor(base*1.8)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0)enemies.push(spawnEnemy(lvl));if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=6&&frameCount%Math.floor(base*0.95)===0){const e=spawnEnemy(lvl);e.homing=false;enemies.push(e);}
+  if(frameCount%Math.floor(base)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=5&&frameCount%Math.floor(base*1.8)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=(isMobile?9:8)&&frameCount%Math.floor(base*2.5)===0)enemies.push(spawnEnemy(lvl));if(isMortSubite(lvl)&&getMortSubiteTier()>=13&&frameCount%Math.floor(base*3.5)===0)enemies.push(spawnEnemy(lvl));if(effectiveLvl>=6&&frameCount%Math.floor(base*0.95)===0){const e=spawnEnemy(lvl);e.homing=false;enemies.push(e);}
   if(Math.random()<0.012+Math.min(lvl,15)*0.003)coins.push(spawnCoin(lvl));
   const dxa=player.x-playerAnim.lastX,dya=player.y-playerAnim.lastY;playerAnim.speed=Math.hypot(dxa,dya);playerAnim.lastX=player.x;playerAnim.lastY=player.y;playerAnim.targetTilt=dxa*0.5;playerAnim.tiltAngle+=(playerAnim.targetTilt-playerAnim.tiltAngle)*0.15;playerAnim.bobPhase+=playerAnim.speed>1?0.18:0.04;playerAnim.breathe+=0.04;playerAnim.squish+=(1-playerAnim.squish)*0.2;
   // Cache homingEnemies — recalcul tous les 3 frames seulement
