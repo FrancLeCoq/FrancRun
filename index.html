@@ -8,25 +8,26 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:#0d0520;font-family:'Fredoka One',cursive;overflow:hidden;width:100vw;height:100vh}
-canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
-#gameTouch{position:fixed;inset:0;z-index:2;display:none;touch-action:none}
-#ui{position:fixed;top:12px;left:14px;color:#fff;z-index:5;pointer-events:none;line-height:1.6}
+body{background:#111;font-family:'Fredoka One',cursive;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+#gameWrapper{position:relative;width:min(100vw,420px);height:min(100vh,900px);overflow:hidden;background:#0d0520;}
+canvas{position:absolute;inset:0;z-index:1;}
+#gameTouch{position:absolute;inset:0;z-index:2;display:none;touch-action:none}
+#ui{position:absolute;top:12px;left:14px;color:#fff;z-index:5;pointer-events:none;line-height:1.6}
 #ui .label{font-size:13px;color:#b89fd4;letter-spacing:1px}
 #ui .val{color:#FFD700;font-size:22px;font-family:'Bangers',cursive;letter-spacing:2px}
-#weaponInfo{position:fixed;top:12px;left:50%;transform:translateX(-50%);color:#FFD700;z-index:5;font-size:15px;font-family:'Bangers',cursive;letter-spacing:2px;text-shadow:0 0 15px #FFD700;pointer-events:none;opacity:0;transition:opacity 0.4s}
-#livesBar{position:fixed;top:10px;right:12px;z-index:5;display:flex;gap:5px;pointer-events:none}
-#lvlProgress{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:5;width:300px;pointer-events:none}
+#weaponInfo{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#FFD700;z-index:5;font-size:15px;font-family:'Bangers',cursive;letter-spacing:2px;text-shadow:0 0 15px #FFD700;pointer-events:none;opacity:0;transition:opacity 0.4s}
+#livesBar{position:absolute;top:10px;right:12px;z-index:5;display:flex;gap:5px;pointer-events:none}
+#lvlProgress{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:5;width:300px;pointer-events:none}
 #lvlProgress .bar-bg{background:rgba(0,0,0,0.6);border-radius:20px;height:12px;border:1px solid rgba(180,100,255,0.35);overflow:hidden}
 #lvlProgress .bar-fill{height:100%;background:linear-gradient(90deg,#a855f7,#FFD700);border-radius:20px;transition:width 0.3s}
 #lvlProgress .bar-label{text-align:center;font-size:10px;color:#b89fd4;margin-top:3px}
-#msg{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);font-size:76px;color:#fff;text-shadow:0 0 40px #fff;opacity:0;transition:.3s;z-index:15;pointer-events:none;white-space:nowrap;font-family:'Bangers',cursive;letter-spacing:5px}
+#msg{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-size:76px;color:#fff;text-shadow:0 0 40px #fff;opacity:0;transition:.3s;z-index:15;pointer-events:none;white-space:nowrap;font-family:'Bangers',cursive;letter-spacing:5px}
 #msg.show{opacity:1}
 #msg.gameover{color:#cc0000;text-shadow:0 0 30px #ff0000,0 0 60px #880000,0 0 100px #440000;font-size:72px;animation:bloodPulse 0.5s ease-in-out infinite alternate}
 @keyframes bloodPulse{0%{text-shadow:0 0 50px #ff0000,0 0 100px #cc0000,0 0 150px #880000,0 0 200px #440000;color:#880000;transform:translate(-50%,-50%) scale(0.92) skewX(-1deg)}100%{text-shadow:0 0 80px #ff2200,0 0 150px #ff0000,0 0 220px #cc0000,0 0 300px #880000;color:#ff0000;transform:translate(-50%,-50%) scale(1.08) skewX(1deg)}}
-#levelup{position:fixed;top:28%;left:50%;transform:translate(-50%,-50%);font-size:46px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:3px;white-space:nowrap;text-align:center}
+#levelup{position:absolute;top:28%;left:50%;transform:translate(-50%,-50%);font-size:46px;color:#FFD700;text-shadow:0 0 20px #FFD700;opacity:0;transition:.3s;z-index:15;pointer-events:none;font-family:'Bangers',cursive;letter-spacing:3px;white-space:nowrap;text-align:center}
 #levelup.show{opacity:1}
-#panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;max-height:92vh;overflow-y:auto;background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));color:#fff;padding:26px 22px;border-radius:22px;z-index:20;border:2px solid rgba(180,100,255,0.35);box-shadow:0 0 60px rgba(120,40,200,0.4);text-align:center}
+#panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;max-height:92vh;overflow-y:auto;background:linear-gradient(145deg,rgba(13,5,32,0.98),rgba(30,10,65,0.98));color:#fff;padding:26px 22px;border-radius:22px;z-index:20;border:2px solid rgba(180,100,255,0.35);box-shadow:0 0 60px rgba(120,40,200,0.4);text-align:center}
 #panel.hidden{display:none!important}
 #panel h2{font-size:30px;margin-bottom:4px;color:#FFD700;font-family:'Bangers',cursive;letter-spacing:3px;text-shadow:0 0 20px #FFD700}
 #panel p{font-size:13px;color:#c9aaee;margin-bottom:14px;line-height:1.5}
@@ -62,16 +63,17 @@ canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
 .podium .pname{font-size:10px;color:#c9aaee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;margin:0 auto}
 .podium .pscore{font-family:'Bangers',cursive;font-size:14px;color:#FFD700}
 /* Touch */
-#touch-zone{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
-#joystick-base{position:fixed;border-radius:50%;background:rgba(168,85,247,0.12);border:2.5px solid rgba(168,85,247,0.5);display:none;transform:translate(-50%,-50%);pointer-events:none;width:150px;height:150px}
-#joystick-stick{position:fixed;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(230,180,255,0.95),rgba(160,80,240,0.85));border:2.5px solid rgba(240,200,255,0.9);display:none;transform:translate(-50%,-50%);pointer-events:none;width:66px;height:66px;box-shadow:0 0 18px rgba(168,85,247,0.8)}
-#modeBtn{position:fixed;bottom:14px;right:14px;z-index:8;display:none;background:rgba(30,10,65,0.85);border:1.5px solid rgba(168,85,247,0.5);border-radius:20px;padding:6px 13px;color:#c084fc;font-size:11px;font-family:'Fredoka One',cursive;cursor:pointer;touch-action:manipulation;letter-spacing:1px}
+#touch-zone{position:absolute;inset:0;z-index:6;display:none;touch-action:none}
+#joystick-base{position:absolute;border-radius:50%;background:rgba(168,85,247,0.12);border:2.5px solid rgba(168,85,247,0.5);display:none;transform:translate(-50%,-50%);pointer-events:none;width:150px;height:150px}
+#joystick-stick{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(230,180,255,0.95),rgba(160,80,240,0.85));border:2.5px solid rgba(240,200,255,0.9);display:none;transform:translate(-50%,-50%);pointer-events:none;width:66px;height:66px;box-shadow:0 0 18px rgba(168,85,247,0.8)}
+#modeBtn{position:absolute;bottom:14px;right:14px;z-index:8;display:none;background:rgba(30,10,65,0.85);border:1.5px solid rgba(168,85,247,0.5);border-radius:20px;padding:6px 13px;color:#c084fc;font-size:11px;font-family:'Fredoka One',cursive;cursor:pointer;touch-action:manipulation;letter-spacing:1px}
 @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.8)}70%{transform:scale(0.9)}100%{transform:scale(1)}}
 @keyframes lifeGain{0%{opacity:0;transform:translate(-50%,-20px) scale(0.5)}30%{opacity:1;transform:translate(-50%,-40px) scale(1.2)}80%{opacity:1;transform:translate(-50%,-60px) scale(1)}100%{opacity:0;transform:translate(-50%,-80px) scale(0.8)}}
-#lifeGainMsg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-family:'Bangers',cursive;letter-spacing:3px;color:#ff4444;text-shadow:0 0 20px #ff0000;z-index:25;pointer-events:none;opacity:0;display:none;white-space:nowrap}
+#lifeGainMsg{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-family:'Bangers',cursive;letter-spacing:3px;color:#ff4444;text-shadow:0 0 20px #ff0000;z-index:25;pointer-events:none;opacity:0;display:none;white-space:nowrap}
 </style>
 </head>
 <body>
+<div id="gameWrapper">
 <canvas id="game"></canvas>
 <div id="gameTouch"></div>
 <div id="touch-zone"></div>
@@ -174,7 +176,11 @@ function enablePlayBtn(){
 // ══ CANVAS ════════════════════════════════════════════════════
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
-function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
+function resize(){
+  const w=document.getElementById('gameWrapper');
+  canvas.width=w?w.offsetWidth:innerWidth;
+  canvas.height=w?w.offsetHeight:innerHeight;
+}
 addEventListener('resize',resize);resize();
 
 const scoreEl=document.getElementById('scoreEl'),levelEl=document.getElementById('levelEl');
@@ -194,7 +200,7 @@ const isMobile=(()=>{
   const touch=navigator.maxTouchPoints>0&&!window.matchMedia('(pointer:fine)').matches;
   return ua||( narrow&&touch);
 })();
-const SCALE=isMobile?0.58:1.0,MOBILE_SPD=isMobile?0.35:1.0;
+const SCALE=0.58,MOBILE_SPD=0.35; // Taille identique PC et mobile
 
 const AC=new(window.AudioContext||window.webkitAudioContext)();
 document.addEventListener('click',()=>AC.resume(),{once:true});
@@ -382,7 +388,7 @@ let inputMode=localStorage.getItem('lcfInputMode')||'drag';
 const touchZone=document.getElementById('touch-zone'),modeBtnEl=document.getElementById('modeBtn');
 let joyActive=false,joyDX=0,joyDY=0,dragActive=false,dragTouchX=0,dragTouchY=0;
 let fingerRing={active:false,x:0,y:0,alpha:0};
-function getJoyAnchor(){return{x:window.innerWidth/2,y:window.innerHeight-95};}
+function getJoyAnchor(){return{x:canvas.width/2,y:canvas.height-95};}
 function showJoyBase(){const a=getJoyAnchor();joystickBase.style.cssText=`display:block;left:${a.x}px;top:${a.y}px`;joystickStick.style.cssText=`display:block;left:${a.x}px;top:${a.y}px`;}
 function resetStickCenter(){const a=getJoyAnchor();joystickStick.style.left=a.x+'px';joystickStick.style.top=a.y+'px';}
 function hideJoy(){joystickBase.style.display='none';joystickStick.style.display='none';joyDX=0;joyDY=0;joyActive=false;}
@@ -400,7 +406,8 @@ let targetX=canvas.width/2,targetY=canvas.height/2;
 function handleMouseMove(e){
   if(gameState!=='play')return;
   // Calcule la position relative au canvas (fonctionne dans iframe)
-  const rect=canvas.getBoundingClientRect();
+  const wrap=document.getElementById('gameWrapper')||canvas;
+  const rect=wrap.getBoundingClientRect();
   targetX=e.clientX-rect.left;
   targetY=e.clientY-rect.top;
 }
@@ -603,5 +610,6 @@ function goMenu(){
 function loop(){update();draw();scoreEl.textContent=score;levelEl.textContent=getLevel(score);requestAnimationFrame(loop);}
 loop();
 </script>
+</div>
 </body>
 </html>
