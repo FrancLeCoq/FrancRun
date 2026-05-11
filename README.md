@@ -85,9 +85,6 @@ Backend (Supabase Edge Functions)
 | `/disconnect` | Unlink your wallet |
 | `/status` | Check your $FRANC balance |
 | `/play` | Launch FrancRun |
-| `/setup` | Post pinned welcome message (admin) |
-| `/setup1` | Post pinned wallet message (admin) |
-| `/setup2` | Post pinned FrancRun message (admin) |
 
 ---
 
