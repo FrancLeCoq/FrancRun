@@ -282,9 +282,13 @@ function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(
 let MAX_LIVES=1,hasFranc=false,walletLinked=false,totalEggsEver=0;
 
 let detectFrancRunning=false;
+let detectFrancTimeout=null;
 async function detectFranc(){
   if(detectFrancRunning)return;
   detectFrancRunning=true;
+  // Timeout de sécurité : reset le flag après 8s max
+  clearTimeout(detectFrancTimeout);
+  detectFrancTimeout=setTimeout(()=>{detectFrancRunning=false;},8000);
   // Désactive PLAY pendant le chargement
   const btn=document.getElementById('playBtn');
   if(btn){btn.disabled=true;btn.style.opacity='0.5';btn.textContent='⏳ Loading...';}
@@ -314,7 +318,23 @@ async function detectFranc(){
   // Active PLAY seulement après
   enablePlayBtn();
   updateWalletBadge();
+  // Rafraîchit aussi l'écran gameover si on est dessus
+  if(gameState==='gameover')refreshGameOverPanel();
   detectFrancRunning=false;
+}
+
+// Rafraîchit le panneau game over (boutons wallet + status)
+function refreshGameOverPanel(){
+  const walletBtn=panel.querySelector('.wallet-btn');
+  if(walletBtn){
+    walletBtn.className='wallet-btn '+(hasFranc?'connected':'disconnected');
+    const lock=walletBtn.querySelector('.wlock');
+    const main=walletBtn.querySelector('.wt-main');
+    const sub=walletBtn.querySelector('.wt-sub');
+    if(lock)lock.textContent=hasFranc?'🔓':'🔒';
+    if(main)main.textContent=hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES';
+    if(sub)sub.textContent=hasFranc?`$FRANC detected — ${MAX_LIVES} lives unlocked!`:walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected';
+  }
 }
 
 // Refresh au retour de la page wallet (visibilitychange)
@@ -711,6 +731,13 @@ function showGameOver(){
     ${rankHtml}
     <button class="btn btn-play" onclick="startGame()" style="margin-top:10px">🔄 Play Again</button>
     <button class="btn btn-gray" onclick="goMenu()" style="margin-top:6px;font-size:13px">🏠 Menu</button>
+    <button class="wallet-btn ${hasFranc?'connected':'disconnected'}" onclick="goToWallet()" style="margin-top:8px">
+      <span class="wlock">${hasFranc?'🔓':'🔒'}</span>
+      <span class="wtxt">
+        <span class="wt-main">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
+        <span class="wt-sub">${hasFranc?`$FRANC detected — ${MAX_LIVES} lives unlocked!`:walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
+      </span>
+    </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:14px 0">
     <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">TOP 10</b>
     <div class="score-section" id="goScoreSection" style="margin-top:6px"></div>`;
