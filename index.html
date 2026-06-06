@@ -218,7 +218,7 @@ function playSound(type){
 
 // ══ SCORES ════════════════════════════════════════════════════
 function getLocalScores(){try{return JSON.parse(localStorage.getItem('lcfScores')||'[]')}catch(e){return[]}}
-function saveLocalScore(s,lvl){let sc=getLocalScores();sc.push({score:s,level:lvl,date:new Date().toLocaleDateString('en')});sc.sort((a,b)=>b.score-a.score);sc=sc.slice(0,10);try{localStorage.setItem('lcfScores',JSON.stringify(sc))}catch(e){}}
+function saveLocalScore(s,lvl){let sc=getLocalScores();sc.push({score:s,level:lvl,date:new Date().toLocaleDateString('en')});sc.sort((a,b)=>b.score-a.score);sc=sc.slice(0,3);try{localStorage.setItem('lcfScores',JSON.stringify(sc))}catch(e){}}
 
 let scorePanelOpen=false;
 function toggleScorePanel(){
@@ -227,40 +227,21 @@ function toggleScorePanel(){
   sp.style.display=scorePanelOpen?'block':'none';
   if(scorePanelOpen)renderScorePanel(document.getElementById('scoreSection'));
 }
-async function renderScorePanel(sec){
+function renderScorePanel(sec){
   if(!sec)return;
-  sec.innerHTML='<div style="color:#c9aaee;font-size:11px;padding:8px;text-align:center">⏳ Loading...</div>';
-  const tg=window.Telegram?.WebApp;
-  const myId=tg?.initDataUnsafe?.user?.id?.toString();
-  const myName=tg?.initDataUnsafe?.user?.first_name||'You';
-  try{
-    const res=await fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'leaderboard',game_id:'francrun',limit:10})});
-    const data=res.ok?await res.json():null;
-    const rows=data?.leaderboard||[];
-    const myRec=rows.find(r=>String(r.telegram_id)===String(myId));
-    const myBest=myRec?myRec.best_score||myRec.score||0:getLocalScores()[0]?.score||0;
-    const myRank=rows.findIndex(r=>String(r.telegram_id)===String(myId))+1;
-    let html=`<div class="my-score"><div class="ms-title">👤 YOUR BEST</div><div style="display:flex;justify-content:space-between;align-items:center"><span>${myName}${myRank>0?` <span style="color:#c9aaee;font-size:10px">#${myRank}</span>`:''}</span><span style="font-family:'Bangers',cursive;font-size:18px;color:#FFD700">${myBest} 🥚</span></div></div>`;
-    if(rows.length>=2){
-      const medals=['🥇','🥈','🥉'];
-      const order=rows.length>=3?[1,0,2]:[0,1];
-      html+='<div class="top3">';
-      order.forEach(i=>{if(!rows[i])return;const r=rows[i];const n=(r.telegram_name||r.telegram_username||'Player').slice(0,8);html+=`<div class="podium"><span class="medal">${medals[i]}</span><div class="pname">${n}</div><div class="pscore">${r.best_score||r.score||0}</div></div>`;});
-      html+='</div>';
-    }
-    if(rows.length){
-      html+='<div style="font-family:Bangers,cursive;letter-spacing:2px;font-size:12px;color:#c084fc;margin-bottom:4px">TOP 10</div><ul class="slist">';
-      rows.forEach((r,i)=>{const n=r.telegram_name||r.telegram_username||'Player';const franc=r.has_franc?'💎':'';const isMe=String(r.telegram_id)===String(myId);const bg=isMe?'background:rgba(255,215,0,0.07);border-radius:6px':'';html+=`<li style="${bg}"><span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} <b>${n}</b>${franc?` <span style="color:#FFD700">${franc}</span>`:''}${isMe?' 👈':''}</span><span style="color:#FFD700;font-family:Bangers,cursive">${r.best_score||r.score||0} 🥚</span></li>`;});
-      html+='</ul>';
-    } else {renderLocalHtml(sec);return;}
-    sec.innerHTML=html;
-  }catch(e){renderLocalHtml(sec);}
-}
-function renderLocalHtml(sec){
   const sc=getLocalScores();
-  if(!sc.length){sec.innerHTML='<div style="color:#888;font-size:12px;text-align:center;padding:12px">No scores yet!</div>';return;}
-  let h='<ul class="slist">';sc.forEach((s,i)=>{h+=`<li><span>${['🥇','🥈','🥉'][i]||'#'+(i+1)} Lvl${s.level||'?'} ${s.date}</span><span style="color:#FFD700;font-family:Bangers,cursive">${s.score}</span></li>`;});h+='</ul>';
-  sec.innerHTML=h;
+  if(!sc.length){
+    sec.innerHTML='<div style="color:#888;font-size:13px;text-align:center;padding:14px">No scores yet!<br><span style="font-size:11px;color:#666">Play your first game to set a record</span></div>';
+    return;
+  }
+  const medals=['🥇','🥈','🥉'];
+  let html='<div style="font-family:Bangers,cursive;letter-spacing:2px;font-size:13px;color:#c084fc;margin-bottom:6px;text-align:center">YOUR BEST 3</div>';
+  html+='<ul class="slist">';
+  sc.forEach((s,i)=>{
+    html+=`<li><span style="font-size:18px">${medals[i]}</span> <span style="flex:1;margin-left:8px">Level ${s.level||'?'} — ${s.date}</span><span style="color:#FFD700;font-family:Bangers,cursive;font-size:18px">${s.score} 🥚</span></li>`;
+  });
+  html+='</ul>';
+  sec.innerHTML=html;
 }
 
 let shakeAmt=0,shakeDur=0;
@@ -350,8 +331,7 @@ setInterval(()=>{
 detectFranc(); // Lance au démarrage
 
 function saveCumulativeEggs(n){
-  const tg=window.Telegram?.WebApp;
-  if(tg?.initData){fetch(SUPABASE+'/save-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData,game_id:'francrun',score,level_reached:getLevel(score),eggs_collected:n})}).catch(()=>{});}
+  // Sauvegarde en ligne désactivée — uniquement local
 }
 
 function updateLivesBar(l){livesBar.innerHTML=`<span style="font-size:22px;filter:drop-shadow(0 0 6px #ff4444)">❤️</span><span style="font-size:20px;font-family:'Bangers',cursive;color:#ff4444;letter-spacing:1px;text-shadow:0 0 8px #ff4444;margin-left:4px">${Math.max(0,l)}</span>`;}
@@ -739,7 +719,7 @@ function showGameOver(){
       </span>
     </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:14px 0">
-    <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">TOP 10</b>
+    <b style="font-size:13px;font-family:'Bangers',cursive;letter-spacing:2px;color:#FFD700">YOUR BEST 3</b>
     <div class="score-section" id="goScoreSection" style="margin-top:6px"></div>`;
   panel.classList.remove('hidden');
   renderScorePanel(document.getElementById('goScoreSection'));
