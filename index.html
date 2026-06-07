@@ -377,7 +377,7 @@ function showLevelUp(lvl){
   else{levelupEl.textContent='⭐ LEVEL '+lvl+'!';levelupEl.style.color='#FFD700';levelupEl.style.textShadow='0 0 20px #FFD700,0 0 40px #ff8800';
     if(lvl===7){clearEnemiesExplosion('#a855f7','#FFD700');setTimeout(()=>{weaponEl.textContent='💥 CLEARED! CATCH YOUR BREATH!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
     if(lvl===8){clearEnemiesExplosion('#ff6600','#ff4400');setTimeout(()=>{weaponEl.textContent='🔥 THINGS ARE HEATING UP!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}if(lvl===9){clearEnemiesExplosion('#ff4400','#ff8800');setTimeout(()=>{weaponEl.textContent='💥 LAST CHANCE TO BREATHE!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);},400);}
-    if(lvl===10){clearEnemiesExplosion('#ff0000','#cc0000');setTimeout(()=>{weaponEl.textContent='☠️ SUDDEN DEATH AWAITS!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3500);},400);}
+    
   }
   levelupEl.className='show';levelupTimeout=setTimeout(()=>{levelupEl.className='';},2500);playSound('levelup');
   if(getWeapon(lvl)==='pistol'&&lvl===4){weaponEl.textContent='🔫 PISTOL UNLOCKED!';weaponEl.style.opacity=1;setTimeout(()=>{weaponEl.style.opacity=0;},3000);}
@@ -579,7 +579,7 @@ function drawParticle(p){ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;
 function update(){
   if(gameState!=='play')return;frameCount++;updatePlayerMovement();
   const lvl=getLevel(score);
-  if(lvl!==lastLevel&&lvl<=MAX_LEVEL){showLevelUp(lvl);lastLevel=lvl;spawnParticles(player.x,player.y,'#FFD700',20,true);spawnParticles(player.x,player.y,'#a855f7',15,true);if(lvl===7||lvl===8||lvl===9||lvl===10||isMortSubite(lvl))player.inv=Math.max(player.inv,180);}
+  if(lvl!==lastLevel&&lvl<=MAX_LEVEL){showLevelUp(lvl);lastLevel=lvl;spawnParticles(player.x,player.y,'#FFD700',20,true);spawnParticles(player.x,player.y,'#a855f7',15,true);if(lvl===7||lvl===8||lvl===9||isMortSubite(lvl))player.inv=Math.max(player.inv,180);}
   updateProgressBar();
   const effectiveLvl=isMortSubite(lvl)?getMortSubiteTier():lvl;const mBonus=isMobile?20:0;
   let base;if(effectiveLvl===1)base=70+mBonus;else if(effectiveLvl===2)base=55+mBonus;else if(effectiveLvl===3)base=42+mBonus;else if(effectiveLvl===4)base=32+mBonus;else if(effectiveLvl===5)base=26+mBonus;else if(effectiveLvl===6)base=22+mBonus;else if(effectiveLvl===7)base=20+mBonus;else if(effectiveLvl===8)base=16+mBonus;else if(effectiveLvl===9)base=13+mBonus;else if(effectiveLvl===10)base=10+mBonus;else base=Math.max(6,10-(effectiveLvl-11)*0.8)+mBonus;
