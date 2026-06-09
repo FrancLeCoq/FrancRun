@@ -141,6 +141,13 @@ function goToWallet(){
   }
 }
 
+// Texte du sous-titre wallet selon la source de déblocage
+function walletSubText(){
+  if(unlockReason==='stars')return 'Unlocked via ⭐';
+  const sym = unlockReason==='ton' ? '💎' : '◎'; // 💎 TON · ◎ Solana
+  return `$FRANC detected ${sym} — ${MAX_LIVES} lives unlocked!`;
+}
+
 function updateWalletBadge(){
   const btn=document.getElementById('walletBtn');
   const lock=document.getElementById('walletLock');
@@ -151,7 +158,7 @@ function updateWalletBadge(){
     btn.className='wallet-btn connected';
     lock.textContent='🔓';
     main.textContent='WALLET CONNECTED ✅';
-    sub.textContent=`$FRANC detected — ${MAX_LIVES} lives unlocked!`;
+    sub.textContent=walletSubText();
   } else if(walletLinked){
     btn.className='wallet-btn disconnected';
     lock.textContent='🔒';
@@ -261,6 +268,8 @@ function getMortSubiteTier(){return Math.min(20,MORT_SUBITE+Math.floor(Math.max(
 
 // ══ $FRANC — BLOQUE PLAY JUSQU'À LA FIN ══════════════════════
 let MAX_LIVES=1,hasFranc=false,walletLinked=false,totalEggsEver=0;
+let unlockReason=null;  // "solana" | "ton" | "stars" | null
+let francBalance=0;     // solde réel (0 si déblocage via Stars)
 
 let detectFrancRunning=false;
 let detectFrancTimeout=null;
@@ -287,8 +296,18 @@ async function detectFranc(){
       if(res.ok){
         const d=await res.json();
         console.log('check-franc:',JSON.stringify(d));
-        hasFranc   = d.hasFranc   || false;
-        walletLinked = d.walletLinked || false;
+        walletLinked = !!(d && d.walletLinked);
+
+        // Verdict de déblocage : nouveau backend → d.unlocked,
+        // ancien backend → fallback hasFranc. Les deux marchent.
+        hasFranc = !!(d && (d.unlocked ?? (d.walletLinked && d.hasFranc)));
+
+        // Raison du déblocage : "solana" | "ton" | "stars" | null
+        unlockReason = (d && d.reason) || (hasFranc ? 'solana' : null);
+
+        // Solde réel (0 pour un déblocage via Stars)
+        francBalance = hasFranc ? Number(d.balance || 0) : 0;
+
         MAX_LIVES = hasFranc ? (d.lives || 10) : 1; // valeur serveur uniquement
       }
     }catch(e){
@@ -314,7 +333,7 @@ function refreshGameOverPanel(){
     const sub=walletBtn.querySelector('.wt-sub');
     if(lock)lock.textContent=hasFranc?'🔓':'🔒';
     if(main)main.textContent=hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES';
-    if(sub)sub.textContent=hasFranc?`$FRANC detected — ${MAX_LIVES} lives unlocked!`:walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected';
+    if(sub)sub.textContent=hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected';
   }
 }
 
@@ -715,7 +734,7 @@ function showGameOver(){
       <span class="wlock">${hasFranc?'🔓':'🔒'}</span>
       <span class="wtxt">
         <span class="wt-main">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
-        <span class="wt-sub">${hasFranc?`$FRANC detected — ${MAX_LIVES} lives unlocked!`:walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
+        <span class="wt-sub">${hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
       </span>
     </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:14px 0">
@@ -738,7 +757,7 @@ function goMenu(){
       <span class="wlock">${hasFranc?'🔓':'🔒'}</span>
       <span class="wtxt">
         <span class="wt-main">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
-        <span class="wt-sub">${hasFranc?`$FRANC detected — ${MAX_LIVES} lives unlocked!`:walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
+        <span class="wt-sub">${hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
       </span>
     </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
