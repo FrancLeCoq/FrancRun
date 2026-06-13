@@ -753,11 +753,11 @@ function goMenu(){
     <span style="color:#FFD700;font-size:12px">30 eggs = +1 level &bull; 10 levels + 💀 Sudden Death</span><br>
     <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
     <button class="btn btn-play" id="playBtn" onclick="startGame()" style="opacity:0.5" disabled>⏳ Loading...</button>
-    <button class="wallet-btn ${hasFranc?'connected':'disconnected'}" onclick="goToWallet()">
-      <span class="wlock">${hasFranc?'🔓':'🔒'}</span>
+    <button class="wallet-btn ${hasFranc?'connected':'disconnected'}" id="walletBtn" onclick="goToWallet()">
+      <span class="wlock" id="walletLock">${hasFranc?'🔓':'🔒'}</span>
       <span class="wtxt">
-        <span class="wt-main">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
-        <span class="wt-sub">${hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
+        <span class="wt-main" id="walletMain">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
+        <span class="wt-sub" id="walletSub">${hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
       </span>
     </button>
     <hr style="border:none;border-top:1px solid rgba(168,85,247,0.2);margin:12px 0">
@@ -772,6 +772,7 @@ function goMenu(){
       ${hasFranc?`<div style="margin-top:8px;padding:6px 10px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.3);border-radius:8px;font-size:11px;text-align:center">✅ $FRANC detected! <b style="color:#FFD700">${MAX_LIVES} lives</b></div>`:''}
     </div>`;
   panel.classList.remove('hidden');
+  updateWalletBadge(); // Synchronise le cadenas avec l'état actuel
   // Relance la détection
   detectFranc();
 }
