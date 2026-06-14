@@ -45,7 +45,7 @@ canvas{position:absolute;inset:0;z-index:1;will-change:transform;transform:trans
 .wallet-btn:active{transform:scale(0.97);opacity:0.85}
 .wallet-btn.disconnected{background:linear-gradient(135deg,rgba(217,119,6,0.25),rgba(180,90,0,0.2));border:2px solid rgba(217,119,6,0.6)}
 .wallet-btn.connected{background:linear-gradient(135deg,rgba(22,163,74,0.25),rgba(15,100,50,0.2));border:2px solid rgba(163,230,53,0.6)}
-.wallet-btn .wlock{font-size:28px;flex-shrink:0;line-height:1}
+.wallet-btn .wlock{font-size:28px;flex-shrink:0;line-height:1;display:inline-flex;align-items:center}
 .wallet-btn .wtxt{flex:1}
 .wallet-btn .wt-main{font-family:'Bangers',cursive;font-size:20px;letter-spacing:2px;display:block}
 .wallet-btn.disconnected .wt-main{color:#fcd34d}
@@ -148,6 +148,19 @@ function walletSubText(){
   return `$FRANC detected ${sym} — ${MAX_LIVES} lives unlocked!`;
 }
 
+// Cadenas : SVG vert OUVERT quand débloqué (rendu fiable), emoji fermé sinon
+function lockHTML(open){
+  if(open){
+    return '<svg width="28" height="32" viewBox="0 0 30 34" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle">'+
+      '<path d="M8 15 V10 a7 7 0 0 1 13.5 -2.6" fill="none" stroke="#a3e635" stroke-width="3.2" stroke-linecap="round"/>'+
+      '<rect x="4" y="15" width="22" height="16" rx="3" fill="#a3e635"/>'+
+      '<circle cx="15" cy="22" r="2.6" fill="#14532d"/>'+
+      '<rect x="13.7" y="22" width="2.6" height="5.5" rx="1.3" fill="#14532d"/>'+
+      '</svg>';
+  }
+  return '🔒';
+}
+
 function updateWalletBadge(){
   const btn=document.getElementById('walletBtn');
   const lock=document.getElementById('walletLock');
@@ -156,17 +169,17 @@ function updateWalletBadge(){
   if(!btn)return;
   if(hasFranc){
     btn.className='wallet-btn connected';
-    lock.textContent='🔓';
+    lock.innerHTML=lockHTML(true);
     main.textContent='WALLET CONNECTED ✅';
     sub.textContent=walletSubText();
   } else if(walletLinked){
     btn.className='wallet-btn disconnected';
-    lock.textContent='🔒';
+    lock.innerHTML=lockHTML(false);
     main.textContent='NO $FRANC FOUND';
     sub.textContent='Buy $FRANC to unlock bonuses';
   } else {
     btn.className='wallet-btn disconnected';
-    lock.textContent='🔒';
+    lock.innerHTML=lockHTML(false);
     main.textContent='TAP TO UNLOCK 10 LIVES';
     sub.textContent='Wallet not connected';
   }
@@ -331,7 +344,7 @@ function refreshGameOverPanel(){
     const lock=walletBtn.querySelector('.wlock');
     const main=walletBtn.querySelector('.wt-main');
     const sub=walletBtn.querySelector('.wt-sub');
-    if(lock)lock.textContent=hasFranc?'🔓':'🔒';
+    if(lock)lock.innerHTML=lockHTML(hasFranc);
     if(main)main.textContent=hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES';
     if(sub)sub.textContent=hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected';
   }
@@ -731,7 +744,7 @@ function showGameOver(){
     <button class="btn btn-play" onclick="startGame()" style="margin-top:10px">🔄 Play Again</button>
     <button class="btn btn-gray" onclick="goMenu()" style="margin-top:6px;font-size:13px">🏠 Menu</button>
     <button class="wallet-btn ${hasFranc?'connected':'disconnected'}" onclick="goToWallet()" style="margin-top:8px">
-      <span class="wlock">${hasFranc?'🔓':'🔒'}</span>
+      <span class="wlock">${hasFranc?lockHTML(true):lockHTML(false)}</span>
       <span class="wtxt">
         <span class="wt-main">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
         <span class="wt-sub">${hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
@@ -754,7 +767,7 @@ function goMenu(){
     <span style="color:#c9aaee;font-size:11px">Weapons from level 4 &bull; Level 11 = Sudden Death!</span></p>
     <button class="btn btn-play" id="playBtn" onclick="startGame()" style="opacity:0.5" disabled>⏳ Loading...</button>
     <button class="wallet-btn ${hasFranc?'connected':'disconnected'}" id="walletBtn" onclick="goToWallet()">
-      <span class="wlock" id="walletLock">${hasFranc?'🔓':'🔒'}</span>
+      <span class="wlock" id="walletLock">${hasFranc?lockHTML(true):lockHTML(false)}</span>
       <span class="wtxt">
         <span class="wt-main" id="walletMain">${hasFranc?'WALLET CONNECTED ✅':'TAP TO UNLOCK 10 LIVES'}</span>
         <span class="wt-sub" id="walletSub">${hasFranc?walletSubText():walletLinked?'Buy $FRANC to unlock bonuses':'Wallet not connected'}</span>
